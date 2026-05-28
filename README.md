@@ -1,3 +1,14 @@
+---
+title: AI Fluency LATAM
+emoji: 🤖
+colorFrom: indigo
+colorTo: blue
+sdk: docker
+app_port: 7860
+pinned: false
+license: mit
+---
+
 # AI Fluency LATAM
 
 Aplicación web de diagnóstico que ayuda a organizaciones de Latinoamérica a
