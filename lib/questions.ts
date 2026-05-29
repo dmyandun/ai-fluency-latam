@@ -1,0 +1,158 @@
+import type { Question } from '@/types/assessment'
+
+export const QUESTIONS: Question[] = [
+  {
+    id: 'q1',
+    dimension: 'taskRepetitiveness',
+    text: '¿Qué porcentaje de las tareas diarias de tu equipo son repetitivas y siguen un patrón predecible?',
+    helpText: 'Ejemplos: ingreso de datos, clasificación de tickets, generación de reportes rutinarios.',
+    scale: {
+      min: 1,
+      max: 5,
+      minLabel: 'Casi ninguna',
+      maxLabel: 'La gran mayoría',
+    },
+  },
+  {
+    id: 'q2',
+    dimension: 'dataMaturity',
+    text: '¿Qué tan organizados, limpios y accesibles son los datos de tu organización?',
+    helpText: 'Considera si tienes bases de datos estructuradas, historial limpio y pipelines de datos activos.',
+    scale: {
+      min: 1,
+      max: 5,
+      minLabel: 'Datos dispersos o inexistentes',
+      maxLabel: 'Datos centralizados y de alta calidad',
+    },
+  },
+  {
+    id: 'q3',
+    dimension: 'creativityRequired',
+    text: '¿Cuánto depende el valor de tu producto o servicio de la creatividad e innovación?',
+    helpText: 'Piensa en diseño, contenido, propuestas, estrategia o comunicación diferenciada.',
+    scale: {
+      min: 1,
+      max: 5,
+      minLabel: 'Poco, operamos con estándares fijos',
+      maxLabel: 'Mucho, la diferenciación viene de ideas originales',
+    },
+  },
+  {
+    id: 'q4',
+    dimension: 'decisionComplexity',
+    text: '¿Qué tan complejas son las decisiones críticas que toma tu equipo?',
+    helpText: 'Considera la cantidad de variables, la ambigüedad del contexto y las consecuencias de cada decisión.',
+    scale: {
+      min: 1,
+      max: 5,
+      minLabel: 'Simples y bien definidas',
+      maxLabel: 'Muy complejas, con alta incertidumbre',
+    },
+  },
+  {
+    id: 'q5',
+    dimension: 'operationalVolume',
+    text: '¿Cuál es el volumen de transacciones, eventos o solicitudes que procesa tu operación diariamente?',
+    scale: {
+      min: 1,
+      max: 5,
+      minLabel: 'Menos de 100 por día',
+      maxLabel: 'Miles o más por día',
+    },
+  },
+  {
+    id: 'q6',
+    dimension: 'dataPrivacy',
+    text: '¿Qué nivel de sensibilidad tienen los datos que maneja tu organización?',
+    helpText: 'Datos financieros, de salud, legales, identidades personales o secretos comerciales.',
+    scale: {
+      min: 1,
+      max: 5,
+      minLabel: 'Datos públicos o poco sensibles',
+      maxLabel: 'Datos altamente confidenciales',
+    },
+  },
+  {
+    id: 'q7',
+    dimension: 'systemsIntegration',
+    text: '¿Qué tan importante es que la solución de IA se integre con tus sistemas actuales (ERP, CRM, APIs)?',
+    scale: {
+      min: 1,
+      max: 5,
+      minLabel: 'No es necesario, puede ser independiente',
+      maxLabel: 'Crítico, debe conectarse con múltiples sistemas',
+    },
+  },
+  {
+    id: 'q8',
+    dimension: 'humanJudgment',
+    text: '¿Qué tan crítico es el criterio humano para validar o tomar las decisiones finales?',
+    helpText: 'Considera si un error del sistema tendría consecuencias graves sin revisión humana.',
+    scale: {
+      min: 1,
+      max: 5,
+      minLabel: 'La máquina puede decidir sola',
+      maxLabel: 'Siempre se necesita un humano en el proceso',
+    },
+  },
+  {
+    id: 'q9',
+    dimension: 'autonomousExecution',
+    text: '¿Qué disposición tiene tu organización para dejar que un sistema ejecute acciones de forma autónoma?',
+    helpText: 'Por ejemplo: enviar correos, crear tickets, ejecutar pagos sin aprobación manual previa.',
+    scale: {
+      min: 1,
+      max: 5,
+      minLabel: 'Cero tolerancia, todo requiere aprobación',
+      maxLabel: 'Alta disposición, confiamos en la automatización',
+    },
+  },
+  {
+    id: 'q10',
+    dimension: 'forecastingNeed',
+    text: '¿Qué tan importante es para tu negocio predecir comportamientos futuros?',
+    helpText: 'Ejemplos: demanda de productos, probabilidad de churn, riesgo de fraude, tendencias de mercado.',
+    scale: {
+      min: 1,
+      max: 5,
+      minLabel: 'No es una prioridad actual',
+      maxLabel: 'Es una necesidad crítica del negocio',
+    },
+  },
+  {
+    id: 'q11',
+    dimension: 'teamTechMaturity',
+    text: '¿Cuál es el nivel técnico promedio del equipo que usaría o mantendría la solución de IA?',
+    helpText: 'Considera conocimientos en programación, datos, APIs o herramientas digitales avanzadas.',
+    scale: {
+      min: 1,
+      max: 5,
+      minLabel: 'Sin experiencia técnica',
+      maxLabel: 'Equipo técnico sólido con experiencia en datos o ML',
+    },
+  },
+  {
+    id: 'q12',
+    dimension: 'regulatorySensitivity',
+    text: '¿Tu sector está sujeto a regulaciones estrictas que controlan el uso de datos o sistemas automatizados?',
+    helpText: 'Banca, salud, seguros, gobierno, sector legal o industrias con auditorías regulatorias frecuentes.',
+    scale: {
+      min: 1,
+      max: 5,
+      minLabel: 'Sin restricciones regulatorias relevantes',
+      maxLabel: 'Regulaciones muy estrictas que gobiernan los datos',
+    },
+  },
+  {
+    id: 'q13',
+    dimension: 'innovationAdvantage',
+    text: '¿En qué medida la innovación y la generación de contenido original son una ventaja competitiva clave?',
+    helpText: 'Considera si generar ideas, propuestas o contenido diferenciado es central en tu propuesta de valor.',
+    scale: {
+      min: 1,
+      max: 5,
+      minLabel: 'No es relevante para nuestro modelo',
+      maxLabel: 'Es nuestra principal ventaja diferencial',
+    },
+  },
+]
