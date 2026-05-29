@@ -36,7 +36,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es" className={inter.variable}>
-      <body className="min-h-screen gradient-base">
+      <body className="min-h-screen bg-slate-50">
         {children}
       </body>
     </html>
