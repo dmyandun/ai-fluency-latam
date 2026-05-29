@@ -213,7 +213,12 @@ export default function Hero() {
           <span>
             AI Fluency <span className="text-indigo-400">LATAM</span> — Diagnóstico de adopción de IA
           </span>
-          <span>Diseñado para organizaciones de Latinoamérica</span>
+          <div className="flex items-center gap-4">
+            <span>Diseñado para organizaciones de Latinoamérica</span>
+            <Link href="/privacy" className="hover:text-gray-300 transition-colors underline underline-offset-2">
+              Política de privacidad
+            </Link>
+          </div>
         </div>
       </footer>
     </div>
