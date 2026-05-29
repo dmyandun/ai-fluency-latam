@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import type { AssessmentState, DimensionScore } from '@/types/assessment'
+import type { AssessmentState } from '@/types/assessment'
 import { QUESTIONS } from '@/lib/questions'
 import { buildAssessmentResult } from '@/lib/scoring'
 import ProgressBar from '@/components/ProgressBar'
@@ -52,7 +52,7 @@ export default function AssessmentPage() {
       const isLast = state.currentQuestionIndex === QUESTIONS.length - 1
       if (isLast) {
         const result = buildAssessmentResult(
-          state.answers as DimensionScore,
+          state.answers as Parameters<typeof buildAssessmentResult>[0],
           state.country,
           state.industry,
           state.activities

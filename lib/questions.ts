@@ -1,18 +1,10 @@
 import type { Question } from '@/types/assessment'
 
+// Q1 (taskRepetitiveness), Q8 (humanJudgment) y Q9 (autonomousExecution) fueron
+// eliminadas porque la clasificación de actividades diarias captura esa misma señal
+// con mayor precisión (derivadas en scoring.ts → deriveFromActivities).
+
 export const QUESTIONS: Question[] = [
-  {
-    id: 'q1',
-    dimension: 'taskRepetitiveness',
-    text: '¿Qué porcentaje de las tareas diarias de tu equipo son repetitivas y siguen un patrón predecible?',
-    helpText: 'Ejemplos: ingreso de datos, clasificación de tickets, generación de reportes rutinarios.',
-    scale: {
-      min: 1,
-      max: 5,
-      minLabel: 'Casi ninguna',
-      maxLabel: 'La gran mayoría',
-    },
-  },
   {
     id: 'q2',
     dimension: 'dataMaturity',
@@ -81,30 +73,6 @@ export const QUESTIONS: Question[] = [
       max: 5,
       minLabel: 'No es necesario, puede ser independiente',
       maxLabel: 'Crítico, debe conectarse con múltiples sistemas',
-    },
-  },
-  {
-    id: 'q8',
-    dimension: 'humanJudgment',
-    text: '¿Qué tan crítico es el criterio humano para validar o tomar las decisiones finales?',
-    helpText: 'Considera si un error del sistema tendría consecuencias graves sin revisión humana.',
-    scale: {
-      min: 1,
-      max: 5,
-      minLabel: 'La máquina puede decidir sola',
-      maxLabel: 'Siempre se necesita un humano en el proceso',
-    },
-  },
-  {
-    id: 'q9',
-    dimension: 'autonomousExecution',
-    text: '¿Qué disposición tiene tu organización para dejar que un sistema ejecute acciones de forma autónoma?',
-    helpText: 'Por ejemplo: enviar correos, crear tickets, ejecutar pagos sin aprobación manual previa.',
-    scale: {
-      min: 1,
-      max: 5,
-      minLabel: 'Cero tolerancia, todo requiere aprobación',
-      maxLabel: 'Alta disposición, confiamos en la automatización',
     },
   },
   {
