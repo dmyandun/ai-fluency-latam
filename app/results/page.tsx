@@ -9,12 +9,13 @@ import { loadOrGenerateRoadmap } from '@/lib/roadmap'
 import ResultCard from '@/components/ResultCard'
 import RecommendationMatrix from '@/components/RecommendationMatrix'
 import RoadmapBoard from '@/components/RoadmapBoard'
+import AIPolicyGenerator from '@/components/AIPolicyGenerator'
 
 export default function ResultsPage() {
   const router = useRouter()
   const [result, setResult]   = useState<AssessmentResult | null>(null)
   const [roadmap, setRoadmap] = useState<Roadmap | null>(null)
-  const [activeTab, setActiveTab] = useState<'results' | 'roadmap'>('results')
+  const [activeTab, setActiveTab] = useState<'results' | 'roadmap' | 'policy'>('results')
 
   useEffect(() => {
     const raw = localStorage.getItem('afl_result')
@@ -80,6 +81,7 @@ export default function ResultsPage() {
           {[
             { id: 'results' as const, label: 'Diagnóstico' },
             { id: 'roadmap' as const, label: 'Roadmap 12 meses' },
+            { id: 'policy'  as const, label: 'Política de IA' },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -267,6 +269,12 @@ export default function ResultsPage() {
           {activeTab === 'roadmap' && roadmap && (
             <div className="animate-fade-in">
               <RoadmapBoard roadmap={roadmap} onUpdateRoadmap={handleUpdateRoadmap} />
+            </div>
+          )}
+
+          {activeTab === 'policy' && (
+            <div className="animate-fade-in max-w-4xl">
+              <AIPolicyGenerator result={result} />
             </div>
           )}
         </div>

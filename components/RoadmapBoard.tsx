@@ -105,17 +105,17 @@ export default function RoadmapBoard({ roadmap, onUpdateRoadmap }: RoadmapBoardP
       {/* Leyenda 4D */}
       <div className="flex flex-wrap gap-2 mb-5">
         {[
-          { label: 'D1 · Discover', color: 'bg-blue-50 text-blue-700 border-blue-200' },
-          { label: 'D2 · Design',   color: 'bg-violet-50 text-violet-700 border-violet-200' },
-          { label: 'D3 · Deploy',   color: 'bg-amber-50 text-amber-700 border-amber-200' },
-          { label: 'D4 · Direct',   color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+          { label: 'D1 · Delegation',  color: 'bg-blue-50 text-blue-700 border-blue-200' },
+          { label: 'D2 · Description', color: 'bg-violet-50 text-violet-700 border-violet-200' },
+          { label: 'D3 · Discernment', color: 'bg-amber-50 text-amber-700 border-amber-200' },
+          { label: 'D4 · Diligence',   color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
         ].map((d) => (
           <span key={d.label} className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${d.color}`}>
             {d.label}
           </span>
         ))}
         <span className="text-xs text-slate-400 self-center ml-1">
-          Framework de AI Fluency · Anthropic
+          AI Fluency Framework · Feller &amp; Dakan / Anthropic
         </span>
       </div>
 
