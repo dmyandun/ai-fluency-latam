@@ -17,16 +17,21 @@ export function deriveFromActivities(activities: WorkActivity[]): Pick<
     return { taskRepetitiveness: 3, humanJudgment: 3, autonomousExecution: 3 }
   }
 
-  const total = activities.length
+  const total     = activities.length
   const aiOnly    = activities.filter((a) => a.category === 'ai_only').length
+  const humanAI   = activities.filter((a) => a.category === 'human_ai').length
   const humanOnly = activities.filter((a) => a.category === 'human_only').length
 
   // Mapear proporción [0,1] a escala [1,5]
-  const toScale = (n: number) => Math.round((n / total) * 4) + 1
+  const toScale = (n: number) => Math.max(1, Math.min(5, Math.round((n / total) * 4) + 1))
 
   return {
-    taskRepetitiveness:  toScale(aiOnly),
-    humanJudgment:       toScale(humanOnly),
+    // Alto cuando muchas tareas las puede hacer la IA sola (repetitivas)
+    taskRepetitiveness: toScale(aiOnly),
+    // Alto cuando los humanos están presentes en la mayoría de tareas
+    // — tanto "Solo humano" como "Humano+IA" requieren criterio humano
+    humanJudgment: toScale(humanOnly + humanAI),
+    // Alto cuando el usuario confía en ejecución autónoma (Solo IA)
     autonomousExecution: toScale(aiOnly),
   }
 }

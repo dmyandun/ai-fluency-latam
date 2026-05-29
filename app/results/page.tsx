@@ -102,6 +102,51 @@ export default function ResultsPage() {
 
           {activeTab === 'results' && (
             <div className="space-y-8 animate-fade-in">
+
+              {/* Aviso de coherencia actividades vs recomendación */}
+              {(() => {
+                const acts = result.activities ?? []
+                if (acts.length === 0) return null
+                const total     = acts.length
+                const aiOnly    = acts.filter((a) => a.category === 'ai_only').length
+                const humanAI   = acts.filter((a) => a.category === 'human_ai').length
+                const humanOnly = acts.filter((a) => a.category === 'human_only').length
+                const humanPct  = Math.round(((humanAI + humanOnly) / total) * 100)
+                const aiPct     = Math.round((aiOnly / total) * 100)
+
+                // Alerta: mayoría colaborativa pero recomienda automation
+                if (humanPct >= 60 && result.interactionModel === 'automation') {
+                  return (
+                    <div className="bg-amber-50 border border-amber-200 rounded-xl px-5 py-4 flex gap-3">
+                      <span className="text-amber-500 text-lg shrink-0">⚠️</span>
+                      <div>
+                        <p className="text-sm font-semibold text-amber-800">Posible inconsistencia en tu diagnóstico</p>
+                        <p className="text-sm text-amber-700 mt-0.5">
+                          El {humanPct}% de tus actividades requieren criterio humano, pero el cuestionario apunta a Automatización.
+                          Revisa si tus respuestas al cuestionario reflejan correctamente tu realidad operativa.
+                        </p>
+                      </div>
+                    </div>
+                  )
+                }
+                // Alerta: mayoría autónoma pero recomienda augmentation
+                if (aiPct >= 60 && result.interactionModel === 'augmentation') {
+                  return (
+                    <div className="bg-amber-50 border border-amber-200 rounded-xl px-5 py-4 flex gap-3">
+                      <span className="text-amber-500 text-lg shrink-0">⚠️</span>
+                      <div>
+                        <p className="text-sm font-semibold text-amber-800">Posible inconsistencia en tu diagnóstico</p>
+                        <p className="text-sm text-amber-700 mt-0.5">
+                          El {aiPct}% de tus actividades pueden hacerlas la IA sola, pero el cuestionario apunta a Aumentación.
+                          Revisa si tus respuestas al cuestionario reflejan correctamente tu contexto.
+                        </p>
+                      </div>
+                    </div>
+                  )
+                }
+                return null
+              })()}
+
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <ResultCard type="interactionModel"   winner={result.interactionModel}   scores={result.interactionScores} />
                 <ResultCard type="implementationType" winner={result.implementationType} scores={result.implementationScores} />
