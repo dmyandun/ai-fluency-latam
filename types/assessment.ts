@@ -21,6 +21,14 @@ export type RoadmapItemSource = 'system' | 'user'
 export type RoadmapPriority = 'high' | 'medium' | 'low'
 export type RoadmapPhaseId = '30d' | '60d' | '90d' | '6m' | '12m'
 
+// Clasificación de actividades diarias
+export type ActivityCategory = 'ai_only' | 'human_ai' | 'human_only'
+
+export interface WorkActivity {
+  description: string
+  category: ActivityCategory | null
+}
+
 export interface AssessmentResult {
   dimensions: DimensionScore
   interactionModel: InteractionModel
@@ -29,6 +37,7 @@ export interface AssessmentResult {
   implementationScores: Record<ImplementationType, number>
   country: string
   industry: string
+  activities: WorkActivity[]
   completedAt: string
 }
 
@@ -83,10 +92,11 @@ export interface RoadmapPhaseConfig {
 }
 
 export interface AssessmentState {
-  step: 'country' | 'industry' | 'questions' | 'done'
+  step: 'country' | 'industry' | 'activities' | 'classify' | 'questions' | 'done'
   currentQuestionIndex: number
   country: string
   industry: string
+  activities: WorkActivity[]
   answers: Partial<DimensionScore>
 }
 

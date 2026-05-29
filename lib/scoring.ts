@@ -3,6 +3,7 @@ import type {
   InteractionModel,
   ImplementationType,
   AssessmentResult,
+  WorkActivity,
 } from '@/types/assessment'
 
 interface ScoreBreakdown {
@@ -97,13 +98,15 @@ export function calculateScores(dimensions: DimensionScore): ScoreBreakdown {
 export function buildAssessmentResult(
   dimensions: DimensionScore,
   country: string,
-  industry: string
+  industry: string,
+  activities: WorkActivity[] = []
 ): AssessmentResult {
   const scores = calculateScores(dimensions)
   return {
     dimensions,
     country,
     industry,
+    activities,
     completedAt: new Date().toISOString(),
     ...scores,
   }

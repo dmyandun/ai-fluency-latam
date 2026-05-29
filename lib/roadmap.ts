@@ -45,6 +45,39 @@ const UNIVERSAL_ITEMS: RoadmapItem[] = [
   makeItem('sys-universal-12m-1', '12m', 'Evaluar ROI y planificar expansión', 'Revisión formal del impacto del primer año: ahorros, mejoras de calidad, velocidad y satisfacción del equipo.', 'medium', 5, 3),
 ]
 
+// 4D Framework de Anthropic para AI Fluency
+// Discover → Design → Deploy → Direct
+const FOUR_D_ITEMS: RoadmapItem[] = [
+  makeItem(
+    'sys-4d-discover',
+    '30d',
+    '4D Framework — Discover: Descubrir oportunidades de IA',
+    'Aplicar el primer paso del framework de AI Fluency de Anthropic: mapear sistemáticamente dónde la IA puede transformar procesos, tareas y decisiones en tu organización. Incluye entrevistar al equipo y revisar los flujos de trabajo actuales.',
+    'high', 5, 2
+  ),
+  makeItem(
+    'sys-4d-design',
+    '60d',
+    '4D Framework — Design: Diseñar la colaboración humano-IA',
+    'Segundo paso del framework: diseñar cómo humanos e IA trabajarán juntos en cada proceso seleccionado. Define roles, límites de autonomía, flujos de aprobación y formatos de interacción (prompt templates, herramientas, interfaces).',
+    'high', 5, 3
+  ),
+  makeItem(
+    'sys-4d-deploy',
+    '90d',
+    '4D Framework — Deploy: Desplegar el piloto de IA',
+    'Tercer paso del framework: lanzar la solución de IA en producción con el alcance definido. Implementar el sistema, capacitar al equipo y medir los primeros resultados contra los KPIs establecidos.',
+    'high', 5, 4
+  ),
+  makeItem(
+    'sys-4d-direct',
+    '6m',
+    '4D Framework — Direct: Dirigir, gobernar y escalar',
+    'Cuarto paso del framework: establecer la gobernanza del uso de IA en la organización. Definir políticas de uso responsable, ciclos de mejora continua, métricas de impacto y criterios para escalar a nuevos procesos.',
+    'medium', 5, 3
+  ),
+]
+
 const INTERACTION_ITEMS: Record<string, RoadmapItem[]> = {
   automation: [
     makeItem('sys-automation-30d-1', '30d', 'Identificar top 3 tareas repetitivas con mayor volumen', 'Priorizar los procesos repetitivos que más tiempo consumen y tienen mayor potencial de automatización.', 'high', 5, 1),
@@ -88,7 +121,7 @@ export function generateDefaultRoadmap(result: AssessmentResult): Roadmap {
   const interactionItems = INTERACTION_ITEMS[result.interactionModel] ?? []
   const implementationItems = IMPLEMENTATION_ITEMS[result.implementationType] ?? []
 
-  const allItems = [...UNIVERSAL_ITEMS, ...interactionItems, ...implementationItems]
+  const allItems = [...UNIVERSAL_ITEMS, ...FOUR_D_ITEMS, ...interactionItems, ...implementationItems]
 
   return {
     items: allItems,
