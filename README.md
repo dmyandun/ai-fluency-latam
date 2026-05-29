@@ -1,3 +1,13 @@
+---
+title: AI Fluency LATAM
+emoji: 🤖
+colorFrom: indigo
+colorTo: violet
+sdk: docker
+app_port: 7860
+pinned: false
+---
+
 # AI Fluency LATAM
 
 Herramienta de diagnóstico B2B para organizaciones de Latinoamérica que necesitan identificar qué tipo de adopción de inteligencia artificial les corresponde.
