@@ -8,7 +8,7 @@ import { getRecommendation, MODEL_LABELS } from '@/lib/recommendations'
 import { loadOrGenerateRoadmap } from '@/lib/roadmap'
 import ResultCard from '@/components/ResultCard'
 import RecommendationMatrix from '@/components/RecommendationMatrix'
-import RoadmapBoard from '@/components/RoadmapBoard'
+import RoadmapFlowBoard from '@/components/RoadmapFlowBoard'
 import AIPolicyGenerator from '@/components/AIPolicyGenerator'
 import SimulationApp from '@/components/SimulationApp'
 import { getSimulation } from '@/lib/simulations'
@@ -271,7 +271,7 @@ export default function ResultsPage() {
 
           {activeTab === 'roadmap' && roadmap && (
             <div className="animate-fade-in">
-              <RoadmapBoard roadmap={roadmap} onUpdateRoadmap={handleUpdateRoadmap} />
+              <RoadmapFlowBoard roadmap={roadmap} onUpdateRoadmap={handleUpdateRoadmap} />
             </div>
           )}
 
