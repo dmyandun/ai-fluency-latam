@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import type { InteractionModel } from '@/types/assessment'
 
 // Cambia esta URL a tu perfil de LinkedIn o página de contacto
-const CONTACT_URL = 'https://www.linkedin.com/in/dyandun'
+const CONTACT_URL = 'https://www.linkedin.com/in/dmyandun/'
 
 const PLACEHOLDERS: Record<string, string> = {
   manufacturing: 'Ej: "Tenemos 80 SKUs de repuestos con alta varianza en consumo y 4 proveedores. ¿Cómo optimizo el stock de seguridad sin sobreinvertir?"',
