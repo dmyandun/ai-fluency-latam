@@ -43,7 +43,7 @@ function ImpactRow({ item }: { item: SimImpact }) {
 export default function SimulationApp({ config, interactionModel, industryId }: SimulationAppProps) {
   const [simState, setSimState] = useState<SimState>('idle')
   const [dotCount, setDotCount] = useState(0)
-  const variant = config.variants[interactionModel]
+  const variant = config.variants[interactionModel] ?? config.variants['augmentation'] ?? Object.values(config.variants)[0]
 
   useEffect(() => {
     if (simState !== 'analyzing') return

@@ -48,6 +48,13 @@ export default function SimulationChat({
     }
   }, [loading])
 
+  // Cuando el orquestador termina, bajar a la respuesta.
+  useEffect(() => {
+    if (agentsComplete && responseRef.current) {
+      responseRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }, [agentsComplete])
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!input.trim() || loading) return
@@ -168,7 +175,6 @@ export default function SimulationChat({
               ↺ Nueva consulta
             </button>
           )}
-          <span className="text-xs text-slate-400 hidden sm:block">⌘↵ para enviar</span>
         </div>
       </form>
 
