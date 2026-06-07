@@ -3,12 +3,14 @@
 import { useState, useEffect } from 'react'
 import type { InteractionModel } from '@/types/assessment'
 import type { SimulationConfig, SimImpact, SimAIInsight } from '@/lib/simulations'
+import SimulationChat from '@/components/SimulationChat'
 
 type SimState = 'idle' | 'analyzing' | 'results' | 'applied'
 
 interface SimulationAppProps {
   config: SimulationConfig
   interactionModel: InteractionModel
+  industryId: string
 }
 
 const STATUS_STYLES = {
@@ -38,7 +40,7 @@ function ImpactRow({ item }: { item: SimImpact }) {
   )
 }
 
-export default function SimulationApp({ config, interactionModel }: SimulationAppProps) {
+export default function SimulationApp({ config, interactionModel, industryId }: SimulationAppProps) {
   const [simState, setSimState] = useState<SimState>('idle')
   const [dotCount, setDotCount] = useState(0)
   const variant = config.variants[interactionModel]
@@ -257,6 +259,16 @@ export default function SimulationApp({ config, interactionModel }: SimulationAp
           )}
         </div>
       </div>
+
+      {/* Chat con IA real — visible siempre debajo de la simulación */}
+      <SimulationChat
+        industryId={industryId}
+        interactionModel={interactionModel}
+        appName={config.appName}
+        colorAccent={config.colorAccent}
+        colorLight={config.colorLight}
+        colorText={config.colorText}
+      />
 
       {/* Footer de la app simulada */}
       <div className="border-t border-slate-100 px-6 py-2.5 bg-slate-50 flex items-center justify-between">
