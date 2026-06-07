@@ -259,7 +259,9 @@ export default function ResultsPage() {
                     Ver roadmap de 12 meses →
                   </button>
                   <a
-                    href="mailto:hola@aifluencylatam.com"
+                    href="https://www.linkedin.com/in/dmyandun/"
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="bg-white border border-slate-300 hover:border-blue-400 text-slate-700 hover:text-blue-700 font-medium px-6 py-3 rounded-xl text-sm transition-all shadow-sm"
                   >
                     Contactar consultoría
