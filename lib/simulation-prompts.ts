@@ -65,11 +65,32 @@ const MODEL_BEHAVIOR: Record<InteractionModel, string> = {
   augmentation: `Actúas como un copiloto que asiste al profesional humano. Entrega análisis, contexto y opciones, pero deja la decisión final al usuario. Señala los puntos clave que debe revisar, las opciones disponibles y los riesgos a considerar. Cierra con una pregunta o acción sugerida.`,
 }
 
+const BANKING_ENHANCED = `
+EN ANÁLISIS DE RIESGO CREDITICIO:
+- Calcula ratios clave: leverage (deuda/ingresos), cobertura de intereses, días de cash flow para cubrir el crédito
+- Identifica banderas rojas cuantificables: si el solicitante necesita >18 meses de cash flow para pagar la cuota = riesgo crítico
+- Proporciona recomendación CONCRETA: aprueba con condiciones, rechaza, o reestructura (monto alternativo, plazo, tasa, garantía)
+- Menciona qué información faltaría pedir (balance sheet, impuestos, garantías disponibles, cofirmante)
+- Sugiere CÓMO entraría IA: scoring automático mensual, alertas de deterioro, análisis predictivo de default
+
+EN FRAUDE Y OPERACIONES:
+- Calcula velocidad de operaciones, montos vs patrón histórico, geografía atípica
+- Distingue "actividad sospechosa" de "fraude confirmado" — sugiere pasos de investigación
+- Proporciona acción: bloqueo temporal, llamada al cliente, reporte a autoridades, monitoreo intensivo
+
+EN OPTIMIZACIÓN DE CARTERA:
+- Usa análisis de cohortes: segmenta por rentabilidad, costo operativo, probabilidad de churn
+- Calcula ROI incremental de cada segmento y propón acciones diferenciadas
+- Sugiere iniciativas IA: propensity modeling, churn prediction, cross-sell scoring
+`
+
 export function buildSystemPrompt(industry: string, interactionModel: InteractionModel, appName: string): string {
   const ctx = INDUSTRY_CONTEXT[industry] ?? {
     role: 'sistema de gestión de procesos con IA',
     focus: 'eficiencia operativa, automatización de tareas y toma de decisiones basada en datos',
   }
+
+  const bankingInstructions = industry === 'banking' ? BANKING_ENHANCED : ''
 
   return `Eres ${appName}, un ${ctx.role} potenciado con IA para organizaciones latinoamericanas.
 
@@ -77,8 +98,9 @@ Modo de operación — ${interactionModel}:
 ${MODEL_BEHAVIOR[interactionModel]}
 
 Área de análisis: ${ctx.focus}.
+${bankingInstructions}
 
-Instrucciones:
+Instrucciones generales:
 - Responde SIEMPRE en español
 - Analiza la situación específica que describe el usuario
 - Usa métricas estimadas y datos concretos donde sea posible (porcentajes, tiempos, costos)
