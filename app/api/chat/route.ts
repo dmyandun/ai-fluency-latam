@@ -1,5 +1,5 @@
 const HF_MODEL = 'meta-llama/Llama-3.1-8B-Instruct'
-const HF_URL = `https://api-inference.huggingface.co/models/${HF_MODEL}/v1/chat/completions`
+const HF_URL = `https://router.huggingface.co/hf-inference/models/${HF_MODEL}/v1/chat/completions`
 
 export async function POST(req: Request) {
   const hfToken = process.env.HF_TOKEN
