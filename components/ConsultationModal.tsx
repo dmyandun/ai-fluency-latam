@@ -4,8 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import Script from 'next/script'
 import type { AssessmentResult, WorkActivity } from '@/types/assessment'
 import { CALENDLY_URL, buildDiagnosisSummary } from '@/lib/contact'
-import ActivityInput from './ActivityInput'
-import ActivityClassifier from './ActivityClassifier'
+import ActivityListInput from './ActivityListInput'
 
 interface ConsultationModalProps {
   result: AssessmentResult
@@ -76,8 +75,6 @@ export default function ConsultationModal({ result, open, onClose }: Consultatio
 
   if (!open) return null
 
-  const allClassified = activities.length > 0 && activities.every((a) => a.category !== null)
-
   return (
     <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <Script
@@ -116,35 +113,12 @@ export default function ConsultationModal({ result, open, onClose }: Consultatio
               <p className="text-xs text-slate-500 mb-3 leading-relaxed">
                 Pueden ser las tareas que <strong className="text-slate-600">más tiempo te consumen</strong> en tu día a día,
                 o los <strong className="text-slate-600">procesos que más problemas o cuellos de botella</strong> generan en tu
-                industria. Escríbelas como las vivas tú — esto nos permite enfocar la consultoría en lo que de verdad te importa.
+                industria. Para cada una, marca según tu criterio cómo crees que se podría automatizar
+                (<span className="text-violet-700">🤖 Solo IA</span>, <span className="text-blue-700">🤝 Humano + IA</span> o
+                {' '}<span className="text-emerald-700">👤 Solo humano</span>) y dale a Agregar.
               </p>
-              <ActivityInput activities={activities} onChange={setActivities} />
+              <ActivityListInput activities={activities} onChange={setActivities} />
             </div>
-
-            {/* Clasificación de cada actividad */}
-            {activities.length > 0 && (
-              <div>
-                <p className="text-sm font-semibold text-slate-800 mb-1">
-                  Según tu criterio, ¿cómo se podría resolver cada una con IA?
-                </p>
-                <p className="text-xs text-slate-500 mb-3 leading-relaxed">
-                  No te preocupes por acertar — es tu intuición. Esto nos da contexto sobre dónde ves
-                  más espacio para la automatización.
-                </p>
-                <div className="flex flex-wrap gap-3 mb-4">
-                  {[
-                    { icon: '🤖', label: 'Solo IA — la IA puede hacerlo sola',         color: 'text-violet-700 bg-violet-50 border-violet-200' },
-                    { icon: '🤝', label: 'Humano + IA — mejor en conjunto',            color: 'text-blue-700 bg-blue-50 border-blue-200' },
-                    { icon: '👤', label: 'Solo humano — requiere criterio humano',     color: 'text-emerald-700 bg-emerald-50 border-emerald-200' },
-                  ].map((item) => (
-                    <span key={item.label} className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full border ${item.color}`}>
-                      {item.icon} {item.label}
-                    </span>
-                  ))}
-                </div>
-                <ActivityClassifier activities={activities} onChange={setActivities} />
-              </div>
-            )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
@@ -177,11 +151,9 @@ export default function ConsultationModal({ result, open, onClose }: Consultatio
             >
               Continuar a agendar →
             </button>
-            {activities.length === 0 ? (
+            {activities.length === 0 && (
               <p className="text-xs text-slate-400 text-center">Agrega al menos una actividad para continuar.</p>
-            ) : !allClassified ? (
-              <p className="text-xs text-slate-400 text-center">Tip: clasifica tus actividades para una reunión más precisa (opcional).</p>
-            ) : null}
+            )}
           </div>
         )}
 
