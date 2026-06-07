@@ -6,8 +6,6 @@ import { buildSystemPrompt } from '@/lib/simulation-prompts'
 
 const CONTACT_URL = 'https://www.linkedin.com/in/dmyandun/'
 
-const HF_MODEL = 'meta-llama/Llama-3.1-8B-Instruct'
-const HF_URL = `https://api-inference.huggingface.co/models/${HF_MODEL}/v1/chat/completions`
 
 const PLACEHOLDERS: Record<string, string> = {
   manufacturing: 'Ej: "Tenemos 80 SKUs de repuestos con alta varianza en consumo y 4 proveedores. ¿Cómo optimizo el stock de seguridad sin sobreinvertir?"',
@@ -63,12 +61,6 @@ export default function SimulationChat({
     e.preventDefault()
     if (!input.trim() || loading) return
 
-    const token = process.env.NEXT_PUBLIC_HF_TOKEN
-    if (!token) {
-      setError('NEXT_PUBLIC_HF_TOKEN no configurado')
-      return
-    }
-
     setLoading(true)
     setResponse('')
     setDone(false)
@@ -77,21 +69,14 @@ export default function SimulationChat({
     try {
       const systemPrompt = buildSystemPrompt(industryId, interactionModel, appName)
 
-      const res = await fetch(HF_URL, {
+      const res = await fetch('/api/chat', {
         method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: HF_MODEL,
           messages: [
             { role: 'system', content: systemPrompt },
             { role: 'user', content: input.trim() },
           ],
-          stream: true,
-          max_tokens: 350,
-          temperature: 0.6,
         }),
       })
 
