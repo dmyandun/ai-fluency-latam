@@ -6,12 +6,11 @@ import Link from 'next/link'
 import type { AssessmentState } from '@/types/assessment'
 import { QUESTIONS } from '@/lib/questions'
 import { buildAssessmentResult } from '@/lib/scoring'
-import ProgressBar from '@/components/ProgressBar'
 import CountrySelector from '@/components/CountrySelector'
 import IndustrySelector from '@/components/IndustrySelector'
 import ActivityInput from '@/components/ActivityInput'
 import ActivityClassifier from '@/components/ActivityClassifier'
-import QuestionCard from '@/components/QuestionCard'
+import QuestionsTable from '@/components/QuestionsTable'
 
 const INITIAL_STATE: AssessmentState = {
   step: 'country',
@@ -35,34 +34,27 @@ export default function AssessmentPage() {
   const router = useRouter()
   const [state, setState] = useState<AssessmentState>(INITIAL_STATE)
 
-  const currentQuestion = QUESTIONS[state.currentQuestionIndex]
-  const currentAnswer   = currentQuestion ? state.answers[currentQuestion.dimension] : undefined
+  const allQuestionsAnswered = QUESTIONS.every((q) => state.answers[q.dimension] !== undefined)
 
   function handleNext() {
-    if (state.step === 'country')     { setState((p) => ({ ...p, step: 'industry' })); return }
-    if (state.step === 'industry')    { setState((p) => ({ ...p, step: 'activities' })); return }
-    if (state.step === 'activities')  {
-      // Si hay actividades, ir a clasificar; si no, saltar al cuestionario
+    if (state.step === 'country')    { setState((p) => ({ ...p, step: 'industry' })); return }
+    if (state.step === 'industry')   { setState((p) => ({ ...p, step: 'activities' })); return }
+    if (state.step === 'activities') {
       setState((p) => ({ ...p, step: p.activities.length > 0 ? 'classify' : 'questions' }))
       return
     }
-    if (state.step === 'classify')    { setState((p) => ({ ...p, step: 'questions' })); return }
+    if (state.step === 'classify')   { setState((p) => ({ ...p, step: 'questions' })); return }
 
     if (state.step === 'questions') {
-      const isLast = state.currentQuestionIndex === QUESTIONS.length - 1
-      if (isLast) {
-        const result = buildAssessmentResult(
-          state.answers as Parameters<typeof buildAssessmentResult>[0],
-          state.country,
-          state.industry,
-          state.activities
-        )
-        localStorage.setItem('afl_result', JSON.stringify(result))
-        localStorage.removeItem('afl_roadmap')
-        router.push('/results')
-        return
-      }
-      setState((p) => ({ ...p, currentQuestionIndex: p.currentQuestionIndex + 1 }))
+      const result = buildAssessmentResult(
+        state.answers as Parameters<typeof buildAssessmentResult>[0],
+        state.country,
+        state.industry,
+        state.activities
+      )
+      localStorage.setItem('afl_result', JSON.stringify(result))
+      localStorage.removeItem('afl_roadmap')
+      router.push('/results')
     }
   }
 
@@ -70,12 +62,8 @@ export default function AssessmentPage() {
     if (state.step === 'industry')   { setState((p) => ({ ...p, step: 'country' })); return }
     if (state.step === 'activities') { setState((p) => ({ ...p, step: 'industry' })); return }
     if (state.step === 'classify')   { setState((p) => ({ ...p, step: 'activities' })); return }
-    if (state.step === 'questions') {
-      if (state.currentQuestionIndex === 0) {
-        setState((p) => ({ ...p, step: p.activities.length > 0 ? 'classify' : 'activities' }))
-      } else {
-        setState((p) => ({ ...p, currentQuestionIndex: p.currentQuestionIndex - 1 }))
-      }
+    if (state.step === 'questions')  {
+      setState((p) => ({ ...p, step: p.activities.length > 0 ? 'classify' : 'activities' }))
     }
   }
 
@@ -88,9 +76,7 @@ export default function AssessmentPage() {
     (state.step === 'industry'   && state.industry !== '') ||
     (state.step === 'activities' && state.activities.length > 0) ||
     (state.step === 'classify'   && allActivitiesClassified) ||
-    (state.step === 'questions'  && currentAnswer !== undefined)
-
-  const isLastQuestion = state.step === 'questions' && state.currentQuestionIndex === QUESTIONS.length - 1
+    (state.step === 'questions'  && allQuestionsAnswered)
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">
@@ -100,11 +86,6 @@ export default function AssessmentPage() {
           <Link href="/" className="text-lg font-semibold text-slate-900 tracking-tight">
             AI Fluency <span className="text-blue-600">LATAM</span>
           </Link>
-          {state.step === 'questions' && (
-            <div className="w-48 sm:w-64">
-              <ProgressBar current={state.currentQuestionIndex + 1} total={QUESTIONS.length} />
-            </div>
-          )}
         </div>
       </nav>
 
@@ -179,12 +160,11 @@ export default function AssessmentPage() {
                 <p className="text-slate-500 leading-relaxed">
                   Para cada actividad, indica cómo crees que debería realizarse con IA.
                 </p>
-                {/* Leyenda */}
                 <div className="flex flex-wrap gap-3 mt-4">
                   {[
-                    { icon: '🤖', label: 'Solo IA', color: 'text-violet-700 bg-violet-50 border-violet-200' },
-                    { icon: '🤝', label: 'Humano + IA', color: 'text-blue-700 bg-blue-50 border-blue-200' },
-                    { icon: '👤', label: 'Solo humano', color: 'text-emerald-700 bg-emerald-50 border-emerald-200' },
+                    { icon: '🤖', label: 'Solo IA',      color: 'text-violet-700 bg-violet-50 border-violet-200' },
+                    { icon: '🤝', label: 'Humano + IA',  color: 'text-blue-700 bg-blue-50 border-blue-200' },
+                    { icon: '👤', label: 'Solo humano',  color: 'text-emerald-700 bg-emerald-50 border-emerald-200' },
                   ].map((item) => (
                     <span key={item.label} className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full border ${item.color}`}>
                       {item.icon} {item.label}
@@ -199,16 +179,22 @@ export default function AssessmentPage() {
             </div>
           )}
 
-          {/* Step: Preguntas */}
-          {state.step === 'questions' && currentQuestion && (
+          {/* Step: Preguntas — tabla única con las 10 dimensiones */}
+          {state.step === 'questions' && (
             <div className="animate-fade-in space-y-6">
-              <p className="text-sm text-blue-600 font-semibold">
-                {STEP_LABELS.questions} · Pregunta {state.currentQuestionIndex + 1}/{QUESTIONS.length}
-              </p>
-              <QuestionCard
-                key={currentQuestion.id}
-                question={currentQuestion}
-                currentValue={currentAnswer}
+              <div>
+                <p className="text-sm text-blue-600 font-semibold mb-2">{STEP_LABELS.questions}</p>
+                <h1 className="text-2xl sm:text-3xl font-semibold text-slate-900 mb-2">
+                  Evalúa tu organización
+                </h1>
+                <p className="text-slate-500 leading-relaxed">
+                  Responde las 10 dimensiones en escala del <strong className="text-slate-700">1</strong> (bajo) al <strong className="text-slate-700">5</strong> (alto).
+                  Puedes ajustar cualquier respuesta antes de continuar.
+                </p>
+              </div>
+              <QuestionsTable
+                questions={QUESTIONS}
+                answers={state.answers}
                 onAnswer={(dim, val) => setState((p) => ({ ...p, answers: { ...p.answers, [dim]: val } }))}
               />
             </div>
@@ -231,7 +217,7 @@ export default function AssessmentPage() {
               disabled={state.step !== 'activities' && !canContinue}
               className="flex-1 sm:flex-none sm:px-8 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-200 disabled:text-slate-400 text-white font-semibold rounded-xl text-sm transition-all shadow-sm"
             >
-              {isLastQuestion
+              {state.step === 'questions'
                 ? 'Ver mis resultados →'
                 : state.step === 'activities' && state.activities.length === 0
                 ? 'Saltar este paso →'
