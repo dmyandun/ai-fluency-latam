@@ -1,5 +1,7 @@
 const HF_MODEL = 'meta-llama/Llama-3.1-8B-Instruct'
-const HF_URL = `https://router.huggingface.co/hf-inference/models/${HF_MODEL}/v1/chat/completions`
+// Endpoint OpenAI-compatible con selección automática de provider.
+// hf-inference ya no sirve LLMs de chat; el router enruta al provider disponible.
+const HF_URL = 'https://router.huggingface.co/v1/chat/completions'
 
 export async function POST(req: Request) {
   const hfToken = process.env.HF_TOKEN
