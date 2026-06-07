@@ -3,7 +3,37 @@ const HF_MODEL = 'meta-llama/Llama-3.1-8B-Instruct'
 // hf-inference ya no sirve LLMs de chat; el router enruta al provider disponible.
 const HF_URL = 'https://router.huggingface.co/v1/chat/completions'
 
+// Rate limiter en memoria (suficiente para deploy single-instance / standalone).
+// Evita que un abusador agote los créditos de Inference Providers.
+const rateLimitStore = new Map<string, { count: number; resetAt: number }>()
+const RATE_WINDOW_MS = 60_000
+const RATE_MAX = 15
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now()
+  const entry = rateLimitStore.get(ip)
+  if (!entry || entry.resetAt < now) {
+    rateLimitStore.set(ip, { count: 1, resetAt: now + RATE_WINDOW_MS })
+    return false
+  }
+  if (entry.count >= RATE_MAX) return true
+  entry.count++
+  return false
+}
+
 export async function POST(req: Request) {
+  const ip =
+    req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
+    req.headers.get('x-real-ip') ??
+    'unknown'
+
+  if (isRateLimited(ip)) {
+    return Response.json(
+      { error: 'Demasiadas solicitudes. Intenta en un momento.' },
+      { status: 429 }
+    )
+  }
+
   const hfToken = process.env.HF_TOKEN
   if (!hfToken) {
     return Response.json({ error: 'HF_TOKEN no configurado' }, { status: 500 })
@@ -16,6 +46,22 @@ export async function POST(req: Request) {
     if (!Array.isArray(messages)) throw new Error('messages inválido')
   } catch {
     return Response.json({ error: 'Body inválido' }, { status: 400 })
+  }
+
+  // Validación estricta de input: limita tamaño y formato para evitar abuso.
+  if (messages.length === 0 || messages.length > 10) {
+    return Response.json({ error: 'Solicitud inválida.' }, { status: 400 })
+  }
+  for (const msg of messages) {
+    if (!msg || typeof msg !== 'object' || Array.isArray(msg)) {
+      return Response.json({ error: 'Solicitud inválida.' }, { status: 400 })
+    }
+    if (!['system', 'user', 'assistant'].includes(msg.role)) {
+      return Response.json({ error: 'Solicitud inválida.' }, { status: 400 })
+    }
+    if (typeof msg.content !== 'string' || msg.content.length === 0 || msg.content.length > 4000) {
+      return Response.json({ error: 'Solicitud inválida.' }, { status: 400 })
+    }
   }
 
   const controller = new AbortController()
