@@ -30,34 +30,34 @@ export default function QuestionsTable({ questions, answers, onAnswer }: Questio
           return (
             <div
               key={question.id}
-              className={`flex flex-col sm:flex-row sm:items-center gap-4 px-5 py-4 border-b border-slate-100 last:border-0 transition-colors ${
+              className={`px-5 py-4 border-b border-slate-100 last:border-0 transition-colors ${
                 isAnswered ? 'bg-blue-50/40' : 'bg-white hover:bg-slate-50'
               }`}
             >
-              {/* Número + pregunta + descripción */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-start gap-3">
-                  <span className={`shrink-0 w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center mt-0.5 ${
-                    isAnswered ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-500'
-                  }`}>
-                    {isAnswered ? '✓' : idx + 1}
-                  </span>
-                  <div>
-                    <p className="text-sm font-medium text-slate-800 leading-snug">
-                      {question.text}
-                    </p>
-                    {question.helpText && (
-                      <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-                        {question.helpText}
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                {/* Número + pregunta + descripción */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start gap-3">
+                    <span className={`shrink-0 w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center mt-0.5 ${
+                      isAnswered ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-500'
+                    }`}>
+                      {isAnswered ? '✓' : idx + 1}
+                    </span>
+                    <div>
+                      <p className="text-sm font-medium text-slate-800 leading-snug">
+                        {question.text}
                       </p>
-                    )}
+                      {question.helpText && (
+                        <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                          {question.helpText}
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Selector 1-5 */}
-              <div className="flex flex-col items-end gap-1 shrink-0">
-                <div className="flex items-center gap-1.5">
+                {/* Selector 1-5 */}
+                <div className="flex items-center gap-1.5 shrink-0 self-start sm:self-center pl-9 sm:pl-0">
                   {[1, 2, 3, 4, 5].map((val) => (
                     <button
                       key={val}
@@ -73,10 +73,16 @@ export default function QuestionsTable({ questions, answers, onAnswer }: Questio
                     </button>
                   ))}
                 </div>
-                <div className="flex justify-between w-full px-0.5">
-                  <span className="text-[10px] text-slate-400 leading-none">{question.scale.minLabel}</span>
-                  <span className="text-[10px] text-slate-400 leading-none text-right max-w-[120px] truncate">{question.scale.maxLabel}</span>
-                </div>
+              </div>
+
+              {/* Etiquetas de escala — ancho completo, justificadas a los extremos */}
+              <div className="flex justify-between items-start gap-6 mt-2.5 pl-9">
+                <span className="flex-1 text-[11px] text-slate-500 leading-snug">
+                  <span className="font-semibold text-slate-600">1</span> · {question.scale.minLabel}
+                </span>
+                <span className="flex-1 text-[11px] text-slate-500 leading-snug text-right">
+                  <span className="font-semibold text-slate-600">5</span> · {question.scale.maxLabel}
+                </span>
               </div>
             </div>
           )
