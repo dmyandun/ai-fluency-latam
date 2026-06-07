@@ -5,6 +5,7 @@ import Script from 'next/script'
 import type { AssessmentResult, WorkActivity } from '@/types/assessment'
 import { CALENDLY_URL, buildDiagnosisSummary } from '@/lib/contact'
 import ActivityInput from './ActivityInput'
+import ActivityClassifier from './ActivityClassifier'
 
 interface ConsultationModalProps {
   result: AssessmentResult
@@ -34,11 +35,24 @@ export default function ConsultationModal({ result, open, onClose }: Consultatio
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [scriptReady, setScriptReady] = useState(false)
+  const [calendarLoaded, setCalendarLoaded] = useState(false)
   const widgetRef = useRef<HTMLDivElement>(null)
+
+  // Detectar cuando el calendario de Calendly terminó de cargar
+  useEffect(() => {
+    function onMessage(e: MessageEvent) {
+      if (typeof e.data === 'object' && e.data?.event === 'calendly.event_type_viewed') {
+        setCalendarLoaded(true)
+      }
+    }
+    window.addEventListener('message', onMessage)
+    return () => window.removeEventListener('message', onMessage)
+  }, [])
 
   // Inicializar el widget de Calendly cuando llegamos al paso de agendar
   useEffect(() => {
     if (step !== 'schedule' || !scriptReady || !widgetRef.current || !window.Calendly) return
+    setCalendarLoaded(false)
     widgetRef.current.innerHTML = ''
     window.Calendly.initInlineWidget({
       url: CALENDLY_URL,
@@ -53,14 +67,16 @@ export default function ConsultationModal({ result, open, onClose }: Consultatio
 
   function handleClose() {
     onClose()
-    // Reset al cerrar
     setStep('form')
     setActivities([])
     setName('')
     setEmail('')
+    setCalendarLoaded(false)
   }
 
   if (!open) return null
+
+  const allClassified = activities.length > 0 && activities.every((a) => a.category !== null)
 
   return (
     <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -76,7 +92,7 @@ export default function ConsultationModal({ result, open, onClose }: Consultatio
             <h3 className="text-base font-semibold text-slate-900">Agenda tu consultoría de IA</h3>
             <p className="text-xs text-slate-500 mt-0.5">
               {step === 'form'
-                ? 'Cuéntanos qué tareas te consumen más tiempo para preparar la reunión'
+                ? 'Cuéntanos sobre tu operación para preparar una reunión enfocada en tu caso'
                 : 'Elige el horario que mejor te funcione'}
             </p>
           </div>
@@ -90,18 +106,45 @@ export default function ConsultationModal({ result, open, onClose }: Consultatio
           </button>
         </div>
 
-        {/* Paso 1: tareas + contacto */}
+        {/* Paso 1: tareas + clasificación + contacto */}
         {step === 'form' && (
           <div className="px-6 py-5 space-y-5">
             <div>
-              <p className="text-sm font-medium text-slate-800 mb-1">
-                ¿Cuáles son las 5 tareas que más tiempo te consumen?
+              <p className="text-sm font-semibold text-slate-800 mb-1">
+                ¿Cuáles son las 5 actividades clave de tu trabajo?
               </p>
-              <p className="text-xs text-slate-500 mb-3">
-                Sé específico — esto nos ayuda a identificar dónde la IA puede tener mayor impacto en tu caso.
+              <p className="text-xs text-slate-500 mb-3 leading-relaxed">
+                Pueden ser las tareas que <strong className="text-slate-600">más tiempo te consumen</strong> en tu día a día,
+                o los <strong className="text-slate-600">procesos que más problemas o cuellos de botella</strong> generan en tu
+                industria. Escríbelas como las vivas tú — esto nos permite enfocar la consultoría en lo que de verdad te importa.
               </p>
               <ActivityInput activities={activities} onChange={setActivities} />
             </div>
+
+            {/* Clasificación de cada actividad */}
+            {activities.length > 0 && (
+              <div>
+                <p className="text-sm font-semibold text-slate-800 mb-1">
+                  Según tu criterio, ¿cómo se podría resolver cada una con IA?
+                </p>
+                <p className="text-xs text-slate-500 mb-3 leading-relaxed">
+                  No te preocupes por acertar — es tu intuición. Esto nos da contexto sobre dónde ves
+                  más espacio para la automatización.
+                </p>
+                <div className="flex flex-wrap gap-3 mb-4">
+                  {[
+                    { icon: '🤖', label: 'Solo IA — la IA puede hacerlo sola',         color: 'text-violet-700 bg-violet-50 border-violet-200' },
+                    { icon: '🤝', label: 'Humano + IA — mejor en conjunto',            color: 'text-blue-700 bg-blue-50 border-blue-200' },
+                    { icon: '👤', label: 'Solo humano — requiere criterio humano',     color: 'text-emerald-700 bg-emerald-50 border-emerald-200' },
+                  ].map((item) => (
+                    <span key={item.label} className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full border ${item.color}`}>
+                      {item.icon} {item.label}
+                    </span>
+                  ))}
+                </div>
+                <ActivityClassifier activities={activities} onChange={setActivities} />
+              </div>
+            )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
@@ -134,9 +177,11 @@ export default function ConsultationModal({ result, open, onClose }: Consultatio
             >
               Continuar a agendar →
             </button>
-            {activities.length === 0 && (
-              <p className="text-xs text-slate-400 text-center">Agrega al menos una tarea para continuar.</p>
-            )}
+            {activities.length === 0 ? (
+              <p className="text-xs text-slate-400 text-center">Agrega al menos una actividad para continuar.</p>
+            ) : !allClassified ? (
+              <p className="text-xs text-slate-400 text-center">Tip: clasifica tus actividades para una reunión más precisa (opcional).</p>
+            ) : null}
           </div>
         )}
 
@@ -148,12 +193,19 @@ export default function ConsultationModal({ result, open, onClose }: Consultatio
               onClick={() => setStep('form')}
               className="text-xs text-slate-500 hover:text-slate-700 px-4 py-2"
             >
-              ← Volver a editar tareas
+              ← Volver a editar actividades
             </button>
-            <div ref={widgetRef} style={{ minWidth: '320px', height: '640px' }} />
-            {!scriptReady && (
-              <p className="text-center text-sm text-slate-400 py-8">Cargando calendario…</p>
-            )}
+            <div className="relative" style={{ minHeight: '640px' }}>
+              {/* Overlay de carga mientras el calendario aparece */}
+              {!calendarLoaded && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-white z-10">
+                  <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                  <p className="text-sm font-medium text-slate-600">Cargando tu calendario…</p>
+                  <p className="text-xs text-slate-400">Esto toma unos segundos, no cierres la ventana</p>
+                </div>
+              )}
+              <div ref={widgetRef} style={{ minWidth: '320px', height: '640px' }} />
+            </div>
           </div>
         )}
       </div>
