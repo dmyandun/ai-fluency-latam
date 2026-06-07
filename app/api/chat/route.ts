@@ -1,5 +1,9 @@
 import { NextRequest } from 'next/server'
+import { setDefaultResultOrder } from 'dns'
 import type { InteractionModel } from '@/types/assessment'
+
+// Fuerza IPv4 en Node.js 17+ donde el orden DNS cambió a 'verbatim'
+setDefaultResultOrder('ipv4first')
 
 const MODEL = 'meta-llama/Llama-3.1-8B-Instruct'
 
