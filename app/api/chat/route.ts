@@ -1,8 +1,6 @@
 import { NextRequest } from 'next/server'
 import type { InteractionModel } from '@/types/assessment'
 
-export const runtime = 'edge'
-
 const MODEL = 'meta-llama/Llama-3.1-8B-Instruct'
 
 const INDUSTRY_CONTEXT: Record<string, { role: string; focus: string }> = {
