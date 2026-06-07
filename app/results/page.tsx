@@ -17,7 +17,7 @@ export default function ResultsPage() {
   const router = useRouter()
   const [result, setResult]   = useState<AssessmentResult | null>(null)
   const [roadmap, setRoadmap] = useState<Roadmap | null>(null)
-  const [activeTab, setActiveTab] = useState<'results' | 'roadmap' | 'policy' | 'simulation'>('results')
+  const [activeTab, setActiveTab] = useState<'results' | 'roadmap' | 'policy'>('results')
 
   useEffect(() => {
     const raw = localStorage.getItem('afl_result')
@@ -84,7 +84,6 @@ export default function ResultsPage() {
             { id: 'results' as const, label: 'Diagnóstico' },
             { id: 'roadmap' as const, label: 'Roadmap 12 meses' },
             { id: 'policy'      as const, label: 'Política de IA' },
-            { id: 'simulation'  as const, label: '✦ Ver simulación' },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -158,6 +157,24 @@ export default function ResultsPage() {
               </div>
 
               <RecommendationMatrix result={result} recommendation={recommendation} />
+
+              {/* Simulación interactiva */}
+              <div>
+                <div className="mb-4">
+                  <h2 className="text-xl font-semibold text-slate-900 mb-1">
+                    Simulación interactiva — así se vería tu producto de IA
+                  </h2>
+                  <p className="text-sm text-slate-500">
+                    Demo de cómo quedaría una aplicación real de IA para tu industria y modelo de interacción recomendado.
+                    Haz clic en el botón de acción para ver la IA en funcionamiento.
+                  </p>
+                </div>
+                <SimulationApp
+                  config={getSimulation(result.industry)}
+                  interactionModel={result.interactionModel}
+                  industryId={result.industry}
+                />
+              </div>
 
               {/* Análisis de actividades diarias */}
               {result.activities && result.activities.length > 0 && (
@@ -283,24 +300,6 @@ export default function ResultsPage() {
             </div>
           )}
 
-          {activeTab === 'simulation' && (
-            <div className="animate-fade-in">
-              <div className="mb-6">
-                <h2 className="text-xl font-semibold text-slate-900 mb-1">
-                  Simulación interactiva — así se vería tu producto de IA
-                </h2>
-                <p className="text-sm text-slate-500">
-                  Demo de cómo quedaría una aplicación real de IA para tu industria y modelo de interacción recomendado.
-                  Haz clic en el botón de acción para ver la IA en funcionamiento.
-                </p>
-              </div>
-              <SimulationApp
-                config={getSimulation(result.industry)}
-                interactionModel={result.interactionModel}
-                industryId={result.industry}
-              />
-            </div>
-          )}
         </div>
       </main>
     </div>
