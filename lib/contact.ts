@@ -3,7 +3,7 @@ import { MODEL_LABELS } from '@/lib/recommendations'
 
 // URL del inline embed de Calendly. Reemplazar con la URL real del evento.
 // (Share → Add to website → Inline Embed → copiar el valor de data-url)
-export const CALENDLY_URL = 'https://calendly.com/REEMPLAZAR/consultoria-ia'
+export const CALENDLY_URL = 'https://calendly.com/dyandun/30min?hide_event_type_details=1&hide_gdpr_banner=1'
 
 const DIMENSION_LABELS: Record<string, string> = {
   taskRepetitiveness: 'Repetitividad',
