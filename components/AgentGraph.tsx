@@ -1,51 +1,82 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { getAgentGraph, type AgentNode } from '@/lib/agent-graph'
 
 interface AgentGraphProps {
   industryId: string
   loading: boolean
   streamDone: boolean
+  caseIndex: number
+  onComplete: () => void
 }
 
 type AgentState = 'pending' | 'loading' | 'done'
 
-export default function AgentGraph({ industryId, loading, streamDone }: AgentGraphProps) {
+const T1 = 4000 // agente 1 completa a los 4s
+const T2 = 7000 // agente 2 completa a los 7s
+const T3_MIN = 10000 // tiempo mínimo del agente 3 (espera además a la IA)
+
+export default function AgentGraph({ industryId, loading, streamDone, caseIndex, onComplete }: AgentGraphProps) {
   const config = getAgentGraph(industryId)
   const [orchestratorState, setOrchestratorState] = useState<AgentState>('pending')
   const [agentStates, setAgentStates] = useState<AgentState[]>(['pending', 'pending', 'pending'])
 
-  // Al iniciar la carga: poner todos en 'loading' y agendar los timers escalonados.
+  const startedRef = useRef(false)
+  const minReachedRef = useRef(false)
+  const streamDoneRef = useRef(false)
+  const completedRef = useRef(false)
+  const timersRef = useRef<NodeJS.Timeout[]>([])
+  const onCompleteRef = useRef(onComplete)
+  onCompleteRef.current = onComplete
+
+  function markAgentDone(idx: number) {
+    setAgentStates((prev) => {
+      const next = [...prev]
+      next[idx] = 'done'
+      return next
+    })
+  }
+
+  function tryCompleteThird() {
+    if (completedRef.current) return
+    if (minReachedRef.current && streamDoneRef.current) {
+      completedRef.current = true
+      markAgentDone(2)
+      setOrchestratorState('done')
+      onCompleteRef.current()
+    }
+  }
+
+  // Arranque de la animación (una sola vez por activación de loading)
   useEffect(() => {
-    if (!loading) return
+    if (!loading || startedRef.current) return
+    startedRef.current = true
 
     setOrchestratorState('loading')
     setAgentStates(['loading', 'loading', 'loading'])
 
-    const timers: NodeJS.Timeout[] = []
-    config.agents.forEach((agent, idx) => {
-      if (agent.completionMs > 0) {
-        const t = setTimeout(() => {
-          setAgentStates((prev) => {
-            const next = [...prev]
-            next[idx] = 'done'
-            return next
-          })
-        }, agent.completionMs)
-        timers.push(t)
-      }
-    })
+    timersRef.current = [
+      setTimeout(() => markAgentDone(0), T1),
+      setTimeout(() => markAgentDone(1), T2),
+      setTimeout(() => {
+        minReachedRef.current = true
+        tryCompleteThird()
+      }, T3_MIN),
+    ]
+  }, [loading])
 
-    return () => timers.forEach(clearTimeout)
-  }, [loading, config.agents])
-
-  // Cuando el stream termina: marcar TODOS como 'done' (no se borra nada).
+  // Cuando el stream termina, intentar completar el tercer agente
   useEffect(() => {
     if (!streamDone) return
-    setAgentStates(['done', 'done', 'done'])
-    setOrchestratorState('done')
+    streamDoneRef.current = true
+    tryCompleteThird()
   }, [streamDone])
+
+  // Limpiar timers solo al desmontar
+  useEffect(() => {
+    return () => timersRef.current.forEach(clearTimeout)
+  }, [])
 
   return (
     <div className="mt-6 rounded-xl border border-slate-200 bg-slate-50 p-6">
@@ -57,7 +88,7 @@ export default function AgentGraph({ industryId, loading, streamDone }: AgentGra
         <div className="text-center">
           <h4 className="text-sm font-semibold text-slate-900">{config.orchestrator}</h4>
           <p className="text-xs text-slate-500 mt-0.5">
-            {orchestratorState === 'loading' ? 'Distribuyendo análisis...' : 'Análisis completado'}
+            {orchestratorState === 'done' ? 'Análisis completado' : 'Distribuyendo análisis...'}
           </p>
         </div>
       </div>
@@ -69,7 +100,6 @@ export default function AgentGraph({ industryId, loading, streamDone }: AgentGra
 
       {/* Horizontal Connector Line */}
       <div className="flex justify-around mb-6 relative h-0.5 bg-slate-300">
-        {/* Three vertical drops */}
         <div className="absolute left-1/4 -translate-x-1/2 top-1/2 w-0.5 h-3 bg-slate-300 -translate-y-1/2" />
         <div className="absolute left-1/2 -translate-x-1/2 top-1/2 w-0.5 h-3 bg-slate-300 -translate-y-1/2" />
         <div className="absolute right-1/4 -translate-x-1/2 top-1/2 w-0.5 h-3 bg-slate-300 -translate-y-1/2" />
@@ -78,7 +108,7 @@ export default function AgentGraph({ industryId, loading, streamDone }: AgentGra
       {/* Agent Nodes */}
       <div className="flex justify-around gap-4">
         {config.agents.map((agent, idx) => (
-          <AgentCard key={idx} agent={agent} state={agentStates[idx]} />
+          <AgentCard key={idx} agent={agent} state={agentStates[idx]} caseIndex={caseIndex} />
         ))}
       </div>
     </div>
@@ -88,9 +118,12 @@ export default function AgentGraph({ industryId, loading, streamDone }: AgentGra
 interface AgentCardProps {
   agent: AgentNode
   state: AgentState
+  caseIndex: number
 }
 
-function AgentCard({ agent, state }: AgentCardProps) {
+function AgentCard({ agent, state, caseIndex }: AgentCardProps) {
+  const finding = agent.findings[caseIndex] ?? agent.findings[0]
+
   return (
     <div className="flex-1 max-w-xs">
       <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
@@ -123,7 +156,7 @@ function AgentCard({ agent, state }: AgentCardProps) {
 
         {/* Finding (only show when done) */}
         {state === 'done' && (
-          <p className="text-xs text-slate-700 mt-3 pt-3 border-t border-slate-200 italic">{agent.finding}</p>
+          <p className="text-xs text-slate-700 mt-3 pt-3 border-t border-slate-200 italic">{finding}</p>
         )}
       </div>
     </div>

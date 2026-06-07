@@ -34,6 +34,7 @@ export default function SimulationChat({
   const [response, setResponse] = useState('')
   const [loading, setLoading]   = useState(false)
   const [done, setDone]         = useState(false)
+  const [agentsComplete, setAgentsComplete] = useState(false)
   const [error, setError]       = useState('')
   const responseRef             = useRef<HTMLDivElement>(null)
   const textareaRef             = useRef<HTMLTextAreaElement>(null)
@@ -51,6 +52,7 @@ export default function SimulationChat({
     setLoading(true)
     setResponse('')
     setDone(false)
+    setAgentsComplete(false)
     setError('')
 
     try {
@@ -108,6 +110,7 @@ export default function SimulationChat({
     setInput(cases[nextIndex])
     setResponse('')
     setDone(false)
+    setAgentsComplete(false)
     setError('')
     textareaRef.current?.focus()
   }
@@ -151,7 +154,7 @@ export default function SimulationChat({
               '✦ Analizar con IA'
             )}
           </button>
-          {(response || error) && (
+          {(agentsComplete || error) && (
             <button
               type="button"
               onClick={handleReset}
@@ -175,10 +178,12 @@ export default function SimulationChat({
           industryId={industryId}
           loading={loading}
           streamDone={done}
+          caseIndex={caseIndex}
+          onComplete={() => setAgentsComplete(true)}
         />
       )}
 
-      {(response || loading) && (
+      {agentsComplete && response && (
         <div
           ref={responseRef}
           className={`mt-4 rounded-xl border px-4 py-4 text-sm text-slate-700 leading-relaxed ${colorLight} border-slate-200`}
@@ -186,7 +191,7 @@ export default function SimulationChat({
           <div className="flex items-center gap-1.5 mb-2.5">
             <span className="text-xs font-semibold text-slate-500">{appName}</span>
             <span className="text-xs text-slate-400">·</span>
-            <span className={`text-xs font-medium ${colorText}`}>IA en tiempo real</span>
+            <span className={`text-xs font-medium ${colorText}`}>Síntesis del orquestador</span>
           </div>
           <div className="space-y-2">
             <ReactMarkdown
@@ -203,14 +208,11 @@ export default function SimulationChat({
             >
               {response}
             </ReactMarkdown>
-            {loading && (
-              <span className="inline-block w-1.5 h-4 bg-indigo-400 animate-pulse ml-0.5 rounded-sm align-text-bottom" />
-            )}
           </div>
         </div>
       )}
 
-      {done && (
+      {agentsComplete && (
         <div className="mt-4 rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-3.5 flex flex-col sm:flex-row items-start sm:items-center gap-3">
           <div className="flex-1">
             <p className="text-sm font-semibold text-indigo-900">
