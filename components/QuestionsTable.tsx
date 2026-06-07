@@ -34,55 +34,49 @@ export default function QuestionsTable({ questions, answers, onAnswer }: Questio
                 isAnswered ? 'bg-blue-50/40' : 'bg-white hover:bg-slate-50'
               }`}
             >
-              <div className="flex flex-col sm:flex-row sm:items-start gap-4">
-                {/* Número + pregunta + descripción */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start gap-3">
-                    <span className={`shrink-0 w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center mt-0.5 ${
-                      isAnswered ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-500'
-                    }`}>
-                      {isAnswered ? '✓' : idx + 1}
-                    </span>
-                    <div>
-                      <p className="text-sm font-medium text-slate-800 leading-snug">
-                        {question.text}
-                      </p>
-                      {question.helpText && (
-                        <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-                          {question.helpText}
-                        </p>
-                      )}
-                    </div>
-                  </div>
+              {/* Número + pregunta + descripción */}
+              <div className="flex items-start gap-3">
+                <span className={`shrink-0 w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center mt-0.5 ${
+                  isAnswered ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-500'
+                }`}>
+                  {isAnswered ? '✓' : idx + 1}
+                </span>
+                <div>
+                  <p className="text-sm font-medium text-slate-800 leading-snug">
+                    {question.text}
+                  </p>
+                  {question.helpText && (
+                    <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                      {question.helpText}
+                    </p>
+                  )}
                 </div>
+              </div>
 
-                {/* Selector 1-5 con anclajes de escala alineados a los botones */}
-                <div className="flex flex-col gap-1.5 shrink-0 self-start pl-9 sm:pl-0">
-                  <div className="flex items-center gap-1.5">
-                    {[1, 2, 3, 4, 5].map((val) => (
-                      <button
-                        key={val}
-                        type="button"
-                        onClick={() => onAnswer(question.dimension, val)}
-                        className={`w-9 h-9 rounded-lg text-sm font-semibold transition-all ${
-                          selected === val
-                            ? 'bg-blue-600 text-white shadow-md scale-110'
-                            : 'bg-white border border-slate-200 text-slate-600 hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50'
-                        }`}
-                      >
-                        {val}
-                      </button>
-                    ))}
-                  </div>
-                  <div className="flex justify-between gap-2">
-                    <span className="max-w-[46%] text-[10px] text-slate-500 leading-tight text-left">
-                      <span className="font-semibold text-slate-600">1</span> {question.scale.minLabel}
-                    </span>
-                    <span className="max-w-[46%] text-[10px] text-slate-500 leading-tight text-right">
-                      <span className="font-semibold text-slate-600">5</span> {question.scale.maxLabel}
-                    </span>
-                  </div>
+              {/* Escala Likert — anclajes a los lados, botones al centro, ancho completo */}
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mt-3 pl-9">
+                <span className="flex-1 text-xs text-slate-500 leading-snug sm:text-right order-2 sm:order-1">
+                  <span className="font-semibold text-slate-600">1</span> · {question.scale.minLabel}
+                </span>
+                <div className="flex items-center justify-center gap-1.5 shrink-0 order-1 sm:order-2">
+                  {[1, 2, 3, 4, 5].map((val) => (
+                    <button
+                      key={val}
+                      type="button"
+                      onClick={() => onAnswer(question.dimension, val)}
+                      className={`w-9 h-9 rounded-lg text-sm font-semibold transition-all ${
+                        selected === val
+                          ? 'bg-blue-600 text-white shadow-md scale-110'
+                          : 'bg-white border border-slate-200 text-slate-600 hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50'
+                      }`}
+                    >
+                      {val}
+                    </button>
+                  ))}
                 </div>
+                <span className="flex-1 text-xs text-slate-500 leading-snug order-3">
+                  <span className="font-semibold text-slate-600">5</span> · {question.scale.maxLabel}
+                </span>
               </div>
             </div>
           )

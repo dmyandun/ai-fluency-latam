@@ -11,6 +11,7 @@ interface SimulationAppProps {
   config: SimulationConfig
   interactionModel: InteractionModel
   industryId: string
+  onSchedule?: () => void
 }
 
 const STATUS_STYLES = {
@@ -40,7 +41,7 @@ function ImpactRow({ item }: { item: SimImpact }) {
   )
 }
 
-export default function SimulationApp({ config, interactionModel, industryId }: SimulationAppProps) {
+export default function SimulationApp({ config, interactionModel, industryId, onSchedule }: SimulationAppProps) {
   const [simState, setSimState] = useState<SimState>('idle')
   const [dotCount, setDotCount] = useState(0)
   const variant = config.variants[interactionModel] ?? config.variants['augmentation'] ?? Object.values(config.variants)[0]
@@ -268,6 +269,7 @@ export default function SimulationApp({ config, interactionModel, industryId }: 
         colorAccent={config.colorAccent}
         colorLight={config.colorLight}
         colorText={config.colorText}
+        onSchedule={onSchedule}
       />
 
       {/* Footer de la app simulada */}

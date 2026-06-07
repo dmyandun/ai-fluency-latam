@@ -7,8 +7,6 @@ import { buildSystemPrompt } from '@/lib/simulation-prompts'
 import { getCases } from '@/lib/simulation-cases'
 import AgentGraph from './AgentGraph'
 
-const CONTACT_URL = 'https://www.linkedin.com/in/dmyandun/'
-
 const TEXTAREA_PLACEHOLDER = 'Describe una situación real de tu organización y analízala con IA...'
 
 interface SimulationChatProps {
@@ -18,6 +16,7 @@ interface SimulationChatProps {
   colorAccent: string
   colorLight: string
   colorText: string
+  onSchedule?: () => void
 }
 
 export default function SimulationChat({
@@ -27,6 +26,7 @@ export default function SimulationChat({
   colorAccent,
   colorLight,
   colorText,
+  onSchedule,
 }: SimulationChatProps) {
   const cases = getCases(industryId)
   const [caseIndex, setCaseIndex] = useState(0)
@@ -236,14 +236,13 @@ export default function SimulationChat({
               Puedo ayudarte a diseñar e implementar soluciones de IA aplicada a tu contexto real.
             </p>
           </div>
-          <a
-            href={CONTACT_URL}
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            type="button"
+            onClick={onSchedule}
             className="shrink-0 py-2 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold transition-all shadow-sm whitespace-nowrap"
           >
             Agenda una consulta →
-          </a>
+          </button>
         </div>
       )}
     </div>

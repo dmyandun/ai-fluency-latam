@@ -8,8 +8,6 @@ import { QUESTIONS } from '@/lib/questions'
 import { buildAssessmentResult } from '@/lib/scoring'
 import CountrySelector from '@/components/CountrySelector'
 import IndustrySelector from '@/components/IndustrySelector'
-import ActivityInput from '@/components/ActivityInput'
-import ActivityClassifier from '@/components/ActivityClassifier'
 import QuestionsTable from '@/components/QuestionsTable'
 
 const INITIAL_STATE: AssessmentState = {
@@ -22,11 +20,11 @@ const INITIAL_STATE: AssessmentState = {
 }
 
 const STEP_LABELS: Record<AssessmentState['step'], string> = {
-  country: 'Paso 1 de 5',
-  industry: 'Paso 2 de 5',
-  activities: 'Paso 3 de 5',
-  classify: 'Paso 4 de 5',
-  questions: 'Paso 5 de 5',
+  country: 'Paso 1 de 3',
+  industry: 'Paso 2 de 3',
+  activities: '',
+  classify: '',
+  questions: 'Paso 3 de 3',
   done: '',
 }
 
@@ -38,19 +36,14 @@ export default function AssessmentPage() {
 
   function handleNext() {
     if (state.step === 'country')    { setState((p) => ({ ...p, step: 'industry' })); return }
-    if (state.step === 'industry')   { setState((p) => ({ ...p, step: 'activities' })); return }
-    if (state.step === 'activities') {
-      setState((p) => ({ ...p, step: p.activities.length > 0 ? 'classify' : 'questions' }))
-      return
-    }
-    if (state.step === 'classify')   { setState((p) => ({ ...p, step: 'questions' })); return }
+    if (state.step === 'industry')   { setState((p) => ({ ...p, step: 'questions' })); return }
 
     if (state.step === 'questions') {
       const result = buildAssessmentResult(
         state.answers as Parameters<typeof buildAssessmentResult>[0],
         state.country,
         state.industry,
-        state.activities
+        [] // Las tareas se recopilan en el flujo de agendar consultoría
       )
       localStorage.setItem('afl_result', JSON.stringify(result))
       localStorage.removeItem('afl_roadmap')
@@ -60,22 +53,12 @@ export default function AssessmentPage() {
 
   function handleBack() {
     if (state.step === 'industry')   { setState((p) => ({ ...p, step: 'country' })); return }
-    if (state.step === 'activities') { setState((p) => ({ ...p, step: 'industry' })); return }
-    if (state.step === 'classify')   { setState((p) => ({ ...p, step: 'activities' })); return }
-    if (state.step === 'questions')  {
-      setState((p) => ({ ...p, step: p.activities.length > 0 ? 'classify' : 'activities' }))
-    }
+    if (state.step === 'questions')  { setState((p) => ({ ...p, step: 'industry' })); return }
   }
-
-  const allActivitiesClassified =
-    state.activities.length > 0 &&
-    state.activities.every((a) => a.category !== null)
 
   const canContinue =
     (state.step === 'country'    && state.country !== '') ||
     (state.step === 'industry'   && state.industry !== '') ||
-    (state.step === 'activities' && state.activities.length > 0) ||
-    (state.step === 'classify'   && allActivitiesClassified) ||
     (state.step === 'questions'  && allQuestionsAnswered)
 
   return (
@@ -124,61 +107,6 @@ export default function AssessmentPage() {
             </div>
           )}
 
-          {/* Step: Actividades */}
-          {state.step === 'activities' && (
-            <div className="animate-fade-in space-y-6">
-              <div>
-                <p className="text-sm text-blue-600 font-semibold mb-2">{STEP_LABELS.activities}</p>
-                <h1 className="text-2xl sm:text-3xl font-semibold text-slate-900 mb-2">
-                  ¿Cuáles son tus actividades diarias más importantes?
-                </h1>
-                <p className="text-slate-500 leading-relaxed">
-                  Describe hasta <strong className="text-slate-700">5 actividades</strong> que consumen más tiempo en tu trabajo diario.
-                  Sé específico — esto nos ayudará a identificar exactamente dónde puede actuar la IA.
-                </p>
-              </div>
-              <ActivityInput
-                activities={state.activities}
-                onChange={(acts) => setState((p) => ({ ...p, activities: acts }))}
-              />
-              {state.activities.length === 0 && (
-                <p className="text-xs text-slate-400 italic">
-                  Puedes continuar sin actividades si prefieres saltarte este paso.
-                </p>
-              )}
-            </div>
-          )}
-
-          {/* Step: Clasificación */}
-          {state.step === 'classify' && (
-            <div className="animate-fade-in space-y-6">
-              <div>
-                <p className="text-sm text-blue-600 font-semibold mb-2">{STEP_LABELS.classify}</p>
-                <h1 className="text-2xl sm:text-3xl font-semibold text-slate-900 mb-2">
-                  ¿Quién debería hacer cada actividad?
-                </h1>
-                <p className="text-slate-500 leading-relaxed">
-                  Para cada actividad, indica cómo crees que debería realizarse con IA.
-                </p>
-                <div className="flex flex-wrap gap-3 mt-4">
-                  {[
-                    { icon: '🤖', label: 'Solo IA',      color: 'text-violet-700 bg-violet-50 border-violet-200' },
-                    { icon: '🤝', label: 'Humano + IA',  color: 'text-blue-700 bg-blue-50 border-blue-200' },
-                    { icon: '👤', label: 'Solo humano',  color: 'text-emerald-700 bg-emerald-50 border-emerald-200' },
-                  ].map((item) => (
-                    <span key={item.label} className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full border ${item.color}`}>
-                      {item.icon} {item.label}
-                    </span>
-                  ))}
-                </div>
-              </div>
-              <ActivityClassifier
-                activities={state.activities}
-                onChange={(acts) => setState((p) => ({ ...p, activities: acts }))}
-              />
-            </div>
-          )}
-
           {/* Step: Preguntas — tabla única con las 10 dimensiones */}
           {state.step === 'questions' && (
             <div className="animate-fade-in space-y-6">
@@ -214,14 +142,10 @@ export default function AssessmentPage() {
             <button
               type="button"
               onClick={handleNext}
-              disabled={state.step !== 'activities' && !canContinue}
+              disabled={!canContinue}
               className="flex-1 sm:flex-none sm:px-8 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-200 disabled:text-slate-400 text-white font-semibold rounded-xl text-sm transition-all shadow-sm"
             >
-              {state.step === 'questions'
-                ? 'Ver mis resultados →'
-                : state.step === 'activities' && state.activities.length === 0
-                ? 'Saltar este paso →'
-                : 'Continuar →'}
+              {state.step === 'questions' ? 'Ver mis resultados →' : 'Continuar →'}
             </button>
           </div>
         </div>

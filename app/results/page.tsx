@@ -12,12 +12,14 @@ import RoadmapFlowBoard from '@/components/RoadmapFlowBoard'
 import AIPolicyGenerator from '@/components/AIPolicyGenerator'
 import SimulationApp from '@/components/SimulationApp'
 import { getSimulation } from '@/lib/simulations'
+import ConsultationModal from '@/components/ConsultationModal'
 
 export default function ResultsPage() {
   const router = useRouter()
   const [result, setResult]   = useState<AssessmentResult | null>(null)
   const [roadmap, setRoadmap] = useState<Roadmap | null>(null)
   const [activeTab, setActiveTab] = useState<'results' | 'roadmap' | 'policy'>('results')
+  const [scheduleOpen, setScheduleOpen] = useState(false)
 
   useEffect(() => {
     const raw = localStorage.getItem('afl_result')
@@ -173,6 +175,7 @@ export default function ResultsPage() {
                   config={getSimulation(result.industry)}
                   interactionModel={result.interactionModel}
                   industryId={result.industry}
+                  onSchedule={() => setScheduleOpen(true)}
                 />
               </div>
 
@@ -275,14 +278,13 @@ export default function ResultsPage() {
                   >
                     Ver roadmap de 12 meses →
                   </button>
-                  <a
-                    href="https://www.linkedin.com/in/dmyandun/"
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <button
+                    type="button"
+                    onClick={() => setScheduleOpen(true)}
                     className="bg-white border border-slate-300 hover:border-blue-400 text-slate-700 hover:text-blue-700 font-medium px-6 py-3 rounded-xl text-sm transition-all shadow-sm"
                   >
                     Contactar consultoría
-                  </a>
+                  </button>
                 </div>
               </div>
             </div>
@@ -302,6 +304,12 @@ export default function ResultsPage() {
 
         </div>
       </main>
+
+      <ConsultationModal
+        result={result}
+        open={scheduleOpen}
+        onClose={() => setScheduleOpen(false)}
+      />
     </div>
   )
 }
