@@ -8,6 +8,7 @@ interface AgentGraphProps {
   loading: boolean
   streamDone: boolean
   caseIndex: number
+  genericFindings: boolean
   onComplete: () => void
 }
 
@@ -17,7 +18,14 @@ const T1 = 4000 // agente 1 completa a los 4s
 const T2 = 7000 // agente 2 completa a los 7s
 const T3_MIN = 10000 // tiempo mínimo del agente 3 (espera además a la IA)
 
-export default function AgentGraph({ industryId, loading, streamDone, caseIndex, onComplete }: AgentGraphProps) {
+// Findings neutros cuando el usuario escribe su propio caso (no inventar datos).
+const GENERIC_FINDINGS = [
+  'Datos de tu caso procesados',
+  'Variables clave identificadas',
+  'Recomendación personalizada lista',
+]
+
+export default function AgentGraph({ industryId, loading, streamDone, caseIndex, genericFindings, onComplete }: AgentGraphProps) {
   const config = getAgentGraph(industryId)
   const [orchestratorState, setOrchestratorState] = useState<AgentState>('pending')
   const [agentStates, setAgentStates] = useState<AgentState[]>(['pending', 'pending', 'pending'])
@@ -108,7 +116,12 @@ export default function AgentGraph({ industryId, loading, streamDone, caseIndex,
       {/* Agent Nodes */}
       <div className="flex justify-around gap-4">
         {config.agents.map((agent, idx) => (
-          <AgentCard key={idx} agent={agent} state={agentStates[idx]} caseIndex={caseIndex} />
+          <AgentCard
+            key={idx}
+            agent={agent}
+            state={agentStates[idx]}
+            finding={genericFindings ? GENERIC_FINDINGS[idx] : (agent.findings[caseIndex] ?? agent.findings[0])}
+          />
         ))}
       </div>
     </div>
@@ -118,12 +131,10 @@ export default function AgentGraph({ industryId, loading, streamDone, caseIndex,
 interface AgentCardProps {
   agent: AgentNode
   state: AgentState
-  caseIndex: number
+  finding: string
 }
 
-function AgentCard({ agent, state, caseIndex }: AgentCardProps) {
-  const finding = agent.findings[caseIndex] ?? agent.findings[0]
-
+function AgentCard({ agent, state, finding }: AgentCardProps) {
   return (
     <div className="flex-1 max-w-xs">
       <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">

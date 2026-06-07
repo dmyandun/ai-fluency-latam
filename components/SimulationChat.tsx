@@ -35,20 +35,25 @@ export default function SimulationChat({
   const [loading, setLoading]   = useState(false)
   const [done, setDone]         = useState(false)
   const [agentsComplete, setAgentsComplete] = useState(false)
+  const [isCustomCase, setIsCustomCase] = useState(false)
   const [error, setError]       = useState('')
   const responseRef             = useRef<HTMLDivElement>(null)
+  const graphRef                = useRef<HTMLDivElement>(null)
   const textareaRef             = useRef<HTMLTextAreaElement>(null)
 
+  // Al iniciar el análisis, llevar la vista hacia el grafo de agentes.
   useEffect(() => {
-    if (response && responseRef.current) {
-      responseRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    if (loading && graphRef.current) {
+      graphRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
-  }, [response])
+  }, [loading])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!input.trim() || loading) return
 
+    // Si el usuario editó el caso predefinido, los agentes usan findings genéricos.
+    setIsCustomCase(input.trim() !== cases[caseIndex]?.trim())
     setLoading(true)
     setResponse('')
     setDone(false)
@@ -174,13 +179,16 @@ export default function SimulationChat({
       )}
 
       {(loading || done) && (
-        <AgentGraph
-          industryId={industryId}
-          loading={loading}
-          streamDone={done}
-          caseIndex={caseIndex}
-          onComplete={() => setAgentsComplete(true)}
-        />
+        <div ref={graphRef} className="scroll-mt-4">
+          <AgentGraph
+            industryId={industryId}
+            loading={loading}
+            streamDone={done}
+            caseIndex={caseIndex}
+            genericFindings={isCustomCase}
+            onComplete={() => setAgentsComplete(true)}
+          />
+        </div>
       )}
 
       {agentsComplete && response && (
