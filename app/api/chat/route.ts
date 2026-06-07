@@ -1,4 +1,7 @@
-const HF_MODEL = 'meta-llama/Llama-3.1-8B-Instruct'
+// Modelo capaz con soporte oficial de español y 8 providers en el router.
+// El sufijo :cheapest hace que HF enrute al provider más barato que lo sirva
+// (mejor precio + redundancia si un provider falla).
+const HF_MODEL = 'meta-llama/Llama-3.3-70B-Instruct:cheapest'
 // Endpoint OpenAI-compatible con selección automática de provider.
 // hf-inference ya no sirve LLMs de chat; el router enruta al provider disponible.
 const HF_URL = 'https://router.huggingface.co/v1/chat/completions'
