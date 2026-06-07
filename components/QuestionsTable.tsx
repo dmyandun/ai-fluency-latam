@@ -34,7 +34,7 @@ export default function QuestionsTable({ questions, answers, onAnswer }: Questio
                 isAnswered ? 'bg-blue-50/40' : 'bg-white hover:bg-slate-50'
               }`}
             >
-              <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+              <div className="flex flex-col sm:flex-row sm:items-start gap-4">
                 {/* Número + pregunta + descripción */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start gap-3">
@@ -56,33 +56,33 @@ export default function QuestionsTable({ questions, answers, onAnswer }: Questio
                   </div>
                 </div>
 
-                {/* Selector 1-5 */}
-                <div className="flex items-center gap-1.5 shrink-0 self-start sm:self-center pl-9 sm:pl-0">
-                  {[1, 2, 3, 4, 5].map((val) => (
-                    <button
-                      key={val}
-                      type="button"
-                      onClick={() => onAnswer(question.dimension, val)}
-                      className={`w-9 h-9 rounded-lg text-sm font-semibold transition-all ${
-                        selected === val
-                          ? 'bg-blue-600 text-white shadow-md scale-110'
-                          : 'bg-white border border-slate-200 text-slate-600 hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50'
-                      }`}
-                    >
-                      {val}
-                    </button>
-                  ))}
+                {/* Selector 1-5 con anclajes de escala alineados a los botones */}
+                <div className="flex flex-col gap-1.5 shrink-0 self-start pl-9 sm:pl-0">
+                  <div className="flex items-center gap-1.5">
+                    {[1, 2, 3, 4, 5].map((val) => (
+                      <button
+                        key={val}
+                        type="button"
+                        onClick={() => onAnswer(question.dimension, val)}
+                        className={`w-9 h-9 rounded-lg text-sm font-semibold transition-all ${
+                          selected === val
+                            ? 'bg-blue-600 text-white shadow-md scale-110'
+                            : 'bg-white border border-slate-200 text-slate-600 hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50'
+                        }`}
+                      >
+                        {val}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="flex justify-between gap-2">
+                    <span className="max-w-[46%] text-[10px] text-slate-500 leading-tight text-left">
+                      <span className="font-semibold text-slate-600">1</span> {question.scale.minLabel}
+                    </span>
+                    <span className="max-w-[46%] text-[10px] text-slate-500 leading-tight text-right">
+                      <span className="font-semibold text-slate-600">5</span> {question.scale.maxLabel}
+                    </span>
+                  </div>
                 </div>
-              </div>
-
-              {/* Etiquetas de escala — ancho completo, justificadas a los extremos */}
-              <div className="flex justify-between items-start gap-6 mt-2.5 pl-9">
-                <span className="flex-1 text-[11px] text-slate-500 leading-snug">
-                  <span className="font-semibold text-slate-600">1</span> · {question.scale.minLabel}
-                </span>
-                <span className="flex-1 text-[11px] text-slate-500 leading-snug text-right">
-                  <span className="font-semibold text-slate-600">5</span> · {question.scale.maxLabel}
-                </span>
               </div>
             </div>
           )
