@@ -5,6 +5,12 @@ const config: Config = {
     './pages/**/*.{js,ts,jsx,tsx,mdx}',
     './components/**/*.{js,ts,jsx,tsx,mdx}',
     './app/**/*.{js,ts,jsx,tsx,mdx}',
+    './lib/**/*.{js,ts,jsx,tsx,mdx}',
+  ],
+  safelist: [
+    // Colores de industria definidos como strings en lib/simulations.ts.
+    // El safelist evita que el purge de producción los elimine.
+    { pattern: /^(bg|text|border)-(indigo|blue|amber|emerald|orange|slate|violet)-(50|100|200|300|400|500|600|700|800)$/ },
   ],
   theme: {
     extend: {
