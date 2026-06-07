@@ -1,11 +1,4 @@
-import { NextRequest } from 'next/server'
-import { setDefaultResultOrder } from 'dns'
 import type { InteractionModel } from '@/types/assessment'
-
-// Fuerza IPv4 en Node.js 17+ donde el orden DNS cambió a 'verbatim'
-setDefaultResultOrder('ipv4first')
-
-const MODEL = 'meta-llama/Llama-3.1-8B-Instruct'
 
 const INDUSTRY_CONTEXT: Record<string, { role: string; focus: string }> = {
   manufacturing: {
@@ -72,7 +65,7 @@ const MODEL_BEHAVIOR: Record<InteractionModel, string> = {
   augmentation: `Actúas como un copiloto que asiste al profesional humano. Entrega análisis, contexto y opciones, pero deja la decisión final al usuario. Señala los puntos clave que debe revisar, las opciones disponibles y los riesgos a considerar. Cierra con una pregunta o acción sugerida.`,
 }
 
-function buildSystemPrompt(industry: string, interactionModel: InteractionModel, appName: string): string {
+export function buildSystemPrompt(industry: string, interactionModel: InteractionModel, appName: string): string {
   const ctx = INDUSTRY_CONTEXT[industry] ?? {
     role: 'sistema de gestión de procesos con IA',
     focus: 'eficiencia operativa, automatización de tareas y toma de decisiones basada en datos',
@@ -93,81 +86,4 @@ Instrucciones:
 - Sé específico: menciona detalles de lo que describió el usuario
 - Máximo 180 palabras — sé conciso e impactante
 - No digas que eres un LLM ni menciones Hugging Face o Meta`
-}
-
-export async function POST(req: NextRequest) {
-  const { industry, interactionModel, appName, message } = await req.json() as {
-    industry: string
-    interactionModel: InteractionModel
-    appName: string
-    message: string
-  }
-
-  if (!process.env.HF_TOKEN) {
-    return new Response('HF_TOKEN no configurado', { status: 500 })
-  }
-
-  const systemPrompt = buildSystemPrompt(industry, interactionModel, appName)
-
-  const hfResponse = await fetch(
-    `https://api-inference.huggingface.co/models/${MODEL}/v1/chat/completions`,
-    {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${process.env.HF_TOKEN}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: MODEL,
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: message },
-        ],
-        stream: true,
-        max_tokens: 350,
-        temperature: 0.6,
-      }),
-    }
-  )
-
-  if (!hfResponse.ok) {
-    const err = await hfResponse.text()
-    return new Response(`Error HF: ${err}`, { status: hfResponse.status })
-  }
-
-  const reader = hfResponse.body!.getReader()
-  const encoder = new TextEncoder()
-  const decoder = new TextDecoder()
-
-  const stream = new ReadableStream({
-    async start(controller) {
-      let buffer = ''
-      try {
-        while (true) {
-          const { done, value } = await reader.read()
-          if (done) break
-          buffer += decoder.decode(value, { stream: true })
-          const lines = buffer.split('\n')
-          buffer = lines.pop() ?? ''
-          for (const line of lines) {
-            if (!line.startsWith('data: ')) continue
-            const data = line.slice(6).trim()
-            if (data === '[DONE]') continue
-            try {
-              const parsed = JSON.parse(data)
-              const content = parsed.choices?.[0]?.delta?.content
-              if (content) controller.enqueue(encoder.encode(content))
-            } catch { /* chunk incompleto */ }
-          }
-        }
-      } finally {
-        controller.close()
-        reader.releaseLock()
-      }
-    },
-  })
-
-  return new Response(stream, {
-    headers: { 'Content-Type': 'text/plain; charset=utf-8' },
-  })
 }

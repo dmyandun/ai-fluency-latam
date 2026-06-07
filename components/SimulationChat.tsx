@@ -2,9 +2,12 @@
 
 import { useState, useRef, useEffect } from 'react'
 import type { InteractionModel } from '@/types/assessment'
+import { buildSystemPrompt } from '@/lib/simulation-prompts'
 
-// Cambia esta URL a tu perfil de LinkedIn o página de contacto
 const CONTACT_URL = 'https://www.linkedin.com/in/dmyandun/'
+
+const HF_MODEL = 'meta-llama/Llama-3.1-8B-Instruct'
+const HF_URL = `https://api-inference.huggingface.co/models/${HF_MODEL}/v1/chat/completions`
 
 const PLACEHOLDERS: Record<string, string> = {
   manufacturing: 'Ej: "Tenemos 80 SKUs de repuestos con alta varianza en consumo y 4 proveedores. ¿Cómo optimizo el stock de seguridad sin sobreinvertir?"',
@@ -42,13 +45,13 @@ export default function SimulationChat({
   colorLight,
   colorText,
 }: SimulationChatProps) {
-  const [input, setInput]           = useState('')
-  const [response, setResponse]     = useState('')
-  const [loading, setLoading]       = useState(false)
-  const [done, setDone]             = useState(false)
-  const [error, setError]           = useState('')
-  const responseRef                 = useRef<HTMLDivElement>(null)
-  const textareaRef                 = useRef<HTMLTextAreaElement>(null)
+  const [input, setInput]       = useState('')
+  const [response, setResponse] = useState('')
+  const [loading, setLoading]   = useState(false)
+  const [done, setDone]         = useState(false)
+  const [error, setError]       = useState('')
+  const responseRef             = useRef<HTMLDivElement>(null)
+  const textareaRef             = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
     if (response && responseRef.current) {
@@ -60,35 +63,63 @@ export default function SimulationChat({
     e.preventDefault()
     if (!input.trim() || loading) return
 
+    const token = process.env.NEXT_PUBLIC_HF_TOKEN
+    if (!token) {
+      setError('NEXT_PUBLIC_HF_TOKEN no configurado')
+      return
+    }
+
     setLoading(true)
     setResponse('')
     setDone(false)
     setError('')
 
     try {
-      const res = await fetch('/api/chat', {
+      const systemPrompt = buildSystemPrompt(industryId, interactionModel, appName)
+
+      const res = await fetch(HF_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
-          industry: industryId,
-          interactionModel,
-          appName,
-          message: input.trim(),
+          model: HF_MODEL,
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: input.trim() },
+          ],
+          stream: true,
+          max_tokens: 350,
+          temperature: 0.6,
         }),
       })
 
       if (!res.ok) {
         const text = await res.text()
-        throw new Error(text || `Error ${res.status}`)
+        throw new Error(`Error ${res.status}: ${text}`)
       }
 
       const reader = res.body!.getReader()
       const decoder = new TextDecoder()
+      let buffer = ''
 
       while (true) {
         const { done: streamDone, value } = await reader.read()
         if (streamDone) break
-        setResponse((prev) => prev + decoder.decode(value, { stream: true }))
+        buffer += decoder.decode(value, { stream: true })
+        const lines = buffer.split('\n')
+        buffer = lines.pop() ?? ''
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue
+          const data = line.slice(6).trim()
+          if (data === '[DONE]') continue
+          try {
+            const parsed = JSON.parse(data)
+            const content = parsed.choices?.[0]?.delta?.content
+            if (content) setResponse((prev) => prev + content)
+          } catch { /* chunk parcial */ }
+        }
       }
 
       setDone(true)
