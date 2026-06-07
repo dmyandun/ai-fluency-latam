@@ -36,6 +36,7 @@ export default function SimulationChat({
   const [done, setDone]         = useState(false)
   const [agentsComplete, setAgentsComplete] = useState(false)
   const [isCustomCase, setIsCustomCase] = useState(false)
+  const [runId, setRunId]       = useState(0)
   const [error, setError]       = useState('')
   const responseRef             = useRef<HTMLDivElement>(null)
   const graphRef                = useRef<HTMLDivElement>(null)
@@ -61,6 +62,7 @@ export default function SimulationChat({
 
     // Si el usuario editó el caso predefinido, los agentes usan findings genéricos.
     setIsCustomCase(input.trim() !== cases[caseIndex]?.trim())
+    setRunId((r) => r + 1) // fuerza remount del grafo para reiniciar la animación
     setLoading(true)
     setResponse('')
     setDone(false)
@@ -187,6 +189,7 @@ export default function SimulationChat({
       {(loading || done) && (
         <div ref={graphRef} className="scroll-mt-4">
           <AgentGraph
+            key={runId}
             industryId={industryId}
             loading={loading}
             streamDone={done}
