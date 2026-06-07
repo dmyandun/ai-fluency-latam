@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import type { InteractionModel } from '@/types/assessment'
 import { buildSystemPrompt } from '@/lib/simulation-prompts'
+import AgentGraph from './AgentGraph'
 
 const CONTACT_URL = 'https://www.linkedin.com/in/dmyandun/'
 
@@ -43,7 +44,8 @@ export default function SimulationChat({
   colorLight,
   colorText,
 }: SimulationChatProps) {
-  const [input, setInput]       = useState('')
+  const placeholder = PLACEHOLDERS[industryId] ?? DEFAULT_PLACEHOLDER
+  const [input, setInput]       = useState(placeholder)
   const [response, setResponse] = useState('')
   const [loading, setLoading]   = useState(false)
   const [done, setDone]         = useState(false)
@@ -116,14 +118,12 @@ export default function SimulationChat({
   }
 
   function handleReset() {
-    setInput('')
+    setInput(placeholder)
     setResponse('')
     setDone(false)
     setError('')
     textareaRef.current?.focus()
   }
-
-  const placeholder = PLACEHOLDERS[industryId] ?? DEFAULT_PLACEHOLDER
 
   return (
     <div className="border-t border-slate-200 bg-gradient-to-b from-slate-50 to-white px-5 py-5">
@@ -181,6 +181,15 @@ export default function SimulationChat({
         <div className="mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-xs text-red-700">
           ⚠ {error}
         </div>
+      )}
+
+      {(loading || done) && (
+        <AgentGraph
+          industryId={industryId}
+          loading={loading}
+          streamDone={done}
+          colorAccent={colorAccent}
+        />
       )}
 
       {(response || loading) && (
