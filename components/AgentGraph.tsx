@@ -7,70 +7,45 @@ interface AgentGraphProps {
   industryId: string
   loading: boolean
   streamDone: boolean
-  colorAccent: string
 }
 
 type AgentState = 'pending' | 'loading' | 'done'
 
-export default function AgentGraph({ industryId, loading, streamDone, colorAccent }: AgentGraphProps) {
+export default function AgentGraph({ industryId, loading, streamDone }: AgentGraphProps) {
   const config = getAgentGraph(industryId)
   const [orchestratorState, setOrchestratorState] = useState<AgentState>('pending')
   const [agentStates, setAgentStates] = useState<AgentState[]>(['pending', 'pending', 'pending'])
-  const [timeouts, setTimeouts] = useState<NodeJS.Timeout[]>([])
 
+  // Al iniciar la carga: poner todos en 'loading' y agendar los timers escalonados.
   useEffect(() => {
-    if (!loading) {
-      setOrchestratorState('pending')
-      setAgentStates(['pending', 'pending', 'pending'])
-      timeouts.forEach(clearTimeout)
-      setTimeouts([])
-      return
-    }
+    if (!loading) return
 
-    // Reset when loading starts
     setOrchestratorState('loading')
     setAgentStates(['loading', 'loading', 'loading'])
 
-    const newTimeouts: NodeJS.Timeout[] = []
-
-    // Schedule agent completions (except the last one which waits for streamDone)
+    const timers: NodeJS.Timeout[] = []
     config.agents.forEach((agent, idx) => {
       if (agent.completionMs > 0) {
-        const timeout = setTimeout(() => {
+        const t = setTimeout(() => {
           setAgentStates((prev) => {
             const next = [...prev]
             next[idx] = 'done'
             return next
           })
         }, agent.completionMs)
-        newTimeouts.push(timeout)
+        timers.push(t)
       }
     })
 
-    setTimeouts(newTimeouts)
-
-    return () => {
-      newTimeouts.forEach(clearTimeout)
-    }
+    return () => timers.forEach(clearTimeout)
   }, [loading, config.agents])
 
-  // When stream is done, mark the last agent as done
+  // Cuando el stream termina: marcar TODOS como 'done' (no se borra nada).
   useEffect(() => {
-    if (streamDone && loading === false) {
-      setAgentStates((prev) => {
-        const next = [...prev]
-        // Find the agent with completionMs === 0 and mark it done
-        const lastAgentIdx = config.agents.findIndex((a) => a.completionMs === 0)
-        if (lastAgentIdx >= 0) {
-          next[lastAgentIdx] = 'done'
-        }
-        return next
-      })
-      setOrchestratorState('done')
-    }
-  }, [streamDone, loading, config.agents])
-
-  const allDone = agentStates.every((s) => s === 'done')
+    if (!streamDone) return
+    setAgentStates(['done', 'done', 'done'])
+    setOrchestratorState('done')
+  }, [streamDone])
 
   return (
     <div className="mt-6 rounded-xl border border-slate-200 bg-slate-50 p-6">

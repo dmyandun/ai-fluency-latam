@@ -1,31 +1,15 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import ReactMarkdown from 'react-markdown'
 import type { InteractionModel } from '@/types/assessment'
 import { buildSystemPrompt } from '@/lib/simulation-prompts'
+import { getCases } from '@/lib/simulation-cases'
 import AgentGraph from './AgentGraph'
 
 const CONTACT_URL = 'https://www.linkedin.com/in/dmyandun/'
 
-
-const PLACEHOLDERS: Record<string, string> = {
-  manufacturing: 'Ej: "Tenemos 80 SKUs de repuestos con alta varianza en consumo y 4 proveedores. ¿Cómo optimizo el stock de seguridad sin sobreinvertir?"',
-  banking:       'Ej: "Solicitud PYME tecnológica, 2 años operando, ingresos $200K/año, sin historial bancario previo, pide $90K a 36 meses."',
-  retail:        'Ej: "Tengo 300 unidades de chaquetas de invierno, terminó la temporada y la demanda cayó 70%. ¿Qué estrategia recomiendas?"',
-  health:        'Ej: "Paciente 62 años, HTA conocida, llega con cefalea intensa súbita 9/10 sin fiebre. PA 185/115. ¿Cómo priorizas?"',
-  logistics:     'Ej: "Dos rutas se cruzan en la zona norte. Un conductor terminó temprano y otro lleva 50 min de retraso con 12 entregas pendientes."',
-  legal:         'Ej: "Cláusula: El proveedor pagará 15% del valor del contrato por cada semana de retraso, sin límite máximo. ¿Qué riesgos ves?"',
-  government:    'Ej: "Solicitud de habilitación sanitaria para restaurante. Tiene 7 de 9 documentos. Falta certificado de fumigación y planos actualizados."',
-  education:     'Ej: "Tenemos 30% de reprobación en matemáticas en secundaria. Los docentes reportan baja motivación. ¿Qué patrones analizarías?"',
-  agro:          'Ej: "Parcela de 50 hectáreas de soja. Última semana con déficit hídrico moderado y temperatura superior al promedio en 4°C."',
-  telecom:       'Ej: "Zona residencial con 200 clientes activos muestra 40% de tickets de soporte por velocidad baja en las últimas 2 semanas."',
-  insurance:     'Ej: "Solicitud de seguro de auto: conductor 24 años, primera póliza, vehículo deportivo 2022, zona urbana de alta siniestralidad."',
-  media:         'Ej: "Artículo publicado hace 6 horas con 12K vistas pero solo 1.2% de tiempo de lectura. ¿Qué recomiendas para aumentar engagement?"',
-  construction:  'Ej: "Proyecto de 18 meses lleva 9 meses ejecutados y ya consumió 62% del presupuesto. La estructura principal está al 45%."',
-  energy:        'Ej: "Planta industrial con pico de consumo los martes entre 14:00-16:00 que supera el límite contratado y genera penalizaciones."',
-}
-
-const DEFAULT_PLACEHOLDER = 'Describe una situación real de tu organización y analízala con IA...'
+const TEXTAREA_PLACEHOLDER = 'Describe una situación real de tu organización y analízala con IA...'
 
 interface SimulationChatProps {
   industryId: string
@@ -44,8 +28,9 @@ export default function SimulationChat({
   colorLight,
   colorText,
 }: SimulationChatProps) {
-  const placeholder = PLACEHOLDERS[industryId] ?? DEFAULT_PLACEHOLDER
-  const [input, setInput]       = useState(placeholder)
+  const cases = getCases(industryId)
+  const [caseIndex, setCaseIndex] = useState(0)
+  const [input, setInput]       = useState(cases[0])
   const [response, setResponse] = useState('')
   const [loading, setLoading]   = useState(false)
   const [done, setDone]         = useState(false)
@@ -118,7 +103,9 @@ export default function SimulationChat({
   }
 
   function handleReset() {
-    setInput(placeholder)
+    const nextIndex = (caseIndex + 1) % cases.length
+    setCaseIndex(nextIndex)
+    setInput(cases[nextIndex])
     setResponse('')
     setDone(false)
     setError('')
@@ -140,7 +127,7 @@ export default function SimulationChat({
           ref={textareaRef}
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder={placeholder}
+          placeholder={TEXTAREA_PLACEHOLDER}
           rows={3}
           disabled={loading}
           className="w-full text-sm text-slate-700 placeholder:text-slate-400 bg-white border border-slate-200 rounded-xl px-4 py-3 resize-none focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 transition-all disabled:opacity-50"
@@ -188,24 +175,38 @@ export default function SimulationChat({
           industryId={industryId}
           loading={loading}
           streamDone={done}
-          colorAccent={colorAccent}
         />
       )}
 
       {(response || loading) && (
         <div
           ref={responseRef}
-          className={`mt-4 rounded-xl border px-4 py-4 text-sm text-slate-700 leading-relaxed whitespace-pre-wrap ${colorLight} border-slate-200`}
+          className={`mt-4 rounded-xl border px-4 py-4 text-sm text-slate-700 leading-relaxed ${colorLight} border-slate-200`}
         >
           <div className="flex items-center gap-1.5 mb-2.5">
             <span className="text-xs font-semibold text-slate-500">{appName}</span>
             <span className="text-xs text-slate-400">·</span>
             <span className={`text-xs font-medium ${colorText}`}>IA en tiempo real</span>
           </div>
-          {response}
-          {loading && (
-            <span className="inline-block w-1.5 h-4 bg-indigo-400 animate-pulse ml-0.5 rounded-sm align-text-bottom" />
-          )}
+          <div className="space-y-2">
+            <ReactMarkdown
+              components={{
+                p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+                strong: ({ children }) => <strong className="font-semibold text-slate-900">{children}</strong>,
+                ul: ({ children }) => <ul className="list-disc pl-5 space-y-1 mb-2">{children}</ul>,
+                ol: ({ children }) => <ol className="list-decimal pl-5 space-y-1 mb-2">{children}</ol>,
+                li: ({ children }) => <li className="text-slate-700">{children}</li>,
+                h1: ({ children }) => <h4 className="font-semibold text-slate-900 mt-3 mb-1">{children}</h4>,
+                h2: ({ children }) => <h4 className="font-semibold text-slate-900 mt-3 mb-1">{children}</h4>,
+                h3: ({ children }) => <h4 className="font-semibold text-slate-900 mt-3 mb-1">{children}</h4>,
+              }}
+            >
+              {response}
+            </ReactMarkdown>
+            {loading && (
+              <span className="inline-block w-1.5 h-4 bg-indigo-400 animate-pulse ml-0.5 rounded-sm align-text-bottom" />
+            )}
+          </div>
         </div>
       )}
 
