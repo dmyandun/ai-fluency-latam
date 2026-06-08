@@ -64,6 +64,19 @@ export default function IndustryVisualization(props: IndustryVisualizationProps)
 const LOGI_AGENTS = ['Atlas-Hub', 'Boreal', 'Andino']
 const LOGI_KPIS = ['98% a tiempo · 1.2k env/día', '96% · 840 env/día', '94% · 610 env/día']
 
+// Datos de picking por bodega (para la vista de bodega seleccionada)
+const PICK_AGENTS = ['PickBot-A', 'PickBot-B', 'PickBot-C']
+const PICK_INFO = [
+  { sku: 'SKU-4471 · Repuestos', opt: '32% menos recorrido' },
+  { sku: 'SKU-8820 · Consumibles', opt: '27% menos recorrido' },
+  { sku: 'SKU-1290 · Empaques', opt: '21% menos recorrido' },
+]
+const PICK_ROUTES = [
+  'M12 130 L40 130 L40 36 L70 36 L70 66 L115 66 L115 36 L145 36 L145 130 L208 130',
+  'M12 130 L40 130 L40 96 L95 96 L95 36 L145 36 L145 96 L208 96 L208 130',
+  'M12 130 L40 36 L95 36 L95 96 L145 96 L145 36 L208 36 L208 130',
+]
+
 function LogisticsViz({ country, colorText }: IndustryVisualizationProps) {
   const shape = getCountryShape(country)
   const cities = getCities(country).slice(0, 3) // máximo 3 nodos para no saturar
@@ -72,6 +85,7 @@ function LogisticsViz({ country, colorText }: IndustryVisualizationProps) {
   const [bbox, setBbox] = useState(shape?.bboxOverride ?? null)
   const [layout, setLayout] = useState<{ w: number; h: number; offX: number; offY: number; scale: number; contW: number; contH: number } | null>(null)
   const [hover, setHover] = useState<number | null>(null)
+  const [selected, setSelected] = useState(0)
 
   // Encuadre robusto: override si existe, si no getBBox() del path renderizado.
   useEffect(() => {
@@ -116,7 +130,7 @@ function LogisticsViz({ country, colorText }: IndustryVisualizationProps) {
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
-        <Header title={`Red de distribución — ${countryName(country)}`} subtitle="Pasa el cursor sobre cada bodega para ver su agente IA y KPIs" noMargin />
+        <Header title={`Red de distribución — ${countryName(country)}`} subtitle="Pasa el cursor para ver el agente IA · haz clic en una bodega para ver su picking" noMargin />
         <SupervisorBadge />
       </div>
 
@@ -146,8 +160,9 @@ function LogisticsViz({ country, colorText }: IndustryVisualizationProps) {
                 <g key={i} style={{ cursor: 'pointer' }}
                   onMouseEnter={() => setHover(i)}
                   onMouseLeave={() => setHover((h) => (h === i ? null : h))}
-                  onClick={() => setHover((h) => (h === i ? null : i))}>
-                  {(i === 0 || hover === i) && <circle cx={p.x} cy={p.y} r={span * 0.028} className={`${colorText} ${hover === i ? 'opacity-30' : 'opacity-20'}`} fill="currentColor" />}
+                  onClick={() => setSelected(i)}>
+                  {(i === 0 || hover === i || selected === i) && <circle cx={p.x} cy={p.y} r={span * 0.028} className={`${colorText} ${hover === i ? 'opacity-30' : 'opacity-20'}`} fill="currentColor" />}
+                  {selected === i && <circle cx={p.x} cy={p.y} r={span * 0.024} fill="none" stroke="currentColor" strokeWidth={span * 0.005} className={colorText} />}
                   <circle cx={p.x} cy={p.y} r={i === 0 ? span * 0.017 : span * 0.012} fill="currentColor" className={colorText}>
                     {i === 0 && <animate attributeName="r" values={`${span * 0.017};${span * 0.023};${span * 0.017}`} dur="1.8s" repeatCount="indefinite" />}
                   </circle>
@@ -180,10 +195,22 @@ function LogisticsViz({ country, colorText }: IndustryVisualizationProps) {
           </div>
         </div>
 
-        {/* Plano de bodega top-down con ruta de picking */}
+        {/* Plano de bodega top-down con ruta de picking (de la bodega seleccionada) */}
         <div className="lg:col-span-2 bg-white/70 rounded-xl border border-slate-200 p-3">
-          <p className="text-xs font-semibold text-slate-700 mb-2">Bodega 1 · plano de picking optimizado</p>
-          <WarehouseLayout />
+          <p className="text-xs font-semibold text-slate-700 mb-2">Bodega {selected + 1} · plano de picking optimizado</p>
+
+          {/* Tarjeta del agente IA de picking */}
+          <div className="mb-2 inline-flex flex-col bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 shadow-sm">
+            <div className="flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              <span className="text-[11px] font-bold text-slate-700">🤖 {PICK_AGENTS[selected % PICK_AGENTS.length]}</span>
+              <span className="text-[9px] text-emerald-600 font-medium">En línea</span>
+            </div>
+            <div className="text-[10px] text-slate-500 leading-tight mt-0.5">Ruta de picking · {PICK_INFO[selected % PICK_INFO.length].sku}</div>
+            <div className="text-[10px] font-semibold text-emerald-600 leading-tight">Optimización: {PICK_INFO[selected % PICK_INFO.length].opt}</div>
+          </div>
+
+          <WarehouseLayout routeIndex={selected % PICK_ROUTES.length} />
           <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-slate-500">
             <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-orange-500" /> A · alta</span>
             <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-amber-400" /> B · media</span>
@@ -197,7 +224,7 @@ function LogisticsViz({ country, colorText }: IndustryVisualizationProps) {
 }
 
 // Plano cenital de bodega: estanterías ABC + ruta de picking animada + cross-dock
-function WarehouseLayout() {
+function WarehouseLayout({ routeIndex = 0 }: { routeIndex?: number }) {
   // Estanterías (rect) con su zona ABC; coordenadas en viewBox 0 0 220 150
   const racks = [
     { x: 20, y: 30, z: 'A' }, { x: 20, y: 60, z: 'A' }, { x: 20, y: 90, z: 'B' },
@@ -205,8 +232,8 @@ function WarehouseLayout() {
     { x: 170, y: 30, z: 'B' }, { x: 170, y: 60, z: 'C' }, { x: 170, y: 90, z: 'C' },
   ]
   const color: Record<string, string> = { A: '#f97316', B: '#fbbf24', C: '#34d399' }
-  // Ruta de picking que pasa por bahías de alta rotación primero
-  const route = 'M12 130 L40 130 L40 36 L70 36 L70 66 L115 66 L115 36 L145 36 L145 130 L208 130'
+  // Ruta de picking de la bodega seleccionada
+  const route = PICK_ROUTES[routeIndex % PICK_ROUTES.length]
 
   return (
     <svg viewBox="0 0 220 150" className="w-full h-auto">
