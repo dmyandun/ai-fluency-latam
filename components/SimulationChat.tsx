@@ -49,10 +49,12 @@ export default function SimulationChat({
     }
   }, [loading])
 
-  // Cuando el orquestador termina, bajar a la respuesta.
+  // Cuando el orquestador termina, bajar al inicio de la respuesta.
   useEffect(() => {
-    if (agentsComplete && responseRef.current) {
-      responseRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    if (agentsComplete) {
+      requestAnimationFrame(() => {
+        responseRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      })
     }
   }, [agentsComplete])
 
@@ -187,7 +189,7 @@ export default function SimulationChat({
       )}
 
       {(loading || done) && (
-        <div ref={graphRef} className="scroll-mt-4">
+        <div ref={graphRef} className="scroll-mt-20">
           <AgentGraph
             key={runId}
             industryId={industryId}
@@ -203,7 +205,7 @@ export default function SimulationChat({
       {agentsComplete && response && (
         <div
           ref={responseRef}
-          className={`mt-4 rounded-xl border px-4 py-4 text-sm text-slate-700 leading-relaxed ${colorLight} border-slate-200`}
+          className={`mt-4 scroll-mt-20 rounded-xl border px-4 py-4 text-sm text-slate-700 leading-relaxed ${colorLight} border-slate-200`}
         >
           <div className="flex items-center gap-1.5 mb-2.5">
             <span className="text-xs font-semibold text-slate-500">{appName}</span>

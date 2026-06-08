@@ -1,7 +1,7 @@
-// Modelo capaz con soporte oficial de español y 8 providers en el router.
+// Modelo con razonamiento fuerte, no-gated (Apache 2.0) y 10 providers.
 // El sufijo :cheapest hace que HF enrute al provider más barato que lo sirva
 // (mejor precio + redundancia si un provider falla).
-const HF_MODEL = 'meta-llama/Llama-3.3-70B-Instruct:cheapest'
+const HF_MODEL = 'openai/gpt-oss-120b:cheapest'
 // Endpoint OpenAI-compatible con selección automática de provider.
 // hf-inference ya no sirve LLMs de chat; el router enruta al provider disponible.
 const HF_URL = 'https://router.huggingface.co/v1/chat/completions'
@@ -82,8 +82,8 @@ export async function POST(req: Request) {
         model: HF_MODEL,
         messages,
         stream: true,
-        max_tokens: 350,
-        temperature: 0.6,
+        max_tokens: 600,
+        temperature: 0.4,
       }),
       signal: controller.signal,
     })
