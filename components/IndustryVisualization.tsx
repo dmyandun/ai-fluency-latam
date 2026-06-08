@@ -61,20 +61,17 @@ export default function IndustryVisualization(props: IndustryVisualizationProps)
 /* ─────────────────────────── Logística ─────────────────────────── */
 
 // Agentes IA ficticios y KPIs por bodega (asignados por índice de nodo)
-const LOGI_AGENTS = ['Atlas-Hub', 'Boreal-N', 'Andino-C', 'Litoral-E', 'Pampa-S']
-const LOGI_KPIS: [string, string][] = [
-  ['98% a tiempo', '1.2k env/día'],
-  ['96% a tiempo', '840 env/día'],
-  ['94% a tiempo', '610 env/día'],
-  ['97% a tiempo', '520 env/día'],
-  ['95% a tiempo', '430 env/día'],
-]
+const LOGI_AGENTS = ['Atlas-Hub', 'Boreal', 'Andino']
+const LOGI_KPIS = ['98% a tiempo · 1.2k env/día', '96% · 840 env/día', '94% · 610 env/día']
+const MAP_H = 300
 
 function LogisticsViz({ country, colorText }: IndustryVisualizationProps) {
   const shape = getCountryShape(country)
-  const cities = getCities(country)
+  const cities = getCities(country).slice(0, 3) // máximo 3 nodos para no saturar
   const pathRef = useRef<SVGPathElement>(null)
+  const svgRef = useRef<SVGSVGElement>(null)
   const [bbox, setBbox] = useState(shape?.bboxOverride ?? null)
+  const [nodePx, setNodePx] = useState<{ x: number; y: number }[]>([])
 
   // Encuadre robusto: override si existe, si no getBBox() del path renderizado.
   useEffect(() => {
@@ -87,81 +84,93 @@ function LogisticsViz({ country, colorText }: IndustryVisualizationProps) {
     }
   }, [country, shape])
 
-  const ready = !!bbox
-  const pad = bbox ? Math.max(bbox.w, bbox.h) * 0.22 : 0
+  const pad = bbox ? Math.max(bbox.w, bbox.h) * 0.12 : 0
   const vb = bbox ? `${bbox.x - pad} ${bbox.y - pad} ${bbox.w + pad * 2} ${bbox.h + pad * 2}` : '0 0 1010 666'
   const span = bbox ? Math.max(bbox.w, bbox.h) : 200
-  const rBase = span * 0.014
-  const fontPx = span * 0.026
 
-  const pts = bbox
-    ? cities.map((c) => ({ ...c, x: bbox.x + c.fx * bbox.w, y: bbox.y + c.fy * bbox.h }))
-    : []
+  const pts = bbox ? cities.map((c) => ({ x: bbox.x + c.fx * bbox.w, y: bbox.y + c.fy * bbox.h })) : []
   const hub = pts[0]
+
+  // Convierte coords del viewBox a píxeles del SVG (considerando el letterbox de "meet")
+  useEffect(() => {
+    if (!bbox || !svgRef.current) { setNodePx([]); return }
+    const vbX = bbox.x - pad, vbY = bbox.y - pad, vbW = bbox.w + pad * 2, vbH = bbox.h + pad * 2
+    const recompute = () => {
+      const rect = svgRef.current!.getBoundingClientRect()
+      const scale = Math.min(rect.width / vbW, rect.height / vbH)
+      const offX = (rect.width - vbW * scale) / 2
+      const offY = (rect.height - vbH * scale) / 2
+      setNodePx(pts.map((p) => ({ x: offX + (p.x - vbX) * scale, y: offY + (p.y - vbY) * scale })))
+    }
+    recompute()
+    const ro = new ResizeObserver(recompute)
+    ro.observe(svgRef.current)
+    return () => ro.disconnect()
+  }, [bbox]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const ready = !!bbox
 
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
-        <Header title={`Red de distribución — ${countryName(country)}`} subtitle="Rutas optimizadas entre centros de distribución, supervisadas por IA" noMargin />
+        <Header title={`Red de distribución — ${countryName(country)}`} subtitle="Bodegas y rutas optimizadas, supervisadas por IA" noMargin />
         <SupervisorBadge />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-        {/* Mapa político del país */}
+        {/* Mapa político del país con overlay de tarjetas */}
         <div className="lg:col-span-3 bg-white/70 rounded-xl border border-slate-200 p-3">
-          <svg viewBox={vb} className={`w-full h-auto transition-opacity duration-300 ${ready ? 'opacity-100' : 'opacity-0'}`} style={{ maxHeight: 320 }}>
-            {/* Contorno político del país (no interactivo, ayuda visual) */}
-            {shape && (
-              <path ref={pathRef} d={shape.path} className="fill-slate-100 stroke-slate-300" strokeWidth={span * 0.003} strokeLinejoin="round" />
-            )}
-            {/* Rutas del CD central a cada ciudad */}
-            {hub && pts.slice(1).map((p, i) => (
-              <line
-                key={i}
-                x1={hub.x} y1={hub.y} x2={p.x} y2={p.y}
-                stroke="currentColor" strokeWidth={span * 0.005}
-                strokeDasharray={`${span * 0.018} ${span * 0.018}`}
-                className={`${colorText} opacity-60`}
-              >
-                <animate attributeName="stroke-dashoffset" values={`${span * 0.036};0`} dur="1.2s" repeatCount="indefinite" begin={`${i * 0.15}s`} />
-              </line>
-            ))}
-            {/* Nodos + tarjeta de agente IA con KPIs */}
-            {pts.map((p, i) => {
-              const cardW = span * 0.46, cardH = span * 0.30
-              const cx = Math.min(Math.max(p.x, bbox!.x - pad + cardW / 2), bbox!.x + bbox!.w + pad - cardW / 2)
-              const cardX = cx - cardW / 2
-              const cardY = p.y - rBase * 2 - cardH
-              return (
+          <div className="relative" style={{ height: MAP_H }}>
+            <svg
+              ref={svgRef}
+              viewBox={vb}
+              preserveAspectRatio="xMidYMid meet"
+              className={`w-full h-full transition-opacity duration-300 ${ready ? 'opacity-100' : 'opacity-0'}`}
+            >
+              {shape && (
+                <path ref={pathRef} d={shape.path} className="fill-slate-100 stroke-slate-300" strokeWidth={span * 0.003} strokeLinejoin="round" />
+              )}
+              {hub && pts.slice(1).map((p, i) => (
+                <line key={i} x1={hub.x} y1={hub.y} x2={p.x} y2={p.y}
+                  stroke="currentColor" strokeWidth={span * 0.006}
+                  strokeDasharray={`${span * 0.02} ${span * 0.02}`}
+                  className={`${colorText} opacity-60`}>
+                  <animate attributeName="stroke-dashoffset" values={`${span * 0.04};0`} dur="1.2s" repeatCount="indefinite" begin={`${i * 0.15}s`} />
+                </line>
+              ))}
+              {pts.map((p, i) => (
                 <g key={i}>
-                  {/* nodo */}
-                  {i === 0 && <circle cx={p.x} cy={p.y} r={rBase * 2.2} className={`${colorText} opacity-20`} fill="currentColor" />}
-                  <circle cx={p.x} cy={p.y} r={i === 0 ? rBase * 1.4 : rBase} fill="currentColor" className={colorText}>
-                    {i === 0 && <animate attributeName="r" values={`${rBase * 1.4};${rBase * 1.9};${rBase * 1.4}`} dur="1.8s" repeatCount="indefinite" />}
+                  {i === 0 && <circle cx={p.x} cy={p.y} r={span * 0.03} className={`${colorText} opacity-20`} fill="currentColor" />}
+                  <circle cx={p.x} cy={p.y} r={i === 0 ? span * 0.02 : span * 0.014} fill="currentColor" className={colorText}>
+                    {i === 0 && <animate attributeName="r" values={`${span * 0.02};${span * 0.026};${span * 0.02}`} dur="1.8s" repeatCount="indefinite" />}
                   </circle>
-                  {/* conector card-nodo */}
-                  <line x1={p.x} y1={p.y} x2={cx} y2={cardY + cardH} stroke="#cbd5e1" strokeWidth={span * 0.002} />
-                  {/* tarjeta del agente IA */}
-                  <rect x={cardX} y={cardY} width={cardW} height={cardH} rx={span * 0.012} fill="white" stroke="#e2e8f0" strokeWidth={span * 0.002} />
-                  <circle cx={cardX + fontPx * 0.7} cy={cardY + fontPx * 0.9} r={fontPx * 0.28} fill="#10b981" />
-                  <text x={cardX + fontPx * 1.3} y={cardY + fontPx * 1.2} className="fill-slate-800 font-bold" style={{ fontSize: fontPx }}>
-                    🤖 {LOGI_AGENTS[i % LOGI_AGENTS.length]}
-                  </text>
-                  <text x={cardX + fontPx * 0.6} y={cardY + fontPx * 2.3} className="fill-slate-500" style={{ fontSize: fontPx * 0.85 }}>
-                    {p.name}
-                  </text>
-                  <text x={cardX + fontPx * 0.6} y={cardY + fontPx * 3.3} className="fill-emerald-600 font-semibold" style={{ fontSize: fontPx * 0.85 }}>
-                    {LOGI_KPIS[i % LOGI_KPIS.length][0]} · {LOGI_KPIS[i % LOGI_KPIS.length][1]}
-                  </text>
                 </g>
-              )
-            })}
-          </svg>
+              ))}
+            </svg>
+
+            {/* Overlay de tarjetas de agente IA — tamaño fijo, semi-transparentes */}
+            {ready && nodePx.map((p, i) => (
+              <div
+                key={i}
+                className="absolute pointer-events-none z-10"
+                style={{ left: p.x, top: p.y, transform: 'translate(-50%, calc(-100% - 6px))' }}
+              >
+                <div className="bg-white/75 backdrop-blur-sm border border-slate-200 rounded-lg px-2 py-1 shadow-sm text-center whitespace-nowrap">
+                  <div className="flex items-center gap-1 justify-center">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                    <span className="text-[10px] font-bold text-slate-700">🤖 {LOGI_AGENTS[i % LOGI_AGENTS.length]}</span>
+                  </div>
+                  <div className="text-[9px] text-slate-500 leading-tight">Bodega {i + 1}</div>
+                  <div className="text-[9px] font-semibold text-emerald-600 leading-tight">{LOGI_KPIS[i % LOGI_KPIS.length]}</div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Plano de bodega top-down con ruta de picking */}
         <div className="lg:col-span-2 bg-white/70 rounded-xl border border-slate-200 p-3">
-          <p className="text-xs font-semibold text-slate-700 mb-2">Plano de bodega — ruta de picking optimizada</p>
+          <p className="text-xs font-semibold text-slate-700 mb-2">Bodega 1 · plano de picking optimizado</p>
           <WarehouseLayout />
           <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-slate-500">
             <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-orange-500" /> A · alta</span>
