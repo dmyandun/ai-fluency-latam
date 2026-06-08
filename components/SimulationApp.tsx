@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import type { InteractionModel } from '@/types/assessment'
 import type { SimulationConfig, SimImpact, SimAIInsight } from '@/lib/simulations'
 import SimulationChat from '@/components/SimulationChat'
+import IndustryVisualization from '@/components/IndustryVisualization'
 
 type SimState = 'idle' | 'analyzing' | 'results' | 'applied'
 
@@ -11,6 +12,7 @@ interface SimulationAppProps {
   config: SimulationConfig
   interactionModel: InteractionModel
   industryId: string
+  country?: string
   onSchedule?: () => void
 }
 
@@ -41,7 +43,7 @@ function ImpactRow({ item }: { item: SimImpact }) {
   )
 }
 
-export default function SimulationApp({ config, interactionModel, industryId, onSchedule }: SimulationAppProps) {
+export default function SimulationApp({ config, interactionModel, industryId, country, onSchedule }: SimulationAppProps) {
   const [simState, setSimState] = useState<SimState>('idle')
   const [dotCount, setDotCount] = useState(0)
   const variant = config.variants[interactionModel] ?? config.variants['augmentation'] ?? Object.values(config.variants)[0]
@@ -123,6 +125,16 @@ export default function SimulationApp({ config, interactionModel, industryId, on
           </div>
         ))}
       </div>
+
+      {/* Visualización por industria */}
+      <IndustryVisualization
+        industryId={industryId}
+        country={country}
+        colorAccent={config.colorAccent}
+        colorLight={config.colorLight}
+        colorText={config.colorText}
+        colorBorder={config.colorBorder}
+      />
 
       {/* Contenido principal */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-0 divide-y lg:divide-y-0 lg:divide-x divide-slate-100">
