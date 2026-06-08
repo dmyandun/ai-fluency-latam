@@ -63,15 +63,14 @@ export default function IndustryVisualization(props: IndustryVisualizationProps)
 // Agentes IA ficticios y KPIs por bodega (asignados por índice de nodo)
 const LOGI_AGENTS = ['Atlas-Hub', 'Boreal', 'Andino']
 const LOGI_KPIS = ['98% a tiempo · 1.2k env/día', '96% · 840 env/día', '94% · 610 env/día']
-const MAP_H = 300
 
 function LogisticsViz({ country, colorText }: IndustryVisualizationProps) {
   const shape = getCountryShape(country)
   const cities = getCities(country).slice(0, 3) // máximo 3 nodos para no saturar
   const pathRef = useRef<SVGPathElement>(null)
-  const svgRef = useRef<SVGSVGElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
   const [bbox, setBbox] = useState(shape?.bboxOverride ?? null)
-  const [nodePx, setNodePx] = useState<{ x: number; y: number }[]>([])
+  const [layout, setLayout] = useState<{ w: number; h: number; offX: number; offY: number; scale: number } | null>(null)
 
   // Encuadre robusto: override si existe, si no getBBox() del path renderizado.
   useEffect(() => {
@@ -84,31 +83,34 @@ function LogisticsViz({ country, colorText }: IndustryVisualizationProps) {
     }
   }, [country, shape])
 
-  const pad = bbox ? Math.max(bbox.w, bbox.h) * 0.12 : 0
+  const pad = bbox ? Math.max(bbox.w, bbox.h) * 0.08 : 0
   const vb = bbox ? `${bbox.x - pad} ${bbox.y - pad} ${bbox.w + pad * 2} ${bbox.h + pad * 2}` : '0 0 1010 666'
   const span = bbox ? Math.max(bbox.w, bbox.h) : 200
+  const vbW = bbox ? bbox.w + pad * 2 : 1010
+  const vbH = bbox ? bbox.h + pad * 2 : 666
+  const vbX = bbox ? bbox.x - pad : 0
+  const vbY = bbox ? bbox.y - pad : 0
 
   const pts = bbox ? cities.map((c) => ({ x: bbox.x + c.fx * bbox.w, y: bbox.y + c.fy * bbox.h })) : []
   const hub = pts[0]
 
-  // Convierte coords del viewBox a píxeles del SVG (considerando el letterbox de "meet")
+  // Dimensiona el SVG al mayor tamaño que llene el contenedor manteniendo el aspect del país.
   useEffect(() => {
-    if (!bbox || !svgRef.current) { setNodePx([]); return }
-    const vbX = bbox.x - pad, vbY = bbox.y - pad, vbW = bbox.w + pad * 2, vbH = bbox.h + pad * 2
+    if (!bbox || !containerRef.current) { setLayout(null); return }
     const recompute = () => {
-      const rect = svgRef.current!.getBoundingClientRect()
+      const rect = containerRef.current!.getBoundingClientRect()
       const scale = Math.min(rect.width / vbW, rect.height / vbH)
-      const offX = (rect.width - vbW * scale) / 2
-      const offY = (rect.height - vbH * scale) / 2
-      setNodePx(pts.map((p) => ({ x: offX + (p.x - vbX) * scale, y: offY + (p.y - vbY) * scale })))
+      const w = vbW * scale, h = vbH * scale
+      setLayout({ w, h, offX: (rect.width - w) / 2, offY: (rect.height - h) / 2, scale })
     }
     recompute()
     const ro = new ResizeObserver(recompute)
-    ro.observe(svgRef.current)
+    ro.observe(containerRef.current)
     return () => ro.disconnect()
   }, [bbox]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const ready = !!bbox
+  const ready = !!bbox && !!layout
+  const nodePx = layout ? pts.map((p) => ({ x: layout.offX + (p.x - vbX) * layout.scale, y: layout.offY + (p.y - vbY) * layout.scale })) : []
 
   return (
     <div>
@@ -117,15 +119,16 @@ function LogisticsViz({ country, colorText }: IndustryVisualizationProps) {
         <SupervisorBadge />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-        {/* Mapa político del país con overlay de tarjetas */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 items-start">
+        {/* Mapa político del país — ocupa el alto, ancho proporcional */}
         <div className="lg:col-span-3 bg-white/70 rounded-xl border border-slate-200 p-3">
-          <div className="relative" style={{ height: MAP_H }}>
+          <div ref={containerRef} className="relative w-full" style={{ height: 'min(64vh, 560px)', minHeight: 340 }}>
             <svg
-              ref={svgRef}
               viewBox={vb}
-              preserveAspectRatio="xMidYMid meet"
-              className={`w-full h-full transition-opacity duration-300 ${ready ? 'opacity-100' : 'opacity-0'}`}
+              width={layout?.w ?? '100%'}
+              height={layout?.h ?? '100%'}
+              className={`absolute transition-opacity duration-300 ${ready ? 'opacity-100' : 'opacity-0'}`}
+              style={{ left: layout?.offX ?? 0, top: layout?.offY ?? 0 }}
             >
               {shape && (
                 <path ref={pathRef} d={shape.path} className="fill-slate-100 stroke-slate-300" strokeWidth={span * 0.003} strokeLinejoin="round" />
@@ -140,9 +143,9 @@ function LogisticsViz({ country, colorText }: IndustryVisualizationProps) {
               ))}
               {pts.map((p, i) => (
                 <g key={i}>
-                  {i === 0 && <circle cx={p.x} cy={p.y} r={span * 0.03} className={`${colorText} opacity-20`} fill="currentColor" />}
-                  <circle cx={p.x} cy={p.y} r={i === 0 ? span * 0.02 : span * 0.014} fill="currentColor" className={colorText}>
-                    {i === 0 && <animate attributeName="r" values={`${span * 0.02};${span * 0.026};${span * 0.02}`} dur="1.8s" repeatCount="indefinite" />}
+                  {i === 0 && <circle cx={p.x} cy={p.y} r={span * 0.026} className={`${colorText} opacity-20`} fill="currentColor" />}
+                  <circle cx={p.x} cy={p.y} r={i === 0 ? span * 0.017 : span * 0.012} fill="currentColor" className={colorText}>
+                    {i === 0 && <animate attributeName="r" values={`${span * 0.017};${span * 0.023};${span * 0.017}`} dur="1.8s" repeatCount="indefinite" />}
                   </circle>
                 </g>
               ))}
