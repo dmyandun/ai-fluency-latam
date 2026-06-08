@@ -70,7 +70,8 @@ function LogisticsViz({ country, colorText }: IndustryVisualizationProps) {
   const pathRef = useRef<SVGPathElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const [bbox, setBbox] = useState(shape?.bboxOverride ?? null)
-  const [layout, setLayout] = useState<{ w: number; h: number; offX: number; offY: number; scale: number } | null>(null)
+  const [layout, setLayout] = useState<{ w: number; h: number; offX: number; offY: number; scale: number; contW: number; contH: number } | null>(null)
+  const [hover, setHover] = useState<number | null>(null)
 
   // Encuadre robusto: override si existe, si no getBBox() del path renderizado.
   useEffect(() => {
@@ -101,7 +102,7 @@ function LogisticsViz({ country, colorText }: IndustryVisualizationProps) {
       const rect = containerRef.current!.getBoundingClientRect()
       const scale = Math.min(rect.width / vbW, rect.height / vbH)
       const w = vbW * scale, h = vbH * scale
-      setLayout({ w, h, offX: (rect.width - w) / 2, offY: (rect.height - h) / 2, scale })
+      setLayout({ w, h, offX: (rect.width - w) / 2, offY: (rect.height - h) / 2, scale, contW: rect.width, contH: rect.height })
     }
     recompute()
     const ro = new ResizeObserver(recompute)
@@ -115,7 +116,7 @@ function LogisticsViz({ country, colorText }: IndustryVisualizationProps) {
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
-        <Header title={`Red de distribución — ${countryName(country)}`} subtitle="Bodegas y rutas optimizadas, supervisadas por IA" noMargin />
+        <Header title={`Red de distribución — ${countryName(country)}`} subtitle="Pasa el cursor sobre cada bodega para ver su agente IA y KPIs" noMargin />
         <SupervisorBadge />
       </div>
 
@@ -142,32 +143,40 @@ function LogisticsViz({ country, colorText }: IndustryVisualizationProps) {
                 </line>
               ))}
               {pts.map((p, i) => (
-                <g key={i}>
-                  {i === 0 && <circle cx={p.x} cy={p.y} r={span * 0.026} className={`${colorText} opacity-20`} fill="currentColor" />}
+                <g key={i} style={{ cursor: 'pointer' }}
+                  onMouseEnter={() => setHover(i)}
+                  onMouseLeave={() => setHover((h) => (h === i ? null : h))}
+                  onClick={() => setHover((h) => (h === i ? null : i))}>
+                  {(i === 0 || hover === i) && <circle cx={p.x} cy={p.y} r={span * 0.028} className={`${colorText} ${hover === i ? 'opacity-30' : 'opacity-20'}`} fill="currentColor" />}
                   <circle cx={p.x} cy={p.y} r={i === 0 ? span * 0.017 : span * 0.012} fill="currentColor" className={colorText}>
                     {i === 0 && <animate attributeName="r" values={`${span * 0.017};${span * 0.023};${span * 0.017}`} dur="1.8s" repeatCount="indefinite" />}
                   </circle>
+                  {/* área de hover ampliada */}
+                  <circle cx={p.x} cy={p.y} r={span * 0.045} fill="transparent" />
                 </g>
               ))}
             </svg>
 
-            {/* Overlay de tarjetas de agente IA — tamaño fijo, semi-transparentes */}
-            {ready && nodePx.map((p, i) => (
-              <div
-                key={i}
-                className="absolute pointer-events-none z-10"
-                style={{ left: p.x, top: p.y, transform: 'translate(-50%, calc(-100% - 6px))' }}
-              >
-                <div className="bg-white/75 backdrop-blur-sm border border-slate-200 rounded-lg px-2 py-1 shadow-sm text-center whitespace-nowrap">
-                  <div className="flex items-center gap-1 justify-center">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                    <span className="text-[10px] font-bold text-slate-700">🤖 {LOGI_AGENTS[i % LOGI_AGENTS.length]}</span>
+            {/* Tarjeta del agente IA — solo la del nodo con hover */}
+            {ready && hover !== null && nodePx[hover] && (() => {
+              const p = nodePx[hover]
+              const below = p.y < (layout!.contH * 0.42) // si está arriba, mostrar la tarjeta debajo
+              return (
+                <div
+                  className="absolute pointer-events-none z-10"
+                  style={{ left: p.x, top: p.y, transform: below ? 'translate(-50%, 14px)' : 'translate(-50%, calc(-100% - 10px))' }}
+                >
+                  <div className="bg-white/90 backdrop-blur-sm border border-slate-200 rounded-lg px-2.5 py-1.5 shadow-md text-center whitespace-nowrap">
+                    <div className="flex items-center gap-1 justify-center">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                      <span className="text-[11px] font-bold text-slate-700">🤖 {LOGI_AGENTS[hover % LOGI_AGENTS.length]}</span>
+                    </div>
+                    <div className="text-[10px] text-slate-500 leading-tight">Bodega {hover + 1}</div>
+                    <div className="text-[10px] font-semibold text-emerald-600 leading-tight">{LOGI_KPIS[hover % LOGI_KPIS.length]}</div>
                   </div>
-                  <div className="text-[9px] text-slate-500 leading-tight">Bodega {i + 1}</div>
-                  <div className="text-[9px] font-semibold text-emerald-600 leading-tight">{LOGI_KPIS[i % LOGI_KPIS.length]}</div>
                 </div>
-              </div>
-            ))}
+              )
+            })()}
           </div>
         </div>
 
