@@ -1,6 +1,8 @@
 'use client'
 
 import { LATAM_COUNTRIES } from '@/lib/countries'
+import { getCountryShape } from '@/lib/country-shapes'
+import { getCities } from '@/lib/country-geo'
 
 interface IndustryVisualizationProps {
   industryId: string
@@ -14,6 +16,23 @@ interface IndustryVisualizationProps {
 function countryName(code?: string): string {
   if (!code) return 'tu país'
   return LATAM_COUNTRIES.find((c) => c.code === code)?.name ?? code
+}
+
+// Insignia del agente de IA supervisor, presente en todas las visualizaciones.
+function SupervisorBadge({ name = 'AFIA · Supervisor IA' }: { name?: string }) {
+  return (
+    <div className="inline-flex items-center gap-2 bg-white border border-slate-200 rounded-full pl-1.5 pr-3 py-1 shadow-sm">
+      <span className="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs">🤖</span>
+      <span className="text-xs font-semibold text-slate-700">{name}</span>
+      <span className="flex items-center gap-1">
+        <span className="relative flex h-2 w-2">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+          <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+        </span>
+        <span className="text-[10px] font-medium text-emerald-600">En línea</span>
+      </span>
+    </div>
+  )
 }
 
 export default function IndustryVisualization(props: IndustryVisualizationProps) {
@@ -41,88 +60,117 @@ export default function IndustryVisualization(props: IndustryVisualizationProps)
 /* ─────────────────────────── Logística ─────────────────────────── */
 
 function LogisticsViz({ country, colorText }: IndustryVisualizationProps) {
-  // Nodos del mapa (coordenadas en el viewBox 0 0 320 220)
-  const hubs = [
-    { x: 80,  y: 60,  label: 'CD Central', main: true },
-    { x: 200, y: 40,  label: 'Bodega N' },
-    { x: 250, y: 130, label: 'Bodega E' },
-    { x: 150, y: 170, label: 'Bodega S' },
-    { x: 50,  y: 150, label: 'Bodega O' },
-  ]
-  const routes = [
-    [hubs[0], hubs[1]], [hubs[0], hubs[2]], [hubs[0], hubs[3]], [hubs[0], hubs[4]], [hubs[1], hubs[2]],
-  ]
+  const shape = getCountryShape(country)
+  const cities = getCities(country)
+
+  // viewBox encuadrado al país con padding
+  const pad = shape ? Math.max(shape.bbox.w, shape.bbox.h) * 0.12 : 0
+  const vb = shape
+    ? `${shape.bbox.x - pad} ${shape.bbox.y - pad} ${shape.bbox.w + pad * 2} ${shape.bbox.h + pad * 2}`
+    : '0 0 320 220'
+  const span = shape ? Math.max(shape.bbox.w, shape.bbox.h) : 220
+  const rBase = span * 0.018       // radio de nodo escalado al país
+  const fontPx = span * 0.035
+
+  // Posición absoluta de cada ciudad dentro del bbox
+  const pts = shape
+    ? cities.map((c) => ({ ...c, x: shape.bbox.x + c.fx * shape.bbox.w, y: shape.bbox.y + c.fy * shape.bbox.h }))
+    : cities.map((c, i) => ({ ...c, x: 60 + i * 50, y: 60 + (i % 2) * 60 }))
+  const hub = pts[0]
 
   return (
     <div>
-      <Header title={`Red de distribución — ${countryName(country)}`} subtitle="Rutas optimizadas entre centros de distribución en tiempo real" />
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+        <Header title={`Red de distribución — ${countryName(country)}`} subtitle="Rutas optimizadas entre centros de distribución en tiempo real" noMargin />
+        <SupervisorBadge />
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-        {/* Mapa */}
+        {/* Mapa político del país */}
         <div className="lg:col-span-3 bg-white/70 rounded-xl border border-slate-200 p-3">
-          <svg viewBox="0 0 320 220" className="w-full h-auto">
-            {/* Contorno esquemático del territorio */}
-            <path
-              d="M60 30 Q110 15 170 28 Q230 18 275 55 Q300 95 270 150 Q250 195 180 200 Q110 205 70 175 Q35 140 45 95 Q40 55 60 30 Z"
-              className="fill-slate-100 stroke-slate-300"
-              strokeWidth="1.5"
-            />
-            {/* Rutas animadas */}
-            {routes.map(([a, b], i) => (
+          <svg viewBox={vb} className="w-full h-auto" style={{ maxHeight: 280 }}>
+            {/* Contorno político del país (no interactivo, ayuda visual) */}
+            {shape && (
+              <path d={shape.path} className="fill-slate-100 stroke-slate-300" strokeWidth={span * 0.004} strokeLinejoin="round" />
+            )}
+            {/* Rutas del CD central a cada ciudad */}
+            {pts.slice(1).map((p, i) => (
               <line
                 key={i}
-                x1={a.x} y1={a.y} x2={b.x} y2={b.y}
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeDasharray="4 4"
+                x1={hub.x} y1={hub.y} x2={p.x} y2={p.y}
+                stroke="currentColor" strokeWidth={span * 0.006}
+                strokeDasharray={`${span * 0.02} ${span * 0.02}`}
                 className={`${colorText} opacity-60`}
               >
-                <animate attributeName="stroke-dashoffset" values="8;0" dur="1.2s" repeatCount="indefinite" begin={`${i * 0.15}s`} />
+                <animate attributeName="stroke-dashoffset" values={`${span * 0.04};0`} dur="1.2s" repeatCount="indefinite" begin={`${i * 0.15}s`} />
               </line>
             ))}
-            {/* Nodos */}
-            {hubs.map((h, i) => (
+            {/* Nodos en ciudades */}
+            {pts.map((p, i) => (
               <g key={i}>
-                {h.main && <circle cx={h.x} cy={h.y} r="11" className={`${colorText} opacity-20`} fill="currentColor" />}
-                <circle cx={h.x} cy={h.y} r={h.main ? 6 : 4} fill="currentColor" className={colorText}>
-                  {h.main && <animate attributeName="r" values="6;8;6" dur="1.8s" repeatCount="indefinite" />}
+                {i === 0 && <circle cx={p.x} cy={p.y} r={rBase * 2.4} className={`${colorText} opacity-20`} fill="currentColor" />}
+                <circle cx={p.x} cy={p.y} r={i === 0 ? rBase * 1.5 : rBase} fill="currentColor" className={colorText}>
+                  {i === 0 && <animate attributeName="r" values={`${rBase * 1.5};${rBase * 2};${rBase * 1.5}`} dur="1.8s" repeatCount="indefinite" />}
                 </circle>
-                <text x={h.x} y={h.y - 10} textAnchor="middle" className="fill-slate-600 text-[7px] font-semibold">{h.label}</text>
+                <text x={p.x} y={p.y - rBase * 2.2} textAnchor="middle" className="fill-slate-700 font-semibold" style={{ fontSize: fontPx }}>
+                  {p.name}
+                </text>
               </g>
             ))}
           </svg>
         </div>
 
-        {/* Bodega ABC + crossdocking */}
+        {/* Plano de bodega top-down con ruta de picking */}
         <div className="lg:col-span-2 bg-white/70 rounded-xl border border-slate-200 p-3">
-          <p className="text-xs font-semibold text-slate-700 mb-2">Layout de bodega — clasificación ABC</p>
-          <div className="space-y-2">
-            {[
-              { zone: 'A', label: 'Alta rotación', color: 'bg-orange-500', pct: '70% de los picks' },
-              { zone: 'B', label: 'Media rotación', color: 'bg-amber-400', pct: '20% de los picks' },
-              { zone: 'C', label: 'Baja rotación', color: 'bg-emerald-400', pct: '10% de los picks' },
-            ].map((z) => (
-              <div key={z.zone} className="flex items-center gap-2">
-                <span className={`w-7 h-7 rounded-md ${z.color} text-white text-xs font-bold flex items-center justify-center shrink-0`}>{z.zone}</span>
-                <div className="flex-1">
-                  <div className="flex gap-0.5">
-                    {Array.from({ length: 6 }).map((_, i) => (
-                      <div key={i} className={`h-3 flex-1 rounded-sm ${z.color} ${i > (z.zone === 'A' ? 5 : z.zone === 'B' ? 3 : 1) ? 'opacity-20' : 'opacity-90'}`} />
-                    ))}
-                  </div>
-                  <p className="text-[10px] text-slate-500 mt-0.5">{z.label} · {z.pct}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="mt-3 pt-3 border-t border-slate-200">
-            <div className="flex items-center gap-2">
-              <span className="px-2 py-1 rounded-md bg-blue-600 text-white text-[10px] font-bold animate-pulse">CROSS-DOCK</span>
-              <span className="text-[10px] text-slate-500">Flujo directo entrada → salida, sin almacenaje</span>
-            </div>
+          <p className="text-xs font-semibold text-slate-700 mb-2">Plano de bodega — ruta de picking optimizada</p>
+          <WarehouseLayout />
+          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-slate-500">
+            <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-orange-500" /> A · alta</span>
+            <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-amber-400" /> B · media</span>
+            <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-emerald-400" /> C · baja</span>
+            <span className="flex items-center gap-1"><span className="px-1 rounded bg-blue-600 text-white text-[8px] font-bold">CD</span> cross-dock</span>
           </div>
         </div>
       </div>
     </div>
+  )
+}
+
+// Plano cenital de bodega: estanterías ABC + ruta de picking animada + cross-dock
+function WarehouseLayout() {
+  // Estanterías (rect) con su zona ABC; coordenadas en viewBox 0 0 220 150
+  const racks = [
+    { x: 20, y: 30, z: 'A' }, { x: 20, y: 60, z: 'A' }, { x: 20, y: 90, z: 'B' },
+    { x: 95, y: 30, z: 'A' }, { x: 95, y: 60, z: 'B' }, { x: 95, y: 90, z: 'C' },
+    { x: 170, y: 30, z: 'B' }, { x: 170, y: 60, z: 'C' }, { x: 170, y: 90, z: 'C' },
+  ]
+  const color: Record<string, string> = { A: '#f97316', B: '#fbbf24', C: '#34d399' }
+  // Ruta de picking que pasa por bahías de alta rotación primero
+  const route = 'M12 130 L40 130 L40 36 L70 36 L70 66 L115 66 L115 36 L145 36 L145 130 L208 130'
+
+  return (
+    <svg viewBox="0 0 220 150" className="w-full h-auto">
+      {/* Muelle / cross-dock */}
+      <rect x="2" y="120" width="20" height="24" rx="2" className="fill-blue-600" />
+      <text x="12" y="135" textAnchor="middle" className="fill-white text-[6px] font-bold">CD</text>
+      <rect x="198" y="120" width="20" height="24" rx="2" className="fill-blue-600" />
+      <text x="208" y="135" textAnchor="middle" className="fill-white text-[6px] font-bold">OUT</text>
+      {/* Estanterías */}
+      {racks.map((r, i) => (
+        <g key={i}>
+          <rect x={r.x} y={r.y} width="40" height="18" rx="2" fill={color[r.z]} opacity="0.85" />
+          <text x={r.x + 20} y={r.y + 12} textAnchor="middle" className="fill-white text-[7px] font-bold">{r.z}</text>
+        </g>
+      ))}
+      {/* Ruta de picking animada */}
+      <path d={route} fill="none" stroke="#4f46e5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="3 3">
+        <animate attributeName="stroke-dashoffset" values="12;0" dur="1s" repeatCount="indefinite" />
+      </path>
+      {/* Operario/AGV recorriendo la ruta */}
+      <circle r="3.5" fill="#4f46e5">
+        <animateMotion dur="4s" repeatCount="indefinite" path={route} />
+      </circle>
+    </svg>
   )
 }
 
@@ -344,9 +392,9 @@ function GenericViz({ colorText }: IndustryVisualizationProps) {
 
 /* ─────────────────────────── Compartido ─────────────────────────── */
 
-function Header({ title, subtitle }: { title: string; subtitle: string }) {
+function Header({ title, subtitle, noMargin = false }: { title: string; subtitle: string; noMargin?: boolean }) {
   return (
-    <div className="mb-4">
+    <div className={noMargin ? '' : 'mb-4'}>
       <h3 className="text-sm font-semibold text-slate-900">{title}</h3>
       <p className="text-xs text-slate-500 mt-0.5">{subtitle}</p>
     </div>
