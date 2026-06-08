@@ -3,7 +3,6 @@
 import { useRef, useState, useEffect } from 'react'
 import { LATAM_COUNTRIES } from '@/lib/countries'
 import { getCountryShape } from '@/lib/country-shapes'
-import { getCities } from '@/lib/country-geo'
 
 interface IndustryVisualizationProps {
   industryId: string
@@ -77,9 +76,22 @@ const PICK_ROUTES = [
   'M12 130 L40 36 L95 36 L95 96 L145 96 L145 36 L208 36 L208 130',
 ]
 
+// Posiciones distribuidas de las bodegas dentro del país (centro + dos extremos)
+const NODE_POS = [
+  { fx: 0.50, fy: 0.46 }, // hub central
+  { fx: 0.36, fy: 0.28 }, // noroeste
+  { fx: 0.64, fy: 0.66 }, // sureste
+]
+
+// Distribución de estanterías ABC distinta por bodega (cada bodega es diferente)
+const RACK_LAYOUTS: { x: number; y: number; z: 'A' | 'B' | 'C' }[][] = [
+  [ { x: 20, y: 30, z: 'A' }, { x: 20, y: 60, z: 'A' }, { x: 20, y: 90, z: 'B' }, { x: 95, y: 30, z: 'A' }, { x: 95, y: 60, z: 'B' }, { x: 95, y: 90, z: 'C' }, { x: 170, y: 30, z: 'B' }, { x: 170, y: 60, z: 'C' }, { x: 170, y: 90, z: 'C' } ],
+  [ { x: 20, y: 30, z: 'C' }, { x: 20, y: 60, z: 'B' }, { x: 20, y: 90, z: 'C' }, { x: 95, y: 30, z: 'A' }, { x: 95, y: 60, z: 'A' }, { x: 95, y: 90, z: 'B' }, { x: 170, y: 30, z: 'B' }, { x: 170, y: 60, z: 'A' }, { x: 170, y: 90, z: 'C' } ],
+  [ { x: 20, y: 30, z: 'C' }, { x: 20, y: 60, z: 'C' }, { x: 20, y: 90, z: 'B' }, { x: 95, y: 30, z: 'B' }, { x: 95, y: 60, z: 'C' }, { x: 95, y: 90, z: 'A' }, { x: 170, y: 30, z: 'A' }, { x: 170, y: 60, z: 'A' }, { x: 170, y: 90, z: 'B' } ],
+]
+
 function LogisticsViz({ country, colorText }: IndustryVisualizationProps) {
   const shape = getCountryShape(country)
-  const cities = getCities(country).slice(0, 3) // máximo 3 nodos para no saturar
   const pathRef = useRef<SVGPathElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const [bbox, setBbox] = useState(shape?.bboxOverride ?? null)
@@ -106,7 +118,7 @@ function LogisticsViz({ country, colorText }: IndustryVisualizationProps) {
   const vbX = bbox ? bbox.x - pad : 0
   const vbY = bbox ? bbox.y - pad : 0
 
-  const pts = bbox ? cities.map((c) => ({ x: bbox.x + c.fx * bbox.w, y: bbox.y + c.fy * bbox.h })) : []
+  const pts = bbox ? NODE_POS.map((c) => ({ x: bbox.x + c.fx * bbox.w, y: bbox.y + c.fy * bbox.h })) : []
   const hub = pts[0]
 
   // Dimensiona el SVG al mayor tamaño que llene el contenedor manteniendo el aspect del país.
@@ -225,12 +237,8 @@ function LogisticsViz({ country, colorText }: IndustryVisualizationProps) {
 
 // Plano cenital de bodega: estanterías ABC + ruta de picking animada + cross-dock
 function WarehouseLayout({ routeIndex = 0 }: { routeIndex?: number }) {
-  // Estanterías (rect) con su zona ABC; coordenadas en viewBox 0 0 220 150
-  const racks = [
-    { x: 20, y: 30, z: 'A' }, { x: 20, y: 60, z: 'A' }, { x: 20, y: 90, z: 'B' },
-    { x: 95, y: 30, z: 'A' }, { x: 95, y: 60, z: 'B' }, { x: 95, y: 90, z: 'C' },
-    { x: 170, y: 30, z: 'B' }, { x: 170, y: 60, z: 'C' }, { x: 170, y: 90, z: 'C' },
-  ]
+  // Estanterías con su zona ABC, distintas por bodega (viewBox 0 0 220 150)
+  const racks = RACK_LAYOUTS[routeIndex % RACK_LAYOUTS.length]
   const color: Record<string, string> = { A: '#f97316', B: '#fbbf24', C: '#34d399' }
   // Ruta de picking de la bodega seleccionada
   const route = PICK_ROUTES[routeIndex % PICK_ROUTES.length]
