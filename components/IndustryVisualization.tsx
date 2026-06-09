@@ -60,34 +60,78 @@ export default function IndustryVisualization(props: IndustryVisualizationProps)
 /* ─────────────────────────── Logística ─────────────────────────── */
 
 // Agentes IA ficticios y KPIs por bodega (asignados por índice de nodo)
-const LOGI_AGENTS = ['Atlas-Hub', 'Boreal', 'Andino']
-const LOGI_KPIS = ['98% a tiempo · 1.2k env/día', '96% · 840 env/día', '94% · 610 env/día']
+const LOGI_AGENTS = ['Atlas-Hub', 'Boreal', 'Andino', 'Litoral', 'Austral']
+const LOGI_KPIS = [
+  '98% a tiempo · 1.2k env/día',
+  '96% · 840 env/día',
+  '94% · 610 env/día',
+  '97% · 520 env/día',
+  '95% · 430 env/día',
+]
 
 // Datos de picking por bodega (para la vista de bodega seleccionada)
-const PICK_AGENTS = ['PickBot-A', 'PickBot-B', 'PickBot-C']
+const PICK_AGENTS = ['PickBot-A', 'PickBot-B', 'PickBot-C', 'PickBot-D', 'PickBot-E']
 const PICK_INFO = [
   { sku: 'SKU-4471 · Repuestos', opt: '32% menos recorrido' },
   { sku: 'SKU-8820 · Consumibles', opt: '27% menos recorrido' },
   { sku: 'SKU-1290 · Empaques', opt: '21% menos recorrido' },
-]
-const PICK_ROUTES = [
-  'M12 130 L40 130 L40 36 L70 36 L70 66 L115 66 L115 36 L145 36 L145 130 L208 130',
-  'M12 130 L40 130 L40 96 L95 96 L95 36 L145 36 L145 96 L208 96 L208 130',
-  'M12 130 L40 36 L95 36 L95 96 L145 96 L145 36 L208 36 L208 130',
+  { sku: 'SKU-6605 · Electrónica', opt: '29% menos recorrido' },
+  { sku: 'SKU-3370 · Textil', opt: '24% menos recorrido' },
 ]
 
-// Posiciones distribuidas de las bodegas dentro del país (centro + dos extremos)
+// Posiciones distribuidas de las bodegas dentro del país (centro + 4 alrededor)
 const NODE_POS = [
-  { fx: 0.50, fy: 0.46 }, // hub central
-  { fx: 0.36, fy: 0.28 }, // noroeste
-  { fx: 0.64, fy: 0.66 }, // sureste
+  { fx: 0.50, fy: 0.48 }, // hub central
+  { fx: 0.34, fy: 0.26 }, // noroeste
+  { fx: 0.66, fy: 0.28 }, // noreste
+  { fx: 0.32, fy: 0.70 }, // suroeste
+  { fx: 0.68, fy: 0.70 }, // sureste
 ]
 
-// Distribución de estanterías ABC distinta por bodega (cada bodega es diferente)
-const RACK_LAYOUTS: { x: number; y: number; z: 'A' | 'B' | 'C' }[][] = [
-  [ { x: 20, y: 30, z: 'A' }, { x: 20, y: 60, z: 'A' }, { x: 20, y: 90, z: 'B' }, { x: 95, y: 30, z: 'A' }, { x: 95, y: 60, z: 'B' }, { x: 95, y: 90, z: 'C' }, { x: 170, y: 30, z: 'B' }, { x: 170, y: 60, z: 'C' }, { x: 170, y: 90, z: 'C' } ],
-  [ { x: 20, y: 30, z: 'C' }, { x: 20, y: 60, z: 'B' }, { x: 20, y: 90, z: 'C' }, { x: 95, y: 30, z: 'A' }, { x: 95, y: 60, z: 'A' }, { x: 95, y: 90, z: 'B' }, { x: 170, y: 30, z: 'B' }, { x: 170, y: 60, z: 'A' }, { x: 170, y: 90, z: 'C' } ],
-  [ { x: 20, y: 30, z: 'C' }, { x: 20, y: 60, z: 'C' }, { x: 20, y: 90, z: 'B' }, { x: 95, y: 30, z: 'B' }, { x: 95, y: 60, z: 'C' }, { x: 95, y: 90, z: 'A' }, { x: 170, y: 30, z: 'A' }, { x: 170, y: 60, z: 'A' }, { x: 170, y: 90, z: 'B' } ],
+// Estantería: rect con zona ABC y orientación (h=horizontal, v=vertical)
+type Rack = { x: number; y: number; w: number; h: number; z: 'A' | 'B' | 'C' }
+
+// 5 layouts de bodega ESTRUCTURALMENTE distintos (viewBox 0 0 220 150)
+const RACK_LAYOUTS: Rack[][] = [
+  // Bodega 1 — 3 columnas verticales
+  [
+    { x: 24, y: 28, w: 30, h: 16, z: 'A' }, { x: 24, y: 52, w: 30, h: 16, z: 'A' }, { x: 24, y: 76, w: 30, h: 16, z: 'B' },
+    { x: 95, y: 28, w: 30, h: 16, z: 'A' }, { x: 95, y: 52, w: 30, h: 16, z: 'B' }, { x: 95, y: 76, w: 30, h: 16, z: 'C' },
+    { x: 166, y: 28, w: 30, h: 16, z: 'B' }, { x: 166, y: 52, w: 30, h: 16, z: 'C' }, { x: 166, y: 76, w: 30, h: 16, z: 'C' },
+  ],
+  // Bodega 2 — 2 bloques con pasillo central ancho
+  [
+    { x: 30, y: 26, w: 46, h: 14, z: 'A' }, { x: 30, y: 48, w: 46, h: 14, z: 'A' }, { x: 30, y: 70, w: 46, h: 14, z: 'B' }, { x: 30, y: 92, w: 46, h: 14, z: 'C' },
+    { x: 144, y: 26, w: 46, h: 14, z: 'B' }, { x: 144, y: 48, w: 46, h: 14, z: 'A' }, { x: 144, y: 70, w: 46, h: 14, z: 'C' }, { x: 144, y: 92, w: 46, h: 14, z: 'C' },
+  ],
+  // Bodega 3 — filas horizontales largas
+  [
+    { x: 26, y: 30, w: 168, h: 12, z: 'A' },
+    { x: 26, y: 52, w: 168, h: 12, z: 'B' },
+    { x: 26, y: 74, w: 168, h: 12, z: 'C' },
+    { x: 26, y: 96, w: 168, h: 12, z: 'C' },
+  ],
+  // Bodega 4 — compacta, pocas estanterías grandes
+  [
+    { x: 28, y: 30, w: 70, h: 32, z: 'A' }, { x: 122, y: 30, w: 70, h: 32, z: 'B' },
+    { x: 28, y: 76, w: 70, h: 30, z: 'B' }, { x: 122, y: 76, w: 70, h: 30, z: 'C' },
+  ],
+  // Bodega 5 — disposición en U alrededor del cross-dock
+  [
+    { x: 24, y: 26, w: 16, h: 80, z: 'A' },
+    { x: 196 - 16, y: 26, w: 16, h: 80, z: 'B' },
+    { x: 56, y: 26, w: 34, h: 14, z: 'A' }, { x: 96, y: 26, w: 34, h: 14, z: 'B' }, { x: 136, y: 26, w: 24, h: 14, z: 'C' },
+    { x: 56, y: 92, w: 34, h: 14, z: 'C' }, { x: 96, y: 92, w: 34, h: 14, z: 'C' }, { x: 136, y: 92, w: 24, h: 14, z: 'B' },
+  ],
+]
+
+// Ruta de picking coherente con cada layout
+const PICK_ROUTES = [
+  'M12 130 L39 130 L39 36 L69 36 L69 84 L110 84 L110 36 L181 36 L181 130 L208 130',
+  'M12 130 L53 130 L53 33 L110 33 L110 99 L167 99 L167 33 L208 33 L208 130',
+  'M12 130 L20 130 L20 36 L200 36 L200 58 L20 58 L20 80 L200 80 L200 130 L208 130',
+  'M12 130 L63 130 L63 46 L157 46 L157 91 L63 91 L63 130 L208 130',
+  'M12 130 L32 130 L32 33 L110 33 L188 33 L188 130 L208 130',
 ]
 
 function LogisticsViz({ country, colorText }: IndustryVisualizationProps) {
@@ -244,7 +288,7 @@ function WarehouseLayout({ routeIndex = 0 }: { routeIndex?: number }) {
   const route = PICK_ROUTES[routeIndex % PICK_ROUTES.length]
 
   return (
-    <svg viewBox="0 0 220 150" className="w-full h-auto">
+    <svg viewBox="0 0 220 150" className="w-full h-auto" key={routeIndex}>
       {/* Muelle / cross-dock */}
       <rect x="2" y="120" width="20" height="24" rx="2" className="fill-blue-600" />
       <text x="12" y="135" textAnchor="middle" className="fill-white text-[6px] font-bold">CD</text>
@@ -253,8 +297,10 @@ function WarehouseLayout({ routeIndex = 0 }: { routeIndex?: number }) {
       {/* Estanterías */}
       {racks.map((r, i) => (
         <g key={i}>
-          <rect x={r.x} y={r.y} width="40" height="18" rx="2" fill={color[r.z]} opacity="0.85" />
-          <text x={r.x + 20} y={r.y + 12} textAnchor="middle" className="fill-white text-[7px] font-bold">{r.z}</text>
+          <rect x={r.x} y={r.y} width={r.w} height={r.h} rx="2" fill={color[r.z]} opacity="0.85" />
+          {r.w >= 18 && r.h >= 12 && (
+            <text x={r.x + r.w / 2} y={r.y + r.h / 2 + 2.5} textAnchor="middle" className="fill-white text-[7px] font-bold">{r.z}</text>
+          )}
         </g>
       ))}
       {/* Ruta de picking animada */}
