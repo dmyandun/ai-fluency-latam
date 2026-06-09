@@ -320,7 +320,6 @@ function WarehouseLayout({ routeIndex = 0 }: { routeIndex?: number }) {
 function RetailViz(_: IndustryVisualizationProps) {
   const categories = ['Abrigos', 'Calzado', 'Accesorios', 'Deportiva']
   const weeks = ['S1', 'S2', 'S3', 'S4', 'S5', 'S6']
-  // Intensidad 0-4 de demanda por celda
   const data = [
     [4, 4, 3, 2, 1, 1],
     [2, 3, 3, 4, 4, 3],
@@ -328,29 +327,62 @@ function RetailViz(_: IndustryVisualizationProps) {
     [3, 3, 4, 4, 3, 2],
   ]
   const shade = ['bg-slate-100', 'bg-amber-100', 'bg-amber-300', 'bg-amber-500', 'bg-amber-600']
+  // Planograma: niveles de stock por producto en la estantería
+  const shelf = [
+    { sku: 'Abrigo XL', stock: 82 }, { sku: 'Bota cuero', stock: 22 }, { sku: 'Bufanda', stock: 64 },
+    { sku: 'Gorro', stock: 12 }, { sku: 'Guante', stock: 70 }, { sku: 'Media térm.', stock: 40 },
+  ]
 
   return (
     <div>
-      <Header title="Mapa de calor de demanda" subtitle="Predicción de demanda por categoría y semana — planeación de inventario" />
-      <div className="bg-white/70 rounded-xl border border-slate-200 p-4 overflow-x-auto">
-        <div className="inline-block min-w-full">
-          <div className="flex gap-1 mb-1 pl-20">
-            {weeks.map((w) => <span key={w} className="w-10 text-center text-[10px] text-slate-400">{w}</span>)}
-          </div>
-          {categories.map((cat, r) => (
-            <div key={cat} className="flex items-center gap-1 mb-1">
-              <span className="w-20 text-[11px] text-slate-600 text-right pr-2">{cat}</span>
-              {data[r].map((v, c) => (
-                <span key={c} className={`w-10 h-8 rounded ${shade[v]} flex items-center justify-center text-[9px] font-semibold ${v >= 3 ? 'text-white' : 'text-slate-500'}`}>
-                  {v >= 4 ? '●' : ''}
-                </span>
-              ))}
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+        <Header title="Demanda y reposición inteligente" subtitle="Pronóstico de demanda y alertas de reposición por producto" noMargin />
+        <SupervisorBadge name="ShelfBot · Supervisor IA" />
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Heatmap de demanda */}
+        <div className="bg-white/70 rounded-xl border border-slate-200 p-4 overflow-x-auto">
+          <p className="text-xs font-semibold text-slate-700 mb-3">Mapa de calor de demanda</p>
+          <div className="inline-block min-w-full">
+            <div className="flex gap-1 mb-1 pl-16">
+              {weeks.map((w) => <span key={w} className="w-9 text-center text-[10px] text-slate-400">{w}</span>)}
             </div>
-          ))}
-          <div className="flex items-center gap-2 mt-3 pl-20">
-            <span className="text-[10px] text-slate-400">Baja</span>
-            {shade.map((s, i) => <span key={i} className={`w-5 h-3 rounded-sm ${s}`} />)}
-            <span className="text-[10px] text-slate-400">Alta</span>
+            {categories.map((cat, r) => (
+              <div key={cat} className="flex items-center gap-1 mb-1">
+                <span className="w-16 text-[10px] text-slate-600 text-right pr-2">{cat}</span>
+                {data[r].map((v, c) => (
+                  <span key={c} className={`w-9 h-7 rounded ${shade[v]} flex items-center justify-center text-[9px] font-semibold ${v >= 3 ? 'text-white' : 'text-slate-500'}`}>
+                    {v >= 4 ? '●' : ''}
+                  </span>
+                ))}
+              </div>
+            ))}
+            <div className="flex items-center gap-2 mt-3 pl-16">
+              <span className="text-[10px] text-slate-400">Baja</span>
+              {shade.map((s, i) => <span key={i} className={`w-5 h-3 rounded-sm ${s}`} />)}
+              <span className="text-[10px] text-slate-400">Alta</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Planograma con niveles de stock y alertas */}
+        <div className="bg-white/70 rounded-xl border border-slate-200 p-4">
+          <p className="text-xs font-semibold text-slate-700 mb-3">Planograma · nivel de stock</p>
+          <div className="grid grid-cols-3 gap-2">
+            {shelf.map((s) => {
+              const low = s.stock < 25
+              const color = s.stock < 25 ? 'bg-red-500' : s.stock < 55 ? 'bg-amber-400' : 'bg-emerald-500'
+              return (
+                <div key={s.sku} className="border border-slate-200 rounded-lg p-2">
+                  <p className="text-[10px] font-medium text-slate-600 truncate mb-1">{s.sku}</p>
+                  <div className="h-14 bg-slate-100 rounded relative overflow-hidden flex items-end">
+                    <div className={`w-full ${color} transition-all`} style={{ height: `${s.stock}%` }} />
+                    {low && <span className="absolute inset-0 flex items-center justify-center text-[8px] font-bold text-red-600 animate-pulse">REPONER</span>}
+                  </div>
+                  <p className="text-[9px] text-slate-400 text-center mt-1">{s.stock}%</p>
+                </div>
+              )
+            })}
           </div>
         </div>
       </div>
@@ -361,39 +393,70 @@ function RetailViz(_: IndustryVisualizationProps) {
 /* ─────────────────────────── Energía ─────────────────────────── */
 
 function EnergyViz({ colorText }: IndustryVisualizationProps) {
-  // Curva de consumo (24 puntos), con pico que supera el límite
-  const pts = [20, 18, 16, 15, 16, 22, 35, 48, 55, 58, 60, 62, 70, 88, 92, 78, 60, 55, 58, 52, 44, 36, 28, 22]
-  const limit = 75
-  const w = 320, h = 120, max = 100
-  const toX = (i: number) => (i / (pts.length - 1)) * w
-  const toY = (v: number) => h - (v / max) * h
-  const line = pts.map((v, i) => `${i === 0 ? 'M' : 'L'}${toX(i).toFixed(1)} ${toY(v).toFixed(1)}`).join(' ')
-  const area = `${line} L${w} ${h} L0 ${h} Z`
-  const limitY = toY(limit)
+  // Nodos de la red: generación → subestación → consumos
+  const gens = [
+    { x: 30, y: 40, label: 'Solar', val: '4.2 MW', kind: 'gen' },
+    { x: 30, y: 110, label: 'Red', val: '6.0 MW', kind: 'gen' },
+  ]
+  const sub = { x: 150, y: 75, label: 'Subestación', val: '10.2 MW' }
+  const loads = [
+    { x: 280, y: 30, label: 'Planta A', val: '85%', warn: false },
+    { x: 280, y: 75, label: 'Planta B', val: '112%', warn: true },
+    { x: 280, y: 120, label: 'Oficinas', val: '47%', warn: false },
+  ]
 
   return (
     <div>
-      <Header title="Curva de demanda energética — 24h" subtitle="Detección de picos que superan el límite contratado y generan penalizaciones" />
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+        <Header title="Red energética en tiempo real" subtitle="Flujo entre generación, subestación y puntos de consumo monitoreado por IA" noMargin />
+        <SupervisorBadge name="GridBot · Supervisor IA" />
+      </div>
       <div className="bg-white/70 rounded-xl border border-slate-200 p-4">
-        <svg viewBox={`0 0 ${w} ${h + 16}`} className="w-full h-auto">
-          {/* Límite contratado */}
-          <line x1="0" y1={limitY} x2={w} y2={limitY} stroke="#ef4444" strokeWidth="1" strokeDasharray="4 3" />
-          <text x="2" y={limitY - 3} className="fill-red-500 text-[8px] font-semibold">Límite contratado</text>
-          {/* Área de consumo */}
-          <path d={area} fill="currentColor" className={`${colorText} opacity-15`} />
-          <path d={line} fill="none" stroke="currentColor" strokeWidth="2" className={colorText} />
-          {/* Zona de exceso resaltada */}
-          {pts.map((v, i) => v > limit && i > 0 && pts[i - 1] > limit ? (
-            <line key={i} x1={toX(i - 1)} y1={toY(pts[i - 1])} x2={toX(i)} y2={toY(v)} stroke="#ef4444" strokeWidth="2.5" />
-          ) : null)}
-          {/* Marcador del pico */}
-          <circle cx={toX(14)} cy={toY(92)} r="4" fill="#ef4444">
-            <animate attributeName="r" values="4;6;4" dur="1.4s" repeatCount="indefinite" />
-          </circle>
+        <svg viewBox="0 0 320 155" className="w-full h-auto" style={{ maxHeight: 280 }}>
+          {/* Flujos generación → subestación */}
+          {gens.map((g, i) => (
+            <line key={i} x1={g.x + 14} y1={g.y} x2={sub.x - 16} y2={sub.y} stroke="currentColor" strokeWidth="2" strokeDasharray="5 4" className={`${colorText} opacity-60`}>
+              <animate attributeName="stroke-dashoffset" values="9;0" dur="0.9s" repeatCount="indefinite" />
+            </line>
+          ))}
+          {/* Flujos subestación → consumos */}
+          {loads.map((l, i) => (
+            <line key={i} x1={sub.x + 16} y1={sub.y} x2={l.x - 14} y2={l.y} stroke={l.warn ? '#ef4444' : 'currentColor'} strokeWidth="2" strokeDasharray="5 4" className={l.warn ? '' : `${colorText} opacity-60`}>
+              <animate attributeName="stroke-dashoffset" values="9;0" dur="0.9s" repeatCount="indefinite" begin={`${i * 0.2}s`} />
+            </line>
+          ))}
+          {/* Nodos de generación */}
+          {gens.map((g, i) => (
+            <g key={i}>
+              <circle cx={g.x} cy={g.y} r="13" fill="white" stroke="#10b981" strokeWidth="2" />
+              <text x={g.x} y={g.y + 3} textAnchor="middle" className="text-[10px]">⚡</text>
+              <text x={g.x} y={g.y - 17} textAnchor="middle" className="fill-slate-600 text-[8px] font-semibold">{g.label}</text>
+              <text x={g.x} y={g.y + 24} textAnchor="middle" className="fill-slate-400 text-[8px]">{g.val}</text>
+            </g>
+          ))}
+          {/* Subestación */}
+          <g>
+            <rect x={sub.x - 18} y={sub.y - 14} width="36" height="28" rx="4" fill="currentColor" className={colorText} />
+            <text x={sub.x} y={sub.y + 3} textAnchor="middle" className="fill-white text-[9px] font-bold">🔌</text>
+            <text x={sub.x} y={sub.y - 19} textAnchor="middle" className="fill-slate-600 text-[8px] font-semibold">{sub.label}</text>
+            <text x={sub.x} y={sub.y + 26} textAnchor="middle" className="fill-slate-400 text-[8px]">{sub.val}</text>
+          </g>
+          {/* Consumos */}
+          {loads.map((l, i) => (
+            <g key={i}>
+              <circle cx={l.x} cy={l.y} r="12" fill="white" stroke={l.warn ? '#ef4444' : '#94a3b8'} strokeWidth="2">
+                {l.warn && <animate attributeName="stroke-width" values="2;3.5;2" dur="1.2s" repeatCount="indefinite" />}
+              </circle>
+              <text x={l.x} y={l.y + 3} textAnchor="middle" className="text-[9px]">🏭</text>
+              <text x={l.x} y={l.y - 16} textAnchor="middle" className="fill-slate-600 text-[8px] font-semibold">{l.label}</text>
+              <text x={l.x} y={l.y + 22} textAnchor="middle" className={`text-[8px] font-bold ${l.warn ? 'fill-red-500' : 'fill-slate-400'}`}>{l.val}</text>
+            </g>
+          ))}
         </svg>
-        <div className="flex items-center gap-4 mt-2 text-[10px] text-slate-500">
-          <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-red-500" /> Exceso (penalización)</span>
-          <span className="flex items-center gap-1"><span className={`w-3 h-0.5 ${colorText}`} style={{ backgroundColor: 'currentColor' }} /> Consumo</span>
+        <div className="flex flex-wrap items-center gap-4 mt-2 text-[10px] text-slate-500">
+          <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-red-500" /> Sobre el límite contratado</span>
+          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full border-2 border-emerald-500" /> Generación</span>
+          <span className="flex items-center gap-1">🏭 Consumo</span>
         </div>
       </div>
     </div>
@@ -403,32 +466,86 @@ function EnergyViz({ colorText }: IndustryVisualizationProps) {
 /* ─────────────────────────── Manufactura ─────────────────────────── */
 
 function ManufacturingViz(_: IndustryVisualizationProps) {
-  const racks = [
-    { id: 'A1', rot: 'A', fill: 90 }, { id: 'A2', rot: 'A', fill: 75 }, { id: 'B1', rot: 'B', fill: 55 },
-    { id: 'B2', rot: 'B', fill: 40 }, { id: 'C1', rot: 'C', fill: 20 }, { id: 'C2', rot: 'C', fill: 15 },
-    { id: 'A3', rot: 'A', fill: 60 }, { id: 'B3', rot: 'B', fill: 80 }, { id: 'C3', rot: 'C', fill: 8 },
+  // Estaciones de la línea: estado activa / cuello de botella / parada
+  const stations = [
+    { label: 'Corte', occ: 88, state: 'ok' as const },
+    { label: 'Soldadura', occ: 96, state: 'bottleneck' as const },
+    { label: 'Ensamble', occ: 72, state: 'ok' as const },
+    { label: 'Pintura', occ: 0, state: 'down' as const },
+    { label: 'Empaque', occ: 64, state: 'ok' as const },
   ]
-  const color: Record<string, string> = { A: 'bg-orange-500', B: 'bg-amber-400', C: 'bg-emerald-400' }
+  const stColor = { ok: '#10b981', bottleneck: '#f59e0b', down: '#ef4444' }
+  const stLabel = { ok: 'Activa', bottleneck: 'Cuello de botella', down: 'Parada' }
+  const beltY = 70, x0 = 18, gap = 58
+  const oee = 71
+  const oeeR = 54, oeeCx = 70, oeeCy = 70
 
   return (
     <div>
-      <Header title="Almacén inteligente — clasificación ABC" subtitle="Ubicación óptima por rotación y alertas de reorden automáticas" />
-      <div className="bg-white/70 rounded-xl border border-slate-200 p-4">
-        <div className="grid grid-cols-3 gap-3">
-          {racks.map((r) => (
-            <div key={r.id} className="border border-slate-200 rounded-lg p-2">
-              <div className="flex items-center justify-between mb-1.5">
-                <span className="text-[11px] font-semibold text-slate-600">{r.id}</span>
-                <span className={`w-4 h-4 rounded ${color[r.rot]} text-white text-[9px] font-bold flex items-center justify-center`}>{r.rot}</span>
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+        <Header title="Línea de producción y OEE" subtitle="Ocupación de estaciones y eficiencia general supervisadas por IA" noMargin />
+        <SupervisorBadge name="LineBot · Supervisor IA" />
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* Línea de producción animada */}
+        <div className="lg:col-span-2 bg-white/70 rounded-xl border border-slate-200 p-4">
+          <p className="text-xs font-semibold text-slate-700 mb-3">Línea de ensamblaje · ocupación por estación</p>
+          <svg viewBox="0 0 310 130" className="w-full h-auto">
+            {/* cinta transportadora */}
+            <line x1={x0} y1={beltY} x2={x0 + gap * (stations.length - 1) + 28} y2={beltY} stroke="#cbd5e1" strokeWidth="6" strokeLinecap="round" strokeDasharray="6 5">
+              <animate attributeName="stroke-dashoffset" values="11;0" dur="0.7s" repeatCount="indefinite" />
+            </line>
+            {/* producto avanzando */}
+            <circle r="4" fill="#4f46e5">
+              <animateMotion dur="5s" repeatCount="indefinite" path={`M${x0} ${beltY} L${x0 + gap * (stations.length - 1) + 28} ${beltY}`} />
+            </circle>
+            {/* estaciones */}
+            {stations.map((s, i) => {
+              const x = x0 + i * gap
+              return (
+                <g key={i}>
+                  <rect x={x} y={beltY - 30} width="28" height="22" rx="3" fill="white" stroke={stColor[s.state]} strokeWidth="2">
+                    {s.state === 'down' && <animate attributeName="opacity" values="1;0.5;1" dur="1s" repeatCount="indefinite" />}
+                  </rect>
+                  {/* relleno de ocupación */}
+                  <rect x={x} y={beltY - 30 + 22 - (22 * s.occ / 100)} width="28" height={22 * s.occ / 100} rx="0" fill={stColor[s.state]} opacity="0.35" />
+                  <circle cx={x + 14} cy={beltY} r="3.5" fill={stColor[s.state]} />
+                  <text x={x + 14} y={beltY - 34} textAnchor="middle" className="fill-slate-600 text-[7px] font-semibold">{s.label}</text>
+                  <text x={x + 14} y={beltY + 16} textAnchor="middle" className="fill-slate-400 text-[7px]">{s.state === 'down' ? '—' : `${s.occ}%`}</text>
+                </g>
+              )
+            })}
+          </svg>
+          <div className="flex flex-wrap items-center gap-3 mt-1 text-[10px] text-slate-500">
+            {(['ok', 'bottleneck', 'down'] as const).map((k) => (
+              <span key={k} className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: stColor[k] }} /> {stLabel[k]}</span>
+            ))}
+          </div>
+        </div>
+
+        {/* Medidor OEE */}
+        <div className="bg-white/70 rounded-xl border border-slate-200 p-4 flex flex-col items-center">
+          <p className="text-xs font-semibold text-slate-700 mb-1 self-start">OEE global</p>
+          <svg viewBox="0 0 140 88" className="w-full max-w-[180px]">
+            <path d={`M16 ${oeeCy} A${oeeR} ${oeeR} 0 0 1 124 ${oeeCy}`} fill="none" stroke="#e2e8f0" strokeWidth="12" strokeLinecap="round" />
+            <path d={`M16 ${oeeCy} A${oeeR} ${oeeR} 0 0 1 124 ${oeeCy}`} fill="none" stroke="url(#oeeG)" strokeWidth="12" strokeLinecap="round"
+              strokeDasharray={`${(oee / 100) * 170} 400`} />
+            <defs>
+              <linearGradient id="oeeG" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor="#ef4444" /><stop offset="50%" stopColor="#f59e0b" /><stop offset="100%" stopColor="#10b981" />
+              </linearGradient>
+            </defs>
+            <text x={oeeCx} y={oeeCy - 4} textAnchor="middle" className="fill-slate-800 text-[18px] font-bold">{oee}%</text>
+            <text x={oeeCx} y={oeeCy + 10} textAnchor="middle" className="fill-slate-400 text-[8px]">objetivo 85%</text>
+          </svg>
+          <div className="w-full mt-2 space-y-1.5">
+            {[{ l: 'Disponibilidad', v: 82 }, { l: 'Rendimiento', v: 88 }, { l: 'Calidad', v: 98 }].map((d) => (
+              <div key={d.l}>
+                <div className="flex justify-between text-[10px] text-slate-500"><span>{d.l}</span><span className="font-semibold tabular-nums">{d.v}%</span></div>
+                <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden"><div className="h-full bg-blue-500 rounded-full" style={{ width: `${d.v}%` }} /></div>
               </div>
-              <div className="h-12 bg-slate-100 rounded relative overflow-hidden flex items-end">
-                <div className={`w-full ${color[r.rot]} transition-all`} style={{ height: `${r.fill}%` }} />
-                {r.fill < 25 && (
-                  <span className="absolute inset-0 flex items-center justify-center text-[8px] font-bold text-red-600 animate-pulse">REORDEN</span>
-                )}
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </div>
@@ -438,28 +555,38 @@ function ManufacturingViz(_: IndustryVisualizationProps) {
 /* ─────────────────────────── Banca ─────────────────────────── */
 
 function BankingViz(_: IndustryVisualizationProps) {
-  const score = 68 // 0-100
-  const angle = (score / 100) * 180
+  const score = 68
   const r = 70, cx = 90, cy = 90
   const rad = (deg: number) => (deg - 180) * (Math.PI / 180)
+  const angle = (score / 100) * 180
   const needleX = cx + r * 0.8 * Math.cos(rad(angle))
   const needleY = cy + r * 0.8 * Math.sin(rad(angle))
 
+  // Flujo de decisión de crédito en vivo
+  const steps = [
+    { icon: '📥', label: 'Solicitud recibida', detail: 'PYME · $120K · 24 meses', state: 'done' as const },
+    { icon: '📊', label: 'Scoring automático', detail: 'Score 68 / 100', state: 'done' as const },
+    { icon: '🧮', label: 'Análisis de ratios', detail: 'DSCR 1.3 · Leverage 46%', state: 'done' as const },
+    { icon: '✅', label: 'Decisión', detail: 'Aprobar con garantía', state: 'active' as const },
+  ]
+
   return (
     <div>
-      <Header title="Motor de scoring crediticio" subtitle="Evaluación de riesgo en tiempo real y composición de cartera" />
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+        <Header title="Motor de scoring y decisión de crédito" subtitle="Evaluación de riesgo y recorrido de la decisión en vivo" noMargin />
+        <SupervisorBadge name="CreditBot · Supervisor IA" />
+      </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {/* Gauge */}
-        <div className="bg-white/70 rounded-xl border border-slate-200 p-4 flex flex-col items-center">
+        {/* Gauge de score */}
+        <div className="bg-white/70 rounded-xl border border-slate-200 p-4 flex flex-col items-center justify-center">
+          <p className="text-xs font-semibold text-slate-700 mb-1 self-start">Score de riesgo</p>
           <svg viewBox="0 0 180 110" className="w-full max-w-[220px]">
             <path d={`M20 90 A${r} ${r} 0 0 1 160 90`} fill="none" stroke="#e2e8f0" strokeWidth="14" strokeLinecap="round" />
             <path d={`M20 90 A${r} ${r} 0 0 1 160 90`} fill="none" stroke="url(#g)" strokeWidth="14" strokeLinecap="round"
               strokeDasharray={`${(score / 100) * 220} 400`} />
             <defs>
               <linearGradient id="g" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor="#10b981" />
-                <stop offset="60%" stopColor="#f59e0b" />
-                <stop offset="100%" stopColor="#ef4444" />
+                <stop offset="0%" stopColor="#10b981" /><stop offset="60%" stopColor="#f59e0b" /><stop offset="100%" stopColor="#ef4444" />
               </linearGradient>
             </defs>
             <line x1={cx} y1={cy} x2={needleX} y2={needleY} stroke="#334155" strokeWidth="2.5" strokeLinecap="round" />
@@ -468,23 +595,30 @@ function BankingViz(_: IndustryVisualizationProps) {
           </svg>
           <p className="text-xs font-semibold text-amber-600">Riesgo moderado</p>
         </div>
-        {/* Composición de cartera */}
+
+        {/* Flujo de decisión en vivo */}
         <div className="bg-white/70 rounded-xl border border-slate-200 p-4">
-          <p className="text-xs font-semibold text-slate-700 mb-3">Composición de cartera</p>
-          {[
-            { label: 'Bajo riesgo', pct: 52, color: 'bg-emerald-500' },
-            { label: 'Riesgo medio', pct: 33, color: 'bg-amber-400' },
-            { label: 'Alto riesgo', pct: 15, color: 'bg-red-500' },
-          ].map((s) => (
-            <div key={s.label} className="mb-2.5">
-              <div className="flex justify-between text-[11px] text-slate-600 mb-1">
-                <span>{s.label}</span><span className="font-semibold tabular-nums">{s.pct}%</span>
+          <p className="text-xs font-semibold text-slate-700 mb-3">Flujo de decisión</p>
+          <div className="space-y-0">
+            {steps.map((s, i) => (
+              <div key={i} className="flex gap-2.5">
+                {/* columna del timeline */}
+                <div className="flex flex-col items-center">
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] shrink-0 ${
+                    s.state === 'done' ? 'bg-emerald-100' : 'bg-amber-100'
+                  }`}>
+                    {s.state === 'done' ? <span className="text-emerald-600 font-bold">✓</span> : <span className="relative flex h-2.5 w-2.5"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" /><span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500" /></span>}
+                  </div>
+                  {i < steps.length - 1 && <div className="w-0.5 flex-1 bg-slate-200 my-0.5" style={{ minHeight: 14 }} />}
+                </div>
+                {/* contenido */}
+                <div className="pb-3">
+                  <p className="text-xs font-semibold text-slate-700 leading-tight">{s.icon} {s.label}</p>
+                  <p className="text-[10px] text-slate-500 leading-tight">{s.detail}</p>
+                </div>
               </div>
-              <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                <div className={`h-full ${s.color} rounded-full transition-all`} style={{ width: `${s.pct}%` }} />
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </div>
@@ -501,7 +635,10 @@ function GenericViz({ colorText }: IndustryVisualizationProps) {
 
   return (
     <div>
-      <Header title="Panel de inteligencia operativa" subtitle="Métricas clave y tendencias detectadas por IA" />
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+        <Header title="Panel de inteligencia operativa" subtitle="Métricas clave y tendencias detectadas por IA" noMargin />
+        <SupervisorBadge />
+      </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="bg-white/70 rounded-xl border border-slate-200 p-4">
           <p className="text-xs font-semibold text-slate-700 mb-3">Indicadores por área</p>
