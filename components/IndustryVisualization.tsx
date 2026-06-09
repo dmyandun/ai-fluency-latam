@@ -352,7 +352,7 @@ function RetailViz(_: IndustryVisualizationProps) {
     [1, 2, 2, 3, 4, 4],
     [3, 3, 4, 4, 3, 2],
   ]
-  const shade = ['bg-slate-100', 'bg-amber-100', 'bg-amber-300', 'bg-amber-500', 'bg-amber-600']
+  const shadeHex = ['#f1f5f9', '#fef3c7', '#fcd34d', '#f59e0b', '#d97706']
 
   // Plano del piso de tienda: secciones clasificadas ABC por valor de ticket
   type Sec = { name: string; x: number; y: number; w: number; h: number; z: 'A' | 'B' | 'C'; rec: string[] }
@@ -373,59 +373,90 @@ function RetailViz(_: IndustryVisualizationProps) {
         <Header title="Demanda y layout inteligente de tienda" subtitle="Mapa de calor de demanda y plano de piso optimizado por IA" noMargin />
         <SupervisorBadge name="ShelfBot · Supervisor IA" />
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Heatmap de demanda */}
-        <div className="bg-white/70 rounded-xl border border-slate-200 p-4 overflow-x-auto">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
+        {/* Heatmap de demanda — llena el contenedor */}
+        <div className="bg-white/70 rounded-xl border border-slate-200 p-4 flex flex-col" style={{ minHeight: 260 }}>
           <p className="text-xs font-semibold text-slate-700 mb-3">Mapa de calor de demanda</p>
-          <div className="inline-block min-w-full">
-            <div className="flex gap-1 mb-1 pl-16">
-              {weeks.map((w) => <span key={w} className="w-9 text-center text-[10px] text-slate-400">{w}</span>)}
-            </div>
-            {categories.map((cat, r) => (
-              <div key={cat} className="flex items-center gap-1 mb-1">
-                <span className="w-16 text-[10px] text-slate-600 text-right pr-2">{cat}</span>
-                {data[r].map((v, c) => (
-                  <span key={c} className={`w-9 h-7 rounded ${shade[v]} flex items-center justify-center text-[9px] font-semibold ${v >= 3 ? 'text-white' : 'text-slate-500'}`}>
-                    {v >= 4 ? '●' : ''}
-                  </span>
-                ))}
-              </div>
-            ))}
-            <div className="flex items-center gap-2 mt-3 pl-16">
-              <span className="text-[10px] text-slate-400">Baja</span>
-              {shade.map((s, i) => <span key={i} className={`w-5 h-3 rounded-sm ${s}`} />)}
-              <span className="text-[10px] text-slate-400">Alta</span>
-            </div>
+          <div className="flex-1 min-h-0">
+            <svg viewBox="0 0 184 122" preserveAspectRatio="xMidYMid meet" className="w-full h-full">
+              {/* etiquetas de semanas */}
+              {weeks.map((w, j) => (
+                <text key={w} x={40 + j * 24 + 12} y={9} textAnchor="middle" className="fill-slate-400 text-[7px]">{w}</text>
+              ))}
+              {/* filas */}
+              {categories.map((cat, r) => (
+                <g key={cat}>
+                  <text x={36} y={14 + r * 24 + 14} textAnchor="end" className="fill-slate-600 text-[7px]">{cat}</text>
+                  {data[r].map((v, c) => (
+                    <g key={c}>
+                      <rect x={40 + c * 24 + 1} y={14 + r * 24 + 1} width={22} height={22} rx={2} fill={shadeHex[v]} />
+                      {v >= 4 && <circle cx={40 + c * 24 + 12} cy={14 + r * 24 + 12} r={2} fill="#fff" />}
+                    </g>
+                  ))}
+                </g>
+              ))}
+              {/* leyenda */}
+              <text x={40} y={120} className="fill-slate-400 text-[7px]">Baja</text>
+              {shadeHex.map((s, i) => <rect key={i} x={62 + i * 12} y={114} width={11} height={7} rx={1} fill={s} />)}
+              <text x={62 + shadeHex.length * 12 + 4} y={120} className="fill-slate-400 text-[7px]">Alta</text>
+            </svg>
           </div>
         </div>
 
-        {/* Plano de piso de tienda — ABC por valor de ticket */}
-        <div className="bg-white/70 rounded-xl border border-slate-200 p-4">
+        {/* Plano de piso de tienda — estilo plano arquitectónico */}
+        <div className="bg-white/70 rounded-xl border border-slate-200 p-4 flex flex-col" style={{ minHeight: 260 }}>
           <p className="text-xs font-semibold text-slate-700 mb-2">Plano de tienda · clasificación ABC por valor de ticket</p>
-          <div className="relative">
-            <svg viewBox="0 0 220 110" className="w-full h-auto">
-              {/* contorno de la tienda */}
-              <rect x="6" y="8" width="208" height="96" rx="4" fill="none" stroke="#cbd5e1" strokeWidth="1.5" />
-              {/* secciones */}
-              {sections.map((s, i) => (
-                <g key={i} style={{ cursor: 'pointer' }} onMouseEnter={() => setHov(i)} onMouseLeave={() => setHov((h) => (h === i ? null : h))}>
-                  <rect x={s.x} y={s.y} width={s.w} height={s.h} rx="3" fill={zColor[s.z]} opacity={hov === i ? 0.95 : 0.8} stroke={hov === i ? '#1e293b' : 'transparent'} strokeWidth="1.5" />
-                  <text x={s.x + s.w / 2} y={s.y + s.h / 2 - 1} textAnchor="middle" className="fill-white text-[7px] font-bold">{s.name}</text>
-                  <text x={s.x + s.w / 2} y={s.y + s.h / 2 + 8} textAnchor="middle" className="fill-white text-[6px] opacity-90">Ticket {s.z}</text>
+          <div className="relative flex-1 min-h-0">
+            <svg viewBox="0 0 220 116" preserveAspectRatio="xMidYMid meet" className="w-full h-full">
+              <defs>
+                <pattern id="floorgrid" width="11" height="11" patternUnits="userSpaceOnUse">
+                  <path d="M11 0 L0 0 0 11" fill="none" stroke="#e2e8f0" strokeWidth="0.4" />
+                </pattern>
+              </defs>
+              {/* piso con grid de plano */}
+              <rect x="6" y="6" width="208" height="104" fill="url(#floorgrid)" />
+              {/* paredes exteriores */}
+              <rect x="6" y="6" width="208" height="104" fill="none" stroke="#475569" strokeWidth="2" />
+              {/* apertura de entrada (gap en pared inferior) */}
+              <rect x="150" y="107" width="42" height="6" fill="white" />
+              {/* secciones como zonas de plano */}
+              {sections.map((s, i) => {
+                const active = hov === i
+                return (
+                  <g key={i} style={{ cursor: 'pointer' }} onMouseEnter={() => setHov(i)} onMouseLeave={() => setHov((h) => (h === i ? null : h))}>
+                    <rect x={s.x} y={s.y} width={s.w} height={s.h} rx={1.5}
+                      fill={zColor[s.z]} fillOpacity={active ? 0.22 : 0.12}
+                      stroke={zColor[s.z]} strokeWidth={active ? 1.8 : 1} />
+                    {/* góndolas (estanterías en planta) */}
+                    {[0, 1].map((g) => (
+                      <rect key={g} x={s.x + 4} y={s.y + 6 + g * 9} width={s.w - 8} height={3} rx={0.5}
+                        fill="none" stroke={zColor[s.z]} strokeWidth={0.7} strokeOpacity={0.7} />
+                    ))}
+                    {/* etiqueta de sección */}
+                    <text x={s.x + s.w / 2} y={s.y + s.h - 3} textAnchor="middle" className="fill-slate-700 text-[6.5px] font-semibold">{s.name}</text>
+                    {/* tag ABC */}
+                    <circle cx={s.x + 6} cy={s.y + 6} r={4} fill={zColor[s.z]} />
+                    <text x={s.x + 6} y={s.y + 8} textAnchor="middle" className="fill-white text-[5px] font-bold">{s.z}</text>
+                  </g>
+                )
+              })}
+              {/* cajas */}
+              {[0, 1, 2].map((c) => (
+                <g key={c}>
+                  <rect x={16 + c * 13} y={96} width={9} height={10} rx={1} fill="none" stroke="#3b82f6" strokeWidth={1} />
+                  <line x1={16 + c * 13} y1={101} x2={25 + c * 13} y2={101} stroke="#3b82f6" strokeWidth={0.6} />
                 </g>
               ))}
-              {/* cajas y entrada */}
-              <rect x="14" y="92" width="40" height="8" rx="2" fill="#3b82f6" />
-              <text x="34" y="98" textAnchor="middle" className="fill-white text-[5px] font-bold">CAJAS</text>
-              <rect x="160" y="92" width="46" height="8" rx="2" fill="#1e293b" />
-              <text x="183" y="98" textAnchor="middle" className="fill-white text-[5px] font-bold">ENTRADA</text>
+              <text x={29} y={94} className="fill-blue-500 text-[6px] font-semibold">Cajas</text>
+              {/* entrada */}
+              <text x={171} y={104} textAnchor="middle" className="fill-slate-500 text-[6px] font-semibold">▼ Entrada</text>
             </svg>
 
             {/* tarjeta del agente al hover */}
             {hov !== null && (
               <div
                 className="absolute z-20 pointer-events-none"
-                style={{ left: `${((sections[hov].x + sections[hov].w / 2) / 220) * 100}%`, top: `${((sections[hov].y) / 110) * 100}%`, transform: 'translate(-50%, calc(-100% - 4px))' }}
+                style={{ left: `${((sections[hov].x + sections[hov].w / 2) / 220) * 100}%`, top: `${(sections[hov].y / 116) * 100}%`, transform: 'translate(-50%, calc(-100% - 4px))' }}
               >
                 <AgentCard agent="LayoutBot" status={zStatus[sections[hov].z]} lines={[sections[hov].name, ...sections[hov].rec]} className="whitespace-nowrap" />
               </div>
