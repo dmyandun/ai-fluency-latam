@@ -18,6 +18,31 @@ function countryName(code?: string): string {
   return LATAM_COUNTRIES.find((c) => c.code === code)?.name ?? code
 }
 
+// Tarjeta de agente IA reutilizable (usada en hovers y paneles de alertas)
+function AgentCard({ agent, lines, status = 'green', className = '' }: {
+  agent: string
+  lines: string[]
+  status?: 'green' | 'amber' | 'red'
+  className?: string
+}) {
+  const dot = status === 'red' ? 'bg-red-500' : status === 'amber' ? 'bg-amber-500' : 'bg-emerald-500'
+  const accent = status === 'red' ? 'text-red-600' : status === 'amber' ? 'text-amber-600' : 'text-emerald-600'
+  return (
+    <div className={`bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 shadow-sm ${className}`}>
+      <div className="flex items-center gap-1.5">
+        <span className="relative flex h-2 w-2">
+          <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${dot} opacity-75`} />
+          <span className={`relative inline-flex rounded-full h-2 w-2 ${dot}`} />
+        </span>
+        <span className="text-[11px] font-bold text-slate-700">🤖 {agent}</span>
+      </div>
+      {lines.map((l, i) => (
+        <p key={i} className={`text-[10px] leading-tight mt-0.5 ${i === lines.length - 1 ? accent + ' font-semibold' : 'text-slate-500'}`}>{l}</p>
+      ))}
+    </div>
+  )
+}
+
 // Insignia del agente de IA supervisor, presente en todas las visualizaciones.
 function SupervisorBadge({ name = 'AFIA · Supervisor IA' }: { name?: string }) {
   return (
@@ -318,6 +343,7 @@ function WarehouseLayout({ routeIndex = 0 }: { routeIndex?: number }) {
 /* ─────────────────────────── Retail ─────────────────────────── */
 
 function RetailViz(_: IndustryVisualizationProps) {
+  const [hov, setHov] = useState<number | null>(null)
   const categories = ['Abrigos', 'Calzado', 'Accesorios', 'Deportiva']
   const weeks = ['S1', 'S2', 'S3', 'S4', 'S5', 'S6']
   const data = [
@@ -327,16 +353,24 @@ function RetailViz(_: IndustryVisualizationProps) {
     [3, 3, 4, 4, 3, 2],
   ]
   const shade = ['bg-slate-100', 'bg-amber-100', 'bg-amber-300', 'bg-amber-500', 'bg-amber-600']
-  // Planograma: niveles de stock por producto en la estantería
-  const shelf = [
-    { sku: 'Abrigo XL', stock: 82 }, { sku: 'Bota cuero', stock: 22 }, { sku: 'Bufanda', stock: 64 },
-    { sku: 'Gorro', stock: 12 }, { sku: 'Guante', stock: 70 }, { sku: 'Media térm.', stock: 40 },
+
+  // Plano del piso de tienda: secciones clasificadas ABC por valor de ticket
+  type Sec = { name: string; x: number; y: number; w: number; h: number; z: 'A' | 'B' | 'C'; rec: string[] }
+  const sections: Sec[] = [
+    { name: 'Electrónica', x: 14, y: 16, w: 58, h: 32, z: 'A', rec: ['Mover cerca de la entrada', '+12% ticket promedio'] },
+    { name: 'Electrodom.', x: 80, y: 16, w: 58, h: 32, z: 'A', rec: ['Demo interactiva en pasillo', '+9% conversión'] },
+    { name: 'Ropa', x: 146, y: 16, w: 60, h: 32, z: 'B', rec: ['Probadores accesibles', '+8% conversión'] },
+    { name: 'Hogar', x: 14, y: 56, w: 58, h: 28, z: 'B', rec: ['Cross-merch con Electrónica', '+6% unidades/ticket'] },
+    { name: 'Abarrotes', x: 80, y: 56, w: 58, h: 28, z: 'C', rec: ['Al fondo → aumenta recorrido', 'mayor exposición'] },
+    { name: 'Limpieza', x: 146, y: 56, w: 60, h: 28, z: 'C', rec: ['Reponer góndola baja', 'evitar quiebres'] },
   ]
+  const zColor = { A: '#f97316', B: '#fbbf24', C: '#34d399' }
+  const zStatus = { A: 'amber' as const, B: 'amber' as const, C: 'green' as const }
 
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
-        <Header title="Demanda y reposición inteligente" subtitle="Pronóstico de demanda y alertas de reposición por producto" noMargin />
+        <Header title="Demanda y layout inteligente de tienda" subtitle="Mapa de calor de demanda y plano de piso optimizado por IA" noMargin />
         <SupervisorBadge name="ShelfBot · Supervisor IA" />
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -365,24 +399,42 @@ function RetailViz(_: IndustryVisualizationProps) {
           </div>
         </div>
 
-        {/* Planograma con niveles de stock y alertas */}
+        {/* Plano de piso de tienda — ABC por valor de ticket */}
         <div className="bg-white/70 rounded-xl border border-slate-200 p-4">
-          <p className="text-xs font-semibold text-slate-700 mb-3">Planograma · nivel de stock</p>
-          <div className="grid grid-cols-3 gap-2">
-            {shelf.map((s) => {
-              const low = s.stock < 25
-              const color = s.stock < 25 ? 'bg-red-500' : s.stock < 55 ? 'bg-amber-400' : 'bg-emerald-500'
-              return (
-                <div key={s.sku} className="border border-slate-200 rounded-lg p-2">
-                  <p className="text-[10px] font-medium text-slate-600 truncate mb-1">{s.sku}</p>
-                  <div className="h-14 bg-slate-100 rounded relative overflow-hidden flex items-end">
-                    <div className={`w-full ${color} transition-all`} style={{ height: `${s.stock}%` }} />
-                    {low && <span className="absolute inset-0 flex items-center justify-center text-[8px] font-bold text-red-600 animate-pulse">REPONER</span>}
-                  </div>
-                  <p className="text-[9px] text-slate-400 text-center mt-1">{s.stock}%</p>
-                </div>
-              )
-            })}
+          <p className="text-xs font-semibold text-slate-700 mb-2">Plano de tienda · clasificación ABC por valor de ticket</p>
+          <div className="relative">
+            <svg viewBox="0 0 220 110" className="w-full h-auto">
+              {/* contorno de la tienda */}
+              <rect x="6" y="8" width="208" height="96" rx="4" fill="none" stroke="#cbd5e1" strokeWidth="1.5" />
+              {/* secciones */}
+              {sections.map((s, i) => (
+                <g key={i} style={{ cursor: 'pointer' }} onMouseEnter={() => setHov(i)} onMouseLeave={() => setHov((h) => (h === i ? null : h))}>
+                  <rect x={s.x} y={s.y} width={s.w} height={s.h} rx="3" fill={zColor[s.z]} opacity={hov === i ? 0.95 : 0.8} stroke={hov === i ? '#1e293b' : 'transparent'} strokeWidth="1.5" />
+                  <text x={s.x + s.w / 2} y={s.y + s.h / 2 - 1} textAnchor="middle" className="fill-white text-[7px] font-bold">{s.name}</text>
+                  <text x={s.x + s.w / 2} y={s.y + s.h / 2 + 8} textAnchor="middle" className="fill-white text-[6px] opacity-90">Ticket {s.z}</text>
+                </g>
+              ))}
+              {/* cajas y entrada */}
+              <rect x="14" y="92" width="40" height="8" rx="2" fill="#3b82f6" />
+              <text x="34" y="98" textAnchor="middle" className="fill-white text-[5px] font-bold">CAJAS</text>
+              <rect x="160" y="92" width="46" height="8" rx="2" fill="#1e293b" />
+              <text x="183" y="98" textAnchor="middle" className="fill-white text-[5px] font-bold">ENTRADA</text>
+            </svg>
+
+            {/* tarjeta del agente al hover */}
+            {hov !== null && (
+              <div
+                className="absolute z-20 pointer-events-none"
+                style={{ left: `${((sections[hov].x + sections[hov].w / 2) / 220) * 100}%`, top: `${((sections[hov].y) / 110) * 100}%`, transform: 'translate(-50%, calc(-100% - 4px))' }}
+              >
+                <AgentCard agent="LayoutBot" status={zStatus[sections[hov].z]} lines={[sections[hov].name, ...sections[hov].rec]} className="whitespace-nowrap" />
+              </div>
+            )}
+          </div>
+          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-slate-500">
+            <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-orange-500" /> A · ticket alto</span>
+            <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-amber-400" /> B · medio</span>
+            <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-emerald-400" /> C · bajo</span>
           </div>
         </div>
       </div>
@@ -411,7 +463,8 @@ function EnergyViz({ colorText }: IndustryVisualizationProps) {
         <Header title="Red energética en tiempo real" subtitle="Flujo entre generación, subestación y puntos de consumo monitoreado por IA" noMargin />
         <SupervisorBadge name="GridBot · Supervisor IA" />
       </div>
-      <div className="bg-white/70 rounded-xl border border-slate-200 p-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="lg:col-span-2 bg-white/70 rounded-xl border border-slate-200 p-4">
         <svg viewBox="0 0 320 155" className="w-full h-auto" style={{ maxHeight: 280 }}>
           {/* Flujos generación → subestación */}
           {gens.map((g, i) => (
@@ -459,6 +512,18 @@ function EnergyViz({ colorText }: IndustryVisualizationProps) {
           <span className="flex items-center gap-1">🏭 Consumo</span>
         </div>
       </div>
+
+      {/* Panel de alertas de agentes IA */}
+      <div className="lg:col-span-1 bg-white/70 rounded-xl border border-slate-200 p-4">
+        <p className="text-xs font-semibold text-slate-700 mb-3">Alertas de agentes IA</p>
+        <div className="space-y-2">
+          <AgentCard agent="GridBot-A" status="green" lines={['Subestación A · compuertas cerradas', 'Operación normal']} />
+          <AgentCard agent="GridBot-B" status="amber" lines={['Subestación B · trabajando al 50%', 'Últ. mant. hace 15 días · próx. en 15 días']} />
+          <AgentCard agent="GridBot-P" status="red" lines={['Planta B · carga 112% sobre límite', 'Desplazar carga flexible 14:00-16:00']} />
+          <AgentCard agent="GridBot-Z" status="green" lines={['Subestación Z · 3 turbinas activas', 'Generación estable']} />
+        </div>
+      </div>
+      </div>
     </div>
   )
 }
@@ -466,7 +531,7 @@ function EnergyViz({ colorText }: IndustryVisualizationProps) {
 /* ─────────────────────────── Manufactura ─────────────────────────── */
 
 function ManufacturingViz(_: IndustryVisualizationProps) {
-  // Estaciones de la línea: estado activa / cuello de botella / parada
+  const [hov, setHov] = useState<number | null>(null)
   const stations = [
     { label: 'Corte', occ: 88, state: 'ok' as const },
     { label: 'Soldadura', occ: 96, state: 'bottleneck' as const },
@@ -476,46 +541,66 @@ function ManufacturingViz(_: IndustryVisualizationProps) {
   ]
   const stColor = { ok: '#10b981', bottleneck: '#f59e0b', down: '#ef4444' }
   const stLabel = { ok: 'Activa', bottleneck: 'Cuello de botella', down: 'Parada' }
-  const beltY = 70, x0 = 18, gap = 58
-  const oee = 71
-  const oeeR = 54, oeeCx = 70, oeeCy = 70
+  const stStatus = { ok: 'green' as const, bottleneck: 'amber' as const, down: 'red' as const }
+  const AGENT: { agent: string; lines: string[] }[] = [
+    { agent: 'LineBot-1', lines: ['Throughput 88%', 'Ritmo nominal'] },
+    { agent: 'LineBot-2', lines: ['Cuello de botella · 96%', 'WIP acumulándose — balanceo sugerido'] },
+    { agent: 'LineBot-3', lines: ['Throughput 72%', 'Operación normal'] },
+    { agent: 'MantBot', lines: ['Línea parada desde 14:20', 'Equipo M-3 despachado · 3 repuestos solicitados', 'Arranque estimado ~16:30 (2h)'] },
+    { agent: 'LineBot-5', lines: ['Throughput 64%', 'Operación normal'] },
+  ]
+  const beltY = 88, x0 = 18, gap = 58
+  const centerPct = (i: number) => Math.min(Math.max(((x0 + i * gap + 14) / 310) * 100, 18), 82)
+  const oee = 71, oeeR = 54, oeeCx = 70, oeeCy = 70
+  // Pareto de causas de paradas (minutos)
+  const pareto = [
+    { c: 'Avería mecánica', m: 120 }, { c: 'Cambio de molde', m: 80 },
+    { c: 'Falta de material', m: 50 }, { c: 'Ajustes', m: 30 }, { c: 'Otros', m: 20 },
+  ]
+  const paretoMax = pareto[0].m
 
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
-        <Header title="Línea de producción y OEE" subtitle="Ocupación de estaciones y eficiencia general supervisadas por IA" noMargin />
+        <Header title="Línea de producción y OEE" subtitle="Pasa el cursor sobre cada estación para ver su agente IA" noMargin />
         <SupervisorBadge name="LineBot · Supervisor IA" />
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Línea de producción animada */}
         <div className="lg:col-span-2 bg-white/70 rounded-xl border border-slate-200 p-4">
-          <p className="text-xs font-semibold text-slate-700 mb-3">Línea de ensamblaje · ocupación por estación</p>
-          <svg viewBox="0 0 310 130" className="w-full h-auto">
-            {/* cinta transportadora */}
-            <line x1={x0} y1={beltY} x2={x0 + gap * (stations.length - 1) + 28} y2={beltY} stroke="#cbd5e1" strokeWidth="6" strokeLinecap="round" strokeDasharray="6 5">
-              <animate attributeName="stroke-dashoffset" values="11;0" dur="0.7s" repeatCount="indefinite" />
-            </line>
-            {/* producto avanzando */}
-            <circle r="4" fill="#4f46e5">
-              <animateMotion dur="5s" repeatCount="indefinite" path={`M${x0} ${beltY} L${x0 + gap * (stations.length - 1) + 28} ${beltY}`} />
-            </circle>
-            {/* estaciones */}
-            {stations.map((s, i) => {
-              const x = x0 + i * gap
-              return (
-                <g key={i}>
-                  <rect x={x} y={beltY - 30} width="28" height="22" rx="3" fill="white" stroke={stColor[s.state]} strokeWidth="2">
-                    {s.state === 'down' && <animate attributeName="opacity" values="1;0.5;1" dur="1s" repeatCount="indefinite" />}
-                  </rect>
-                  {/* relleno de ocupación */}
-                  <rect x={x} y={beltY - 30 + 22 - (22 * s.occ / 100)} width="28" height={22 * s.occ / 100} rx="0" fill={stColor[s.state]} opacity="0.35" />
-                  <circle cx={x + 14} cy={beltY} r="3.5" fill={stColor[s.state]} />
-                  <text x={x + 14} y={beltY - 34} textAnchor="middle" className="fill-slate-600 text-[7px] font-semibold">{s.label}</text>
-                  <text x={x + 14} y={beltY + 16} textAnchor="middle" className="fill-slate-400 text-[7px]">{s.state === 'down' ? '—' : `${s.occ}%`}</text>
-                </g>
-              )
-            })}
-          </svg>
+          <p className="text-xs font-semibold text-slate-700 mb-2">Línea de ensamblaje · ocupación por estación</p>
+          <div className="relative pt-16">
+            {/* tarjeta del agente al hover */}
+            {hov !== null && (
+              <div className="absolute top-0 z-20 pointer-events-none" style={{ left: `${centerPct(hov)}%`, transform: 'translate(-50%, 0)' }}>
+                <AgentCard agent={AGENT[hov].agent} lines={AGENT[hov].lines} status={stStatus[stations[hov].state]} className="whitespace-nowrap" />
+              </div>
+            )}
+            <svg viewBox="0 0 310 120" className="w-full h-auto">
+              <line x1={x0} y1={beltY} x2={x0 + gap * (stations.length - 1) + 28} y2={beltY} stroke="#cbd5e1" strokeWidth="6" strokeLinecap="round" strokeDasharray="6 5">
+                <animate attributeName="stroke-dashoffset" values="11;0" dur="0.7s" repeatCount="indefinite" />
+              </line>
+              <circle r="4" fill="#4f46e5">
+                <animateMotion dur="5s" repeatCount="indefinite" path={`M${x0} ${beltY} L${x0 + gap * (stations.length - 1) + 28} ${beltY}`} />
+              </circle>
+              {stations.map((s, i) => {
+                const x = x0 + i * gap
+                return (
+                  <g key={i} style={{ cursor: 'pointer' }} onMouseEnter={() => setHov(i)} onMouseLeave={() => setHov((h) => (h === i ? null : h))}>
+                    <rect x={x} y={beltY - 34} width="28" height="24" rx="3" fill="white" stroke={stColor[s.state]} strokeWidth={hov === i ? 3 : 2}>
+                      {s.state === 'down' && <animate attributeName="opacity" values="1;0.5;1" dur="1s" repeatCount="indefinite" />}
+                    </rect>
+                    <rect x={x} y={beltY - 34 + 24 - (24 * s.occ / 100)} width="28" height={24 * s.occ / 100} fill={stColor[s.state]} opacity="0.35" />
+                    <circle cx={x + 14} cy={beltY} r="3.5" fill={stColor[s.state]} />
+                    <text x={x + 14} y={beltY - 38} textAnchor="middle" className="fill-slate-600 text-[7px] font-semibold">{s.label}</text>
+                    <text x={x + 14} y={beltY + 16} textAnchor="middle" className="fill-slate-400 text-[7px]">{s.state === 'down' ? '⚠' : `${s.occ}%`}</text>
+                    {/* hit-area */}
+                    <rect x={x - 6} y={beltY - 42} width="40" height="58" fill="transparent" />
+                  </g>
+                )
+              })}
+            </svg>
+          </div>
           <div className="flex flex-wrap items-center gap-3 mt-1 text-[10px] text-slate-500">
             {(['ok', 'bottleneck', 'down'] as const).map((k) => (
               <span key={k} className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: stColor[k] }} /> {stLabel[k]}</span>
@@ -523,28 +608,38 @@ function ManufacturingViz(_: IndustryVisualizationProps) {
           </div>
         </div>
 
-        {/* Medidor OEE */}
-        <div className="bg-white/70 rounded-xl border border-slate-200 p-4 flex flex-col items-center">
-          <p className="text-xs font-semibold text-slate-700 mb-1 self-start">OEE global</p>
-          <svg viewBox="0 0 140 88" className="w-full max-w-[180px]">
+        {/* OEE + Pareto + plan */}
+        <div className="bg-white/70 rounded-xl border border-slate-200 p-4">
+          <p className="text-xs font-semibold text-slate-700 mb-1">OEE global</p>
+          <svg viewBox="0 0 140 80" className="w-full max-w-[170px] mx-auto">
             <path d={`M16 ${oeeCy} A${oeeR} ${oeeR} 0 0 1 124 ${oeeCy}`} fill="none" stroke="#e2e8f0" strokeWidth="12" strokeLinecap="round" />
-            <path d={`M16 ${oeeCy} A${oeeR} ${oeeR} 0 0 1 124 ${oeeCy}`} fill="none" stroke="url(#oeeG)" strokeWidth="12" strokeLinecap="round"
-              strokeDasharray={`${(oee / 100) * 170} 400`} />
-            <defs>
-              <linearGradient id="oeeG" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor="#ef4444" /><stop offset="50%" stopColor="#f59e0b" /><stop offset="100%" stopColor="#10b981" />
-              </linearGradient>
-            </defs>
+            <path d={`M16 ${oeeCy} A${oeeR} ${oeeR} 0 0 1 124 ${oeeCy}`} fill="none" stroke="url(#oeeG)" strokeWidth="12" strokeLinecap="round" strokeDasharray={`${(oee / 100) * 170} 400`} />
+            <defs><linearGradient id="oeeG" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stopColor="#ef4444" /><stop offset="50%" stopColor="#f59e0b" /><stop offset="100%" stopColor="#10b981" /></linearGradient></defs>
             <text x={oeeCx} y={oeeCy - 4} textAnchor="middle" className="fill-slate-800 text-[18px] font-bold">{oee}%</text>
             <text x={oeeCx} y={oeeCy + 10} textAnchor="middle" className="fill-slate-400 text-[8px]">objetivo 85%</text>
           </svg>
-          <div className="w-full mt-2 space-y-1.5">
-            {[{ l: 'Disponibilidad', v: 82 }, { l: 'Rendimiento', v: 88 }, { l: 'Calidad', v: 98 }].map((d) => (
-              <div key={d.l}>
-                <div className="flex justify-between text-[10px] text-slate-500"><span>{d.l}</span><span className="font-semibold tabular-nums">{d.v}%</span></div>
-                <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden"><div className="h-full bg-blue-500 rounded-full" style={{ width: `${d.v}%` }} /></div>
+
+          {/* Pareto de paradas */}
+          <p className="text-[11px] font-semibold text-slate-700 mt-2 mb-1.5">Pareto de paradas (min)</p>
+          <div className="space-y-1">
+            {pareto.map((p) => (
+              <div key={p.c} className="flex items-center gap-2">
+                <span className="w-24 text-[9px] text-slate-500 truncate">{p.c}</span>
+                <div className="flex-1 h-2.5 bg-slate-100 rounded-sm overflow-hidden">
+                  <div className="h-full bg-amber-500 rounded-sm" style={{ width: `${(p.m / paretoMax) * 100}%` }} />
+                </div>
+                <span className="text-[9px] tabular-nums text-slate-400 w-6 text-right">{p.m}</span>
               </div>
             ))}
+          </div>
+
+          {/* Plan de mejora del agente */}
+          <div className="mt-3">
+            <AgentCard agent="OEEBot · plan de mejora" status="green" lines={[
+              '1. Kit SMED → cambios de molde -40%',
+              '2. Stock mínimo de repuestos críticos',
+              '3. Mantenimiento predictivo en soldadura',
+            ]} />
           </div>
         </div>
       </div>
@@ -555,13 +650,13 @@ function ManufacturingViz(_: IndustryVisualizationProps) {
 /* ─────────────────────────── Banca ─────────────────────────── */
 
 function BankingViz(_: IndustryVisualizationProps) {
-  const score = 68
-  const r = 70, cx = 90, cy = 90
-  const rad = (deg: number) => (deg - 180) * (Math.PI / 180)
-  const angle = (score / 100) * 180
-  const needleX = cx + r * 0.8 * Math.cos(rad(angle))
-  const needleY = cy + r * 0.8 * Math.sin(rad(angle))
-
+  const [hov, setHov] = useState<number | null>(null)
+  // Centro de riesgo: 3 agentes especializados
+  const agents = [
+    { name: 'FraudBot', icon: '🛡️', metric: '3 transacciones bloqueadas hoy', status: 'red' as const, detail: ['Patrón de layering en cuenta ****8821', 'Reporte enviado a cumplimiento'] },
+    { name: 'MoraBot', icon: '📨', metric: '$320K en mora priorizada', status: 'amber' as const, detail: ['47 cuentas > 60 días', 'Plan de recuperación · prob. de cobro 64%'] },
+    { name: 'RiskBot', icon: '📉', metric: '12 créditos en deterioro', status: 'amber' as const, detail: ['DSCR < 1.2 en 12 clientes', 'Alerta temprana de default activada'] },
+  ]
   // Flujo de decisión de crédito en vivo
   const steps = [
     { icon: '📥', label: 'Solicitud recibida', detail: 'PYME · $120K · 24 meses', state: 'done' as const },
@@ -573,27 +668,39 @@ function BankingViz(_: IndustryVisualizationProps) {
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
-        <Header title="Motor de scoring y decisión de crédito" subtitle="Evaluación de riesgo y recorrido de la decisión en vivo" noMargin />
+        <Header title="Centro de riesgo y decisión de crédito" subtitle="Agentes IA monitoreando fraude, mora y riesgo · pasa el cursor para el detalle" noMargin />
         <SupervisorBadge name="CreditBot · Supervisor IA" />
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {/* Gauge de score */}
-        <div className="bg-white/70 rounded-xl border border-slate-200 p-4 flex flex-col items-center justify-center">
-          <p className="text-xs font-semibold text-slate-700 mb-1 self-start">Score de riesgo</p>
-          <svg viewBox="0 0 180 110" className="w-full max-w-[220px]">
-            <path d={`M20 90 A${r} ${r} 0 0 1 160 90`} fill="none" stroke="#e2e8f0" strokeWidth="14" strokeLinecap="round" />
-            <path d={`M20 90 A${r} ${r} 0 0 1 160 90`} fill="none" stroke="url(#g)" strokeWidth="14" strokeLinecap="round"
-              strokeDasharray={`${(score / 100) * 220} 400`} />
-            <defs>
-              <linearGradient id="g" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor="#10b981" /><stop offset="60%" stopColor="#f59e0b" /><stop offset="100%" stopColor="#ef4444" />
-              </linearGradient>
-            </defs>
-            <line x1={cx} y1={cy} x2={needleX} y2={needleY} stroke="#334155" strokeWidth="2.5" strokeLinecap="round" />
-            <circle cx={cx} cy={cy} r="4" fill="#334155" />
-            <text x={cx} y={cy + 18} textAnchor="middle" className="fill-slate-800 text-[16px] font-bold">{score}</text>
-          </svg>
-          <p className="text-xs font-semibold text-amber-600">Riesgo moderado</p>
+        {/* Centro de riesgo: agentes IA */}
+        <div className="bg-white/70 rounded-xl border border-slate-200 p-4">
+          <p className="text-xs font-semibold text-slate-700 mb-3">Centro de riesgo IA</p>
+          <div className="space-y-2">
+            {agents.map((a, i) => {
+              const dot = a.status === 'red' ? 'bg-red-500' : a.status === 'amber' ? 'bg-amber-500' : 'bg-emerald-500'
+              return (
+                <div
+                  key={i}
+                  className="border border-slate-200 rounded-lg p-2.5 cursor-pointer transition-all hover:border-blue-300 hover:bg-blue-50/40"
+                  onMouseEnter={() => setHov(i)}
+                  onMouseLeave={() => setHov((h) => (h === i ? null : h))}
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span className="relative flex h-2 w-2"><span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${dot} opacity-75`} /><span className={`relative inline-flex rounded-full h-2 w-2 ${dot}`} /></span>
+                    <span className="text-[11px] font-bold text-slate-700">{a.icon} {a.name}</span>
+                  </div>
+                  <p className="text-[11px] text-slate-600 mt-0.5">{a.metric}</p>
+                  {hov === i && (
+                    <div className="mt-1.5 pt-1.5 border-t border-slate-100">
+                      {a.detail.map((d, j) => (
+                        <p key={j} className={`text-[10px] leading-tight ${j === a.detail.length - 1 ? 'text-blue-600 font-semibold' : 'text-slate-500'}`}>{d}</p>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
         </div>
 
         {/* Flujo de decisión en vivo */}
@@ -602,16 +709,12 @@ function BankingViz(_: IndustryVisualizationProps) {
           <div className="space-y-0">
             {steps.map((s, i) => (
               <div key={i} className="flex gap-2.5">
-                {/* columna del timeline */}
                 <div className="flex flex-col items-center">
-                  <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] shrink-0 ${
-                    s.state === 'done' ? 'bg-emerald-100' : 'bg-amber-100'
-                  }`}>
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] shrink-0 ${s.state === 'done' ? 'bg-emerald-100' : 'bg-amber-100'}`}>
                     {s.state === 'done' ? <span className="text-emerald-600 font-bold">✓</span> : <span className="relative flex h-2.5 w-2.5"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" /><span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500" /></span>}
                   </div>
                   {i < steps.length - 1 && <div className="w-0.5 flex-1 bg-slate-200 my-0.5" style={{ minHeight: 14 }} />}
                 </div>
-                {/* contenido */}
                 <div className="pb-3">
                   <p className="text-xs font-semibold text-slate-700 leading-tight">{s.icon} {s.label}</p>
                   <p className="text-[10px] text-slate-500 leading-tight">{s.detail}</p>
