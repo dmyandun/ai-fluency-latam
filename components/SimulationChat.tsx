@@ -35,6 +35,7 @@ export default function SimulationChat({
   const [loading, setLoading]   = useState(false)
   const [done, setDone]         = useState(false)
   const [agentsComplete, setAgentsComplete] = useState(false)
+  const [responseVisible, setResponseVisible] = useState(false)
   const [isCustomCase, setIsCustomCase] = useState(false)
   const [runId, setRunId]       = useState(0)
   const [error, setError]       = useState('')
@@ -49,15 +50,23 @@ export default function SimulationChat({
     }
   }, [loading])
 
-  // Cuando el orquestador termina, esperar ~1s y bajar al inicio de la respuesta.
+  // Cuando el orquestador termina, esperar ~1s antes de revelar la respuesta.
   useEffect(() => {
-    if (agentsComplete) {
+    if (agentsComplete && response) {
       const t = setTimeout(() => {
-        responseRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        setResponseVisible(true)
       }, 1000)
       return () => clearTimeout(t)
     }
-  }, [agentsComplete])
+  }, [agentsComplete, response])
+
+  // La respuesta aparece y el scroll ocurre en el mismo ciclo visual.
+  useEffect(() => {
+    if (!responseVisible) return
+    requestAnimationFrame(() => {
+      responseRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    })
+  }, [responseVisible])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -70,6 +79,7 @@ export default function SimulationChat({
     setResponse('')
     setDone(false)
     setAgentsComplete(false)
+    setResponseVisible(false)
     setError('')
 
     try {
@@ -128,6 +138,7 @@ export default function SimulationChat({
     setResponse('')
     setDone(false)
     setAgentsComplete(false)
+    setResponseVisible(false)
     setError('')
     textareaRef.current?.focus()
   }
@@ -171,7 +182,7 @@ export default function SimulationChat({
               '✦ Analizar con IA'
             )}
           </button>
-          {(agentsComplete || error) && (
+          {(responseVisible || error) && (
             <button
               type="button"
               onClick={handleReset}
@@ -203,7 +214,7 @@ export default function SimulationChat({
         </div>
       )}
 
-      {agentsComplete && response && (
+      {responseVisible && response && (
         <div
           ref={responseRef}
           className={`mt-4 scroll-mt-20 rounded-xl border px-4 py-4 text-sm text-slate-700 leading-relaxed ${colorLight} border-slate-200`}
@@ -232,7 +243,7 @@ export default function SimulationChat({
         </div>
       )}
 
-      {agentsComplete && (
+      {responseVisible && (
         <div className="mt-4 rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-3.5 flex flex-col sm:flex-row items-start sm:items-center gap-3">
           <div className="flex-1">
             <p className="text-sm font-semibold text-indigo-900">
