@@ -14,9 +14,9 @@ interface AgentGraphProps {
 
 type AgentState = 'pending' | 'loading' | 'done'
 
-const T1 = 4000 // agente 1 completa a los 4s
-const T2 = 7000 // agente 2 completa a los 7s
-const T3_MIN = 10000 // tiempo mínimo del agente 3 (espera además a la IA)
+const T1 = 3000 // agente 1 completa a los 3s
+const T2 = 5000 // agente 2 completa a los 5s
+const T3_MIN = 6000 // tiempo mínimo del agente 3 (espera además a la IA)
 
 // Findings neutros cuando el usuario escribe su propio caso (no inventar datos).
 const GENERIC_FINDINGS = [

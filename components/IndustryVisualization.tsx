@@ -104,15 +104,6 @@ const PICK_INFO = [
   { sku: 'SKU-3370 · Textil', opt: '24% menos recorrido' },
 ]
 
-// Posiciones distribuidas de las bodegas dentro del país (centro + 4 alrededor)
-const NODE_POS = [
-  { fx: 0.50, fy: 0.48 }, // hub central
-  { fx: 0.34, fy: 0.26 }, // noroeste
-  { fx: 0.66, fy: 0.28 }, // noreste
-  { fx: 0.32, fy: 0.70 }, // suroeste
-  { fx: 0.68, fy: 0.70 }, // sureste
-]
-
 // Estantería: rect con zona ABC y orientación (h=horizontal, v=vertical)
 type Rack = { x: number; y: number; w: number; h: number; z: 'A' | 'B' | 'C' }
 
@@ -167,6 +158,7 @@ function LogisticsViz({ country, colorText }: IndustryVisualizationProps) {
   const [layout, setLayout] = useState<{ w: number; h: number; offX: number; offY: number; scale: number; contW: number; contH: number } | null>(null)
   const [hover, setHover] = useState<number | null>(null)
   const [selected, setSelected] = useState(0)
+  const [nodes, setNodes] = useState<{ x: number; y: number }[]>([])
 
   // Encuadre robusto: override si existe, si no getBBox() del path renderizado.
   useEffect(() => {
@@ -179,6 +171,37 @@ function LogisticsViz({ country, colorText }: IndustryVisualizationProps) {
     }
   }, [country, shape])
 
+  // Genera hasta 5 nodos DENTRO del polígono del país (test point-in-polygon del DOM),
+  // distribuidos por regiones (centro + 4 cuadrantes).
+  useEffect(() => {
+    const path = pathRef.current
+    if (!bbox || !path || typeof path.isPointInFill !== 'function') { setNodes([]); return }
+    const inside: { gx: number; gy: number; x: number; y: number }[] = []
+    for (let gx = 0.08; gx <= 0.92; gx += 0.06) {
+      for (let gy = 0.08; gy <= 0.92; gy += 0.06) {
+        const x = bbox.x + gx * bbox.w, y = bbox.y + gy * bbox.h
+        try {
+          if (path.isPointInFill(new DOMPoint(x, y))) inside.push({ gx, gy, x, y })
+        } catch { /* DOMPoint no disponible */ }
+      }
+    }
+    const targets = [[0.5, 0.5], [0.3, 0.3], [0.7, 0.3], [0.3, 0.7], [0.7, 0.7]]
+    const used = new Set<number>()
+    const chosen: { x: number; y: number }[] = []
+    for (const [tx, ty] of targets) {
+      let bestIdx = -1, bestD = Infinity
+      inside.forEach((p, idx) => {
+        if (used.has(idx)) return
+        const d = (p.gx - tx) ** 2 + (p.gy - ty) ** 2
+        if (d < bestD) { bestD = d; bestIdx = idx }
+      })
+      if (bestIdx >= 0) { used.add(bestIdx); chosen.push({ x: inside[bestIdx].x, y: inside[bestIdx].y }) }
+    }
+    // Fallback: si el test falla por completo, usar el centro del bbox
+    if (chosen.length === 0) chosen.push({ x: bbox.x + bbox.w / 2, y: bbox.y + bbox.h / 2 })
+    setNodes(chosen)
+  }, [bbox])
+
   const pad = bbox ? Math.max(bbox.w, bbox.h) * 0.08 : 0
   const vb = bbox ? `${bbox.x - pad} ${bbox.y - pad} ${bbox.w + pad * 2} ${bbox.h + pad * 2}` : '0 0 1010 666'
   const span = bbox ? Math.max(bbox.w, bbox.h) : 200
@@ -187,7 +210,7 @@ function LogisticsViz({ country, colorText }: IndustryVisualizationProps) {
   const vbX = bbox ? bbox.x - pad : 0
   const vbY = bbox ? bbox.y - pad : 0
 
-  const pts = bbox ? NODE_POS.map((c) => ({ x: bbox.x + c.fx * bbox.w, y: bbox.y + c.fy * bbox.h })) : []
+  const pts = nodes
   const hub = pts[0]
 
   // Dimensiona el SVG al mayor tamaño que llene el contenedor manteniendo el aspect del país.

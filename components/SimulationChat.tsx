@@ -49,12 +49,13 @@ export default function SimulationChat({
     }
   }, [loading])
 
-  // Cuando el orquestador termina, bajar al inicio de la respuesta.
+  // Cuando el orquestador termina, esperar ~1s y bajar al inicio de la respuesta.
   useEffect(() => {
     if (agentsComplete) {
-      requestAnimationFrame(() => {
+      const t = setTimeout(() => {
         responseRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      })
+      }, 1000)
+      return () => clearTimeout(t)
     }
   }, [agentsComplete])
 
