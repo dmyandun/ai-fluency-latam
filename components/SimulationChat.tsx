@@ -9,6 +9,22 @@ import AgentGraph from './AgentGraph'
 
 const TEXTAREA_PLACEHOLDER = 'Describe una situación real de tu organización y analízala con IA...'
 
+function normalizeMarkdownTables(text: string): string {
+  return text
+    .split('\n')
+    .map((line) => {
+      if (!line.includes('|')) return line
+      const cells = line
+        .split('|')
+        .map((cell) => cell.trim())
+        .filter((cell) => cell && !/^-+$/.test(cell.replace(/\s/g, '')))
+
+      if (cells.length < 2) return line.replace(/\|/g, ' · ')
+      return `- ${cells.join(' · ')}`
+    })
+    .join('\n')
+}
+
 interface SimulationChatProps {
   industryId: string
   interactionModel: InteractionModel
@@ -42,6 +58,7 @@ export default function SimulationChat({
   const responseRef             = useRef<HTMLDivElement>(null)
   const graphRef                = useRef<HTMLDivElement>(null)
   const textareaRef             = useRef<HTMLTextAreaElement>(null)
+  const displayedResponse       = normalizeMarkdownTables(response)
 
   // Al iniciar el análisis, llevar la vista hacia el grafo de agentes.
   useEffect(() => {
@@ -237,7 +254,7 @@ export default function SimulationChat({
                 h3: ({ children }) => <h4 className="font-semibold text-slate-900 mt-3 mb-1">{children}</h4>,
               }}
             >
-              {response}
+              {displayedResponse}
             </ReactMarkdown>
           </div>
         </div>

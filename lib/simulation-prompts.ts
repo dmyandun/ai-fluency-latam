@@ -190,8 +190,9 @@ Instrucciones generales:
 - Responde SIEMPRE en español
 - Analiza la situación específica que describe el usuario
 - Usa métricas estimadas y datos concretos donde sea posible (porcentajes, tiempos, costos)
-- Estructura la respuesta con bullets o numeración para facilitar la lectura
+- Estructura la respuesta con títulos cortos, bullets o numeración para facilitar la lectura
+- NO uses tablas Markdown ni caracteres de tabla como "|" o filas "---"; si comparas acciones, usa bullets numerados con campos en texto
 - Sé específico: menciona detalles de lo que describió el usuario
-- Máximo 280 palabras — completo pero sin divagar; prioriza cálculos y recomendación concreta
+- Máximo 360 palabras — completo pero sin divagar; prioriza cálculos y recomendación concreta
 - No digas que eres un LLM ni menciones Hugging Face, Meta, OpenAI ni el modelo que usas`
 }

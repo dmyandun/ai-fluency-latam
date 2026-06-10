@@ -68,7 +68,7 @@ export async function POST(req: Request) {
   }
 
   const controller = new AbortController()
-  const timeout = setTimeout(() => controller.abort(), 30_000)
+  const timeout = setTimeout(() => controller.abort(), 45_000)
 
   let hfRes: Response
   try {
@@ -82,7 +82,7 @@ export async function POST(req: Request) {
         model: HF_MODEL,
         messages,
         stream: true,
-        max_tokens: 600,
+        max_tokens: 900,
         temperature: 0.4,
       }),
       signal: controller.signal,

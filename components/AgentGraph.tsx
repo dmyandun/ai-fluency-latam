@@ -90,13 +90,21 @@ export default function AgentGraph({ industryId, loading, streamDone, caseIndex,
     <div className="mt-6 rounded-xl border border-slate-200 bg-slate-50 p-6">
       {/* Orchestrator Node */}
       <div className="flex flex-col items-center gap-2 mb-6">
-        <div className="flex items-center justify-center w-14 h-14 rounded-lg bg-indigo-600 text-white shadow-md">
-          <span className="text-xl">🧠</span>
+        <div className={`flex items-center justify-center w-14 h-14 rounded-lg text-white shadow-md transition-colors ${
+          orchestratorState === 'done' ? 'bg-emerald-600' : 'bg-indigo-600'
+        }`}>
+          <span className="text-xl">{orchestratorState === 'done' ? '✓' : '🧠'}</span>
         </div>
         <div className="text-center">
-          <h4 className="text-sm font-semibold text-slate-900">{config.orchestrator}</h4>
-          <p className="text-xs text-slate-500 mt-0.5">
-            {orchestratorState === 'done' ? 'Análisis completado' : 'Distribuyendo análisis...'}
+          <h4 className={`text-sm font-bold transition-colors ${
+            orchestratorState === 'done' ? 'text-emerald-700' : 'text-slate-900'
+          }`}>
+            {config.orchestrator}
+          </h4>
+          <p className={`text-xs mt-0.5 transition-colors ${
+            orchestratorState === 'done' ? 'text-emerald-700 font-semibold' : 'text-slate-500'
+          }`}>
+            {orchestratorState === 'done' ? '✓ Análisis completado' : 'Distribuyendo análisis...'}
           </p>
         </div>
       </div>
