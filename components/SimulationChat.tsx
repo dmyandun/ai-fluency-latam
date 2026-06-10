@@ -99,12 +99,16 @@ export default function SimulationChat({
     setResponseVisible(false)
     setError('')
 
+    const controller = new AbortController()
+    const timeout = window.setTimeout(() => controller.abort(), 65_000)
+
     try {
       const systemPrompt = buildSystemPrompt(industryId, interactionModel, appName)
 
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal,
         body: JSON.stringify({
           messages: [
             { role: 'system', content: systemPrompt },
@@ -121,6 +125,7 @@ export default function SimulationChat({
       const reader = res.body!.getReader()
       const decoder = new TextDecoder()
       let buffer = ''
+      let fullText = ''
 
       while (true) {
         const { done: streamDone, value } = await reader.read()
@@ -135,15 +140,29 @@ export default function SimulationChat({
           try {
             const parsed = JSON.parse(data)
             const content = parsed.choices?.[0]?.delta?.content
-            if (content) setResponse((prev) => prev + content)
+            if (content) {
+              fullText += content
+              setResponse((prev) => prev + content)
+            }
           } catch { /* chunk parcial */ }
         }
       }
 
+      if (!fullText.trim()) {
+        throw new Error('La IA no devolvió contenido. Intenta nuevamente en unos segundos.')
+      }
+
       setDone(true)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al conectar con la IA')
+      const message =
+        err instanceof DOMException && err.name === 'AbortError'
+          ? 'La inferencia tardó demasiado. Puede ser saturación del proveedor de Hugging Face; intenta de nuevo o cambia el caso.'
+          : err instanceof Error
+            ? err.message
+            : 'Error al conectar con la IA'
+      setError(message)
     } finally {
+      window.clearTimeout(timeout)
       setLoading(false)
     }
   }
@@ -165,10 +184,13 @@ export default function SimulationChat({
       <div className="flex items-center gap-2 mb-3">
         <div className={`w-2 h-2 rounded-full animate-pulse ${loading ? 'bg-amber-400' : done ? 'bg-emerald-400' : 'bg-indigo-400'}`} />
         <h3 className="text-sm font-semibold text-slate-800">
-          Prueba con un caso real tuyo
+          Simulador de diagnóstico operativo
         </h3>
         <span className="text-xs text-slate-400 font-normal">— respuesta generada por IA en tiempo real</span>
       </div>
+      <p className="mb-3 text-xs leading-relaxed text-slate-500">
+        Prueba cómo la IA puede ayudarte con problemas de un caso ficticio o real escrito por ti.
+      </p>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         <textarea
@@ -257,6 +279,18 @@ export default function SimulationChat({
               {displayedResponse}
             </ReactMarkdown>
           </div>
+        </div>
+      )}
+
+      {agentsComplete && loading && !response && !error && (
+        <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          <div className="flex items-center gap-2">
+            <span className="w-3 h-3 border-2 border-amber-300 border-t-amber-600 rounded-full animate-spin" />
+            <span className="font-semibold">Redactando respuesta final...</span>
+          </div>
+          <p className="mt-1 text-xs text-amber-700">
+            Los agentes ya completaron el análisis. El modelo está terminando de emitir la síntesis visible.
+          </p>
         </div>
       )}
 

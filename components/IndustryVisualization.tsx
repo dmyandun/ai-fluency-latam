@@ -234,7 +234,7 @@ function LogisticsViz({ country, colorText }: IndustryVisualizationProps) {
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
-        <Header title={`Red de distribución — ${countryName(country)}`} subtitle="Pasa el cursor para ver el agente IA · haz clic en una bodega para ver su picking" noMargin />
+        <Header title={`Red de distribución — ${countryName(country)}`} subtitle="Haz clic en una bodega para ver su agente IA y su picking" noMargin />
         <SupervisorBadge />
       </div>
 
@@ -265,7 +265,7 @@ function LogisticsViz({ country, colorText }: IndustryVisualizationProps) {
                   onMouseEnter={() => setHover(i)}
                   onMouseLeave={() => setHover((h) => (h === i ? null : h))}
                   onClick={() => setSelected(i)}>
-                  {(i === 0 || hover === i || selected === i) && <circle cx={p.x} cy={p.y} r={span * 0.028} className={`${colorText} ${hover === i ? 'opacity-30' : 'opacity-20'}`} fill="currentColor" />}
+                  {(i === 0 || hover === i || selected === i) && <circle cx={p.x} cy={p.y} r={span * 0.028} className={`${colorText} ${hover === i || selected === i ? 'opacity-30' : 'opacity-20'}`} fill="currentColor" />}
                   {selected === i && <circle cx={p.x} cy={p.y} r={span * 0.024} fill="none" stroke="currentColor" strokeWidth={span * 0.005} className={colorText} />}
                   <circle cx={p.x} cy={p.y} r={i === 0 ? span * 0.017 : span * 0.012} fill="currentColor" className={colorText}>
                     {i === 0 && <animate attributeName="r" values={`${span * 0.017};${span * 0.023};${span * 0.017}`} dur="1.8s" repeatCount="indefinite" />}
@@ -276,9 +276,10 @@ function LogisticsViz({ country, colorText }: IndustryVisualizationProps) {
               ))}
             </svg>
 
-            {/* Tarjeta del agente IA — solo la del nodo con hover */}
-            {ready && hover !== null && nodePx[hover] && (() => {
-              const p = nodePx[hover]
+            {/* Tarjeta del agente IA — una queda abierta como indicador de interacción */}
+            {ready && nodePx[hover ?? selected] && (() => {
+              const active = hover ?? selected
+              const p = nodePx[active]
               const below = p.y < (layout!.contH * 0.42) // si está arriba, mostrar la tarjeta debajo
               return (
                 <div
@@ -288,10 +289,10 @@ function LogisticsViz({ country, colorText }: IndustryVisualizationProps) {
                   <div className="bg-white/90 backdrop-blur-sm border border-slate-200 rounded-lg px-2.5 py-1.5 shadow-md text-center whitespace-nowrap">
                     <div className="flex items-center gap-1 justify-center">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                      <span className="text-[11px] font-bold text-slate-700">🤖 {LOGI_AGENTS[hover % LOGI_AGENTS.length]}</span>
+                      <span className="text-[11px] font-bold text-slate-700">🤖 {LOGI_AGENTS[active % LOGI_AGENTS.length]}</span>
                     </div>
-                    <div className="text-[10px] text-slate-500 leading-tight">Bodega {hover + 1}</div>
-                    <div className="text-[10px] font-semibold text-emerald-600 leading-tight">{LOGI_KPIS[hover % LOGI_KPIS.length]}</div>
+                    <div className="text-[10px] text-slate-500 leading-tight">Bodega {active + 1}</div>
+                    <div className="text-[10px] font-semibold text-emerald-600 leading-tight">{LOGI_KPIS[active % LOGI_KPIS.length]}</div>
                   </div>
                 </div>
               )
@@ -366,7 +367,7 @@ function WarehouseLayout({ routeIndex = 0 }: { routeIndex?: number }) {
 /* ─────────────────────────── Retail ─────────────────────────── */
 
 function RetailViz(_: IndustryVisualizationProps) {
-  const [hov, setHov] = useState<number | null>(null)
+  const [hov, setHov] = useState(0)
   const categories = ['Abrigos', 'Calzado', 'Accesorios', 'Deportiva']
   const weeks = ['S1', 'S2', 'S3', 'S4', 'S5', 'S6']
   const data = [
@@ -446,7 +447,7 @@ function RetailViz(_: IndustryVisualizationProps) {
               {sections.map((s, i) => {
                 const active = hov === i
                 return (
-                  <g key={i} style={{ cursor: 'pointer' }} onMouseEnter={() => setHov(i)} onMouseLeave={() => setHov((h) => (h === i ? null : h))}>
+                  <g key={i} style={{ cursor: 'pointer' }} onMouseEnter={() => setHov(i)} onClick={() => setHov(i)}>
                     <rect x={s.x} y={s.y} width={s.w} height={s.h} rx={1.5}
                       fill={zColor[s.z]} fillOpacity={active ? 0.22 : 0.12}
                       stroke={zColor[s.z]} strokeWidth={active ? 1.8 : 1} />
@@ -476,14 +477,12 @@ function RetailViz(_: IndustryVisualizationProps) {
             </svg>
 
             {/* tarjeta del agente al hover */}
-            {hov !== null && (
-              <div
-                className="absolute z-20 pointer-events-none"
-                style={{ left: `${((sections[hov].x + sections[hov].w / 2) / 220) * 100}%`, top: `${(sections[hov].y / 116) * 100}%`, transform: 'translate(-50%, calc(-100% - 4px))' }}
-              >
-                <AgentCard agent="LayoutBot" status={zStatus[sections[hov].z]} lines={[sections[hov].name, ...sections[hov].rec]} className="whitespace-nowrap" />
-              </div>
-            )}
+            <div
+              className="absolute z-20 pointer-events-none"
+              style={{ left: `${((sections[hov].x + sections[hov].w / 2) / 220) * 100}%`, top: `${(sections[hov].y / 116) * 100}%`, transform: 'translate(-50%, calc(-100% - 4px))' }}
+            >
+              <AgentCard agent="LayoutBot" status={zStatus[sections[hov].z]} lines={[sections[hov].name, ...sections[hov].rec]} className="whitespace-nowrap" />
+            </div>
           </div>
           <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-slate-500">
             <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-orange-500" /> A · ticket alto</span>
@@ -585,7 +584,7 @@ function EnergyViz({ colorText }: IndustryVisualizationProps) {
 /* ─────────────────────────── Manufactura ─────────────────────────── */
 
 function ManufacturingViz(_: IndustryVisualizationProps) {
-  const [hov, setHov] = useState<number | null>(null)
+  const [hov, setHov] = useState(0)
   const stations = [
     { label: 'Corte', occ: 88, state: 'ok' as const },
     { label: 'Soldadura', occ: 96, state: 'bottleneck' as const },
@@ -616,7 +615,7 @@ function ManufacturingViz(_: IndustryVisualizationProps) {
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
-        <Header title="Línea de producción y OEE" subtitle="Pasa el cursor sobre cada estación para ver su agente IA" noMargin />
+        <Header title="Línea de producción y OEE" subtitle="Haz clic en una estación para ver su agente IA" noMargin />
         <SupervisorBadge name="LineBot · Supervisor IA" />
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -625,11 +624,9 @@ function ManufacturingViz(_: IndustryVisualizationProps) {
           <p className="text-xs font-semibold text-slate-700 mb-2">Línea de ensamblaje · ocupación por estación</p>
           <div className="relative pt-16">
             {/* tarjeta del agente al hover */}
-            {hov !== null && (
-              <div className="absolute top-0 z-20 pointer-events-none" style={{ left: `${centerPct(hov)}%`, transform: 'translate(-50%, 0)' }}>
-                <AgentCard agent={AGENT[hov].agent} lines={AGENT[hov].lines} status={stStatus[stations[hov].state]} className="whitespace-nowrap" />
-              </div>
-            )}
+            <div className="absolute top-0 z-20 pointer-events-none" style={{ left: `${centerPct(hov)}%`, transform: 'translate(-50%, 0)' }}>
+              <AgentCard agent={AGENT[hov].agent} lines={AGENT[hov].lines} status={stStatus[stations[hov].state]} className="whitespace-nowrap" />
+            </div>
             <svg viewBox="0 0 310 120" className="w-full h-auto">
               <line x1={x0} y1={beltY} x2={x0 + gap * (stations.length - 1) + 28} y2={beltY} stroke="#cbd5e1" strokeWidth="6" strokeLinecap="round" strokeDasharray="6 5">
                 <animate attributeName="stroke-dashoffset" values="11;0" dur="0.7s" repeatCount="indefinite" />
@@ -640,7 +637,7 @@ function ManufacturingViz(_: IndustryVisualizationProps) {
               {stations.map((s, i) => {
                 const x = x0 + i * gap
                 return (
-                  <g key={i} style={{ cursor: 'pointer' }} onMouseEnter={() => setHov(i)} onMouseLeave={() => setHov((h) => (h === i ? null : h))}>
+                  <g key={i} style={{ cursor: 'pointer' }} onMouseEnter={() => setHov(i)} onClick={() => setHov(i)}>
                     <rect x={x} y={beltY - 34} width="28" height="24" rx="3" fill="white" stroke={stColor[s.state]} strokeWidth={hov === i ? 3 : 2}>
                       {s.state === 'down' && <animate attributeName="opacity" values="1;0.5;1" dur="1s" repeatCount="indefinite" />}
                     </rect>
@@ -704,7 +701,7 @@ function ManufacturingViz(_: IndustryVisualizationProps) {
 /* ─────────────────────────── Banca ─────────────────────────── */
 
 function BankingViz(_: IndustryVisualizationProps) {
-  const [hov, setHov] = useState<number | null>(null)
+  const [hov, setHov] = useState(0)
   // Centro de riesgo: 3 agentes especializados
   const agents = [
     { name: 'FraudBot', icon: '🛡️', metric: '3 transacciones bloqueadas hoy', status: 'red' as const, detail: ['Patrón de layering en cuenta ****8821', 'Reporte enviado a cumplimiento'] },
@@ -722,7 +719,7 @@ function BankingViz(_: IndustryVisualizationProps) {
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
-        <Header title="Centro de riesgo y decisión de crédito" subtitle="Agentes IA monitoreando fraude, mora y riesgo · pasa el cursor para el detalle" noMargin />
+        <Header title="Centro de riesgo y decisión de crédito" subtitle="Agentes IA monitoreando fraude, mora y riesgo · haz clic para ver el detalle" noMargin />
         <SupervisorBadge name="CreditBot · Supervisor IA" />
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -737,7 +734,7 @@ function BankingViz(_: IndustryVisualizationProps) {
                   key={i}
                   className="border border-slate-200 rounded-lg p-2.5 cursor-pointer transition-all hover:border-blue-300 hover:bg-blue-50/40"
                   onMouseEnter={() => setHov(i)}
-                  onMouseLeave={() => setHov((h) => (h === i ? null : h))}
+                  onClick={() => setHov(i)}
                 >
                   <div className="flex items-center gap-1.5">
                     <span className="relative flex h-2 w-2"><span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${dot} opacity-75`} /><span className={`relative inline-flex rounded-full h-2 w-2 ${dot}`} /></span>

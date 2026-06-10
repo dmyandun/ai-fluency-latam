@@ -36,10 +36,10 @@ export default function Hero() {
             AI Fluency <span className="text-blue-600">LATAM</span>
           </span>
           <Link
-            href="/assessment"
+            href="/explore"
             className="text-sm bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg transition-colors shadow-sm"
           >
-            Iniciar diagnóstico
+            Ver simulaciones
           </Link>
         </div>
       </nav>
@@ -65,10 +65,10 @@ export default function Hero() {
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-20">
           <Link
-            href="/assessment"
+            href="/explore"
             className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-4 rounded-xl text-base transition-all shadow-md hover:shadow-lg"
           >
-            Iniciar diagnóstico gratuito →
+            Ver simulaciones →
           </Link>
           <a
             href="#modelos"
@@ -178,10 +178,10 @@ export default function Hero() {
             El diagnóstico toma menos de 5 minutos y te entrega un roadmap concreto para los próximos 12 meses.
           </p>
           <Link
-            href="/assessment"
+            href="/explore"
             className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold px-10 py-4 rounded-xl text-base transition-all shadow-md hover:shadow-lg"
           >
-            Iniciar diagnóstico gratuito →
+            Ver simulaciones →
           </Link>
         </div>
       </section>

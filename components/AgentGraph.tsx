@@ -15,8 +15,8 @@ interface AgentGraphProps {
 type AgentState = 'pending' | 'loading' | 'done'
 
 const T1 = 3000 // agente 1 completa a los 3s
-const T2 = 5000 // agente 2 completa a los 5s
-const T3_MIN = 6000 // tiempo mínimo del agente 3 (espera además a la IA)
+const T2 = 6000 // agente 2 completa 3s después del agente 1
+const T3 = 9000 // agente 3 y orquestador completan 3s después del agente 2
 
 // Findings neutros cuando el usuario escribe su propio caso (no inventar datos).
 const GENERIC_FINDINGS = [
@@ -30,9 +30,6 @@ export default function AgentGraph({ industryId, loading, streamDone, caseIndex,
   const [orchestratorState, setOrchestratorState] = useState<AgentState>('pending')
   const [agentStates, setAgentStates] = useState<AgentState[]>(['pending', 'pending', 'pending'])
 
-  const startedRef = useRef(false)
-  const minReachedRef = useRef(false)
-  const streamDoneRef = useRef(false)
   const completedRef = useRef(false)
   const timersRef = useRef<NodeJS.Timeout[]>([])
   const onCompleteRef = useRef(onComplete)
@@ -46,20 +43,21 @@ export default function AgentGraph({ industryId, loading, streamDone, caseIndex,
     })
   }
 
-  function tryCompleteThird() {
+  function completeGraph() {
     if (completedRef.current) return
-    if (minReachedRef.current && streamDoneRef.current) {
-      completedRef.current = true
-      markAgentDone(2)
-      setOrchestratorState('done')
-      onCompleteRef.current()
-    }
+    completedRef.current = true
+    setAgentStates(['done', 'done', 'done'])
+    setOrchestratorState('done')
+    onCompleteRef.current()
   }
 
-  // Arranque de la animación (una sola vez por activación de loading)
+  // Animación por tiempos fijos. Se programa al montar el grafo y no depende de
+  // loading/streamDone, porque esos estados pueden cambiar antes de que termine
+  // la cascada visual.
   useEffect(() => {
-    if (!loading || startedRef.current) return
-    startedRef.current = true
+    timersRef.current.forEach(clearTimeout)
+    timersRef.current = []
+    completedRef.current = false
 
     setOrchestratorState('loading')
     setAgentStates(['loading', 'loading', 'loading'])
@@ -67,24 +65,18 @@ export default function AgentGraph({ industryId, loading, streamDone, caseIndex,
     timersRef.current = [
       setTimeout(() => markAgentDone(0), T1),
       setTimeout(() => markAgentDone(1), T2),
-      setTimeout(() => {
-        minReachedRef.current = true
-        tryCompleteThird()
-      }, T3_MIN),
+      setTimeout(() => completeGraph(), T3),
     ]
-  }, [loading])
+    return () => {
+      timersRef.current.forEach(clearTimeout)
+      timersRef.current = []
+    }
+  }, [])
 
-  // Cuando el stream termina, intentar completar el tercer agente
+  // Si el stream termina antes, el grafo conserva su ritmo visual y completa en T3.
   useEffect(() => {
     if (!streamDone) return
-    streamDoneRef.current = true
-    tryCompleteThird()
   }, [streamDone])
-
-  // Limpiar timers solo al desmontar
-  useEffect(() => {
-    return () => timersRef.current.forEach(clearTimeout)
-  }, [])
 
   return (
     <div className="mt-6 rounded-xl border border-slate-200 bg-slate-50 p-6">
