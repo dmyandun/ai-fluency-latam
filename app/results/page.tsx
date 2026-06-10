@@ -286,6 +286,14 @@ export default function ResultsPage() {
                   >
                     Contactar consultoría
                   </button>
+                  <a
+                    href="https://www.linkedin.com/in/dmyandun/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 rounded-xl text-sm transition-all shadow-sm"
+                  >
+                    Charlemos de IA
+                  </a>
                 </div>
               </div>
             </div>

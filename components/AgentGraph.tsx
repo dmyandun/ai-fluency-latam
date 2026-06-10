@@ -93,7 +93,7 @@ export default function AgentGraph({ industryId, loading, streamDone, caseIndex,
         <div className={`flex items-center justify-center w-14 h-14 rounded-lg text-white shadow-md transition-colors ${
           orchestratorState === 'done' ? 'bg-emerald-600' : 'bg-indigo-600'
         }`}>
-          <span className="text-xl">{orchestratorState === 'done' ? '✓' : '🧠'}</span>
+          <span className="text-xl">🧠</span>
         </div>
         <div className="text-center">
           <h4 className={`text-sm font-bold transition-colors ${

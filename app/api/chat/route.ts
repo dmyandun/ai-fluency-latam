@@ -82,7 +82,7 @@ export async function POST(req: Request) {
         model: HF_MODEL,
         messages,
         stream: true,
-        max_tokens: 900,
+        max_tokens: 1200,
         temperature: 0.4,
       }),
       signal: controller.signal,
