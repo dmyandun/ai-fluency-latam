@@ -1598,30 +1598,51 @@ function AgroViz(_: IndustryVisualizationProps) {
 
 // Celdas/torres de la red de acceso (coordenadas en viewBox 0 0 300 220)
 type CellStatus = 'ok' | 'warn' | 'crit'
-const TELECOM_CELLS: { id: string; zona: string; load: number; status: CellStatus; x: number; y: number; lines: string[] }[] = [
-  { id: 'N-01', zona: 'Norte', load: 85, status: 'crit', x: 150, y: 38, lines: ['Carga 85% en hora pico · congestión', 'Ampliar capacidad · prioridad alta'] },
-  { id: 'E-02', zona: 'Este', load: 71, status: 'warn', x: 244, y: 96, lines: ['Carga 71% · al límite en pico', 'Balancear tráfico con celda vecina'] },
-  { id: 'S-03', zona: 'Sur', load: 48, status: 'ok', x: 196, y: 178, lines: ['Carga 48% · estable', 'Sin acción requerida'] },
-  { id: 'O-04', zona: 'Oeste', load: 62, status: 'ok', x: 60, y: 150, lines: ['Carga 62% · estable', 'Monitoreo continuo'] },
-  { id: 'C-05', zona: 'Centro', load: 74, status: 'warn', x: 92, y: 70, lines: ['Carga 74% · creciente', 'Programar upgrade en 30 días'] },
+type CellKpi = { label: string; value: string; tone?: 'good' | 'warn' | 'bad' }
+const TELECOM_CELLS: {
+  id: string; zona: string; load: number; status: CellStatus; x: number; y: number
+  lines: string[]; kpis: CellKpi[]
+}[] = [
+  {
+    id: 'N-01', zona: 'Norte', load: 85, status: 'crit', x: 150, y: 38,
+    lines: ['Carga 85% en hora pico · congestión', 'Reasignar portadora y ampliar capacidad · prioridad alta'],
+    kpis: [{ label: 'Carga pico', value: '85%', tone: 'bad' }, { label: 'Disponibilidad', value: '99.2%', tone: 'warn' }, { label: 'Reintentos', value: '4.1%', tone: 'bad' }],
+  },
+  {
+    id: 'E-02', zona: 'Este', load: 71, status: 'warn', x: 244, y: 96,
+    lines: ['Carga 71% · al límite en hora pico', 'Balancear tráfico con celda vecina N-01'],
+    kpis: [{ label: 'Carga pico', value: '71%', tone: 'warn' }, { label: 'Disponibilidad', value: '99.7%', tone: 'good' }, { label: 'Reintentos', value: '1.8%', tone: 'warn' }],
+  },
+  {
+    id: 'S-03', zona: 'Sur', load: 48, status: 'ok', x: 196, y: 178,
+    lines: ['Carga 48% · estable con capacidad holgada', 'Sin acción requerida'],
+    kpis: [{ label: 'Carga pico', value: '48%', tone: 'good' }, { label: 'Disponibilidad', value: '99.9%', tone: 'good' }, { label: 'Reintentos', value: '0.6%', tone: 'good' }],
+  },
+  {
+    id: 'O-04', zona: 'Oeste', load: 62, status: 'ok', x: 60, y: 150,
+    lines: ['Carga 62% · estable', 'Monitoreo continuo · sin riesgo a 30 días'],
+    kpis: [{ label: 'Carga pico', value: '62%', tone: 'good' }, { label: 'Disponibilidad', value: '99.8%', tone: 'good' }, { label: 'Reintentos', value: '0.9%', tone: 'good' }],
+  },
+  {
+    id: 'C-05', zona: 'Centro', load: 74, status: 'warn', x: 92, y: 70,
+    lines: ['Carga 74% · tendencia creciente', 'Programar upgrade de capacidad en 30 días'],
+    kpis: [{ label: 'Carga pico', value: '74%', tone: 'warn' }, { label: 'Disponibilidad', value: '99.6%', tone: 'warn' }, { label: 'Reintentos', value: '2.2%', tone: 'warn' }],
+  },
 ]
 const CELL_COLOR: Record<CellStatus, string> = { ok: '#16a34a', warn: '#f59e0b', crit: '#ef4444' }
 
 function TelecomViz(_: IndustryVisualizationProps) {
-  const [selCell, setSelCell] = useState(0) // N-01 congestionada
-  const [hov, setHov] = useState(0)
+  const [selCell, setSelCell] = useState(0)                     // celda fijada (clic) → KPIs de la derecha
+  const [hovCell, setHovCell] = useState<number | null>(null)   // celda en hover → tarjeta de la izquierda
   const core = { x: 150, y: 110 }
   const cell = TELECOM_CELLS[selCell]
+  const hovered = hovCell !== null ? TELECOM_CELLS[hovCell] : null
   const cellStatus = (s: CellStatus): 'green' | 'amber' | 'red' => (s === 'ok' ? 'green' : s === 'warn' ? 'amber' : 'red')
-  const support = [
-    { name: 'ChurnBot', icon: '👥', metric: 'Churn 6% en zona norte', status: 'red' as const, detail: ['Clientes con 2+ tickets y consumo a la baja', 'Retención proactiva antes del 3er ticket'] },
-    { name: 'TicketBot', icon: '🎫', metric: '12K tickets/semana', status: 'amber' as const, detail: ['55% son consultas repetitivas', 'IA conversacional resolvería el 55% sin agente'] },
-  ]
 
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
-        <Header title="Centro de operaciones de red (NOC)" subtitle="Carga por celda, churn y soporte · haz clic en una celda para ver su agente" noMargin />
+        <Header title="Centro de operaciones de red (NOC)" subtitle="Pasa el cursor sobre una celda para ver su agente · haz clic para fijar sus KPIs" noMargin />
         <SupervisorBadge name="RedBot · Supervisor IA" />
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -1641,15 +1662,22 @@ function TelecomViz(_: IndustryVisualizationProps) {
             {/* celdas */}
             {TELECOM_CELLS.map((c, i) => {
               const active = selCell === i
+              const isHov = hovCell === i
               const col = CELL_COLOR[c.status]
               return (
-                <g key={c.id} style={{ cursor: 'pointer' }} onMouseEnter={() => setSelCell(i)} onClick={() => setSelCell(i)}>
+                <g
+                  key={c.id}
+                  style={{ cursor: 'pointer' }}
+                  onMouseEnter={() => setHovCell(i)}
+                  onMouseLeave={() => setHovCell(null)}
+                  onClick={() => setSelCell(i)}
+                >
                   {/* cobertura */}
-                  <circle cx={c.x} cy={c.y} r="26" fill={col} fillOpacity={active ? 0.16 : 0.08} stroke={col} strokeOpacity="0.3" strokeWidth="1">
+                  <circle cx={c.x} cy={c.y} r="26" fill={col} fillOpacity={active || isHov ? 0.18 : 0.08} stroke={col} strokeOpacity="0.3" strokeWidth="1">
                     {c.status === 'crit' && <animate attributeName="r" values="24;30;24" dur="1.4s" repeatCount="indefinite" />}
                   </circle>
                   {/* torre */}
-                  <circle cx={c.x} cy={c.y} r={active ? 9 : 7.5} fill={col} stroke="#fff" strokeWidth="1.5" />
+                  <circle cx={c.x} cy={c.y} r={active || isHov ? 9 : 7.5} fill={col} stroke="#fff" strokeWidth="1.5" />
                   <text x={c.x} y={c.y + 2.5} textAnchor="middle" className="fill-white text-[7px] font-bold">{c.load}</text>
                   <text x={c.x} y={c.y + 22} textAnchor="middle" className="fill-slate-600 text-[7px] font-semibold">{c.id} · {c.zona}</text>
                   {active && <circle cx={c.x} cy={c.y} r="13" fill="none" stroke="#6366f1" strokeWidth="1.4" strokeDasharray="3 2" />}
@@ -1662,20 +1690,34 @@ function TelecomViz(_: IndustryVisualizationProps) {
             <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full" style={{ background: CELL_COLOR.warn }} /> Al límite</span>
             <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full" style={{ background: CELL_COLOR.crit }} /> Congestión</span>
           </div>
-          <div className="mt-2">
-            <AgentCard agent={`RedBot · ${cell.id} (${cell.zona})`} status={cellStatus(cell.status)} lines={cell.lines} />
+          {/* Tarjeta hover: aparece al pasar el cursor sobre una celda */}
+          <div className="mt-2 min-h-[60px]">
+            {hovered ? (
+              <AgentCard
+                agent={`RedBot · ${hovered.id} (${hovered.zona})`}
+                status={cellStatus(hovered.status)}
+                lines={hovered.lines}
+                className="animate-fade-in"
+              />
+            ) : (
+              <div className="flex items-center gap-2 rounded-lg border border-dashed border-slate-200 px-2.5 py-3 text-[10px] text-slate-400">
+                <span>👆</span> Pasa el cursor sobre una celda para ver el análisis de RedBot
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Clientes y soporte */}
+        {/* Clientes y soporte — tarjetas auto-desplegadas + KPIs por celda */}
         <div className="bg-white/70 rounded-xl border border-slate-200 p-4">
-          <p className="text-xs font-semibold text-slate-700 mb-3">Clientes y soporte</p>
-          <AgentList agents={support} hov={hov} setHov={setHov} />
-          <KpiRow items={[
-            { label: 'Churn', value: '2.8%/mes', tone: 'bad' },
-            { label: 'CSAT', value: '6.2/10', tone: 'warn' },
-            { label: 'Pico red', value: '85%', tone: 'bad' },
-          ]} />
+          <p className="text-xs font-semibold text-slate-700 mb-1">
+            Indicadores · {cell.zona} <span className="text-slate-400">({cell.id})</span>
+          </p>
+          <KpiRow items={cell.kpis} />
+          <p className="text-xs font-semibold text-slate-700 mt-4 mb-2">Clientes y soporte</p>
+          <div className="space-y-2">
+            <AgentCard agent="ChurnBot" status="red" lines={['Churn 6% concentrado en zona norte', 'Clientes con 2+ tickets y consumo a la baja', 'Retención proactiva antes del 3er ticket']} />
+            <AgentCard agent="TicketBot" status="amber" lines={['12K tickets/semana · 55% repetitivos', 'IA conversacional resolvería el 55% sin agente', 'Ahorro estimado: 6.6K gestiones/semana']} />
+          </div>
         </div>
       </div>
     </div>

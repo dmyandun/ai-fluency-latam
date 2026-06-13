@@ -200,6 +200,7 @@ export default function ExploreFlow() {
               description="Esta es la primera experiencia de valor para el usuario que llega desde LinkedIn: ve agentes, visualizaciones y análisis antes de llenar el diagnóstico."
             >
               <SimulationApp
+                key={`${industry}-${country}`}
                 config={getSimulation(industry)}
                 interactionModel={DEFAULT_INTERACTION_MODEL}
                 industryId={industry}
