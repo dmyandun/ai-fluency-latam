@@ -70,6 +70,9 @@ export default function IndustryVisualization(props: IndustryVisualizationProps)
     case 'energy':    viz = <EnergyViz {...props} />; break
     case 'manufacturing': viz = <ManufacturingViz {...props} />; break
     case 'banking':   viz = <BankingViz {...props} />; break
+    case 'health':    viz = <HealthViz {...props} />; break
+    case 'insurance': viz = <InsuranceViz {...props} />; break
+    case 'legal':     viz = <LegalViz {...props} />; break
     default:          viz = <GenericViz {...props} />
   }
 
@@ -773,6 +776,336 @@ function BankingViz(_: IndustryVisualizationProps) {
               </div>
             ))}
           </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ─────────────────── Helpers compartidos (flujo, gauge, KPIs) ─────────────────── */
+
+type StepState = 'done' | 'active' | 'pending'
+type Step = { icon: string; label: string; detail: string; state: StepState }
+
+function StepFlow({ title, steps }: { title: string; steps: Step[] }) {
+  return (
+    <div className="bg-white/70 rounded-xl border border-slate-200 p-4">
+      <p className="text-xs font-semibold text-slate-700 mb-3">{title}</p>
+      <div className="space-y-0">
+        {steps.map((s, i) => (
+          <div key={i} className="flex gap-2.5">
+            <div className="flex flex-col items-center">
+              <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] shrink-0 ${
+                s.state === 'done' ? 'bg-emerald-100' : s.state === 'active' ? 'bg-amber-100' : 'bg-slate-100'
+              }`}>
+                {s.state === 'done'
+                  ? <span className="text-emerald-600 font-bold">✓</span>
+                  : s.state === 'active'
+                    ? <span className="relative flex h-2.5 w-2.5"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" /><span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500" /></span>
+                    : <span className="w-2 h-2 rounded-full bg-slate-300" />}
+              </div>
+              {i < steps.length - 1 && <div className="w-0.5 flex-1 bg-slate-200 my-0.5" style={{ minHeight: 14 }} />}
+            </div>
+            <div className="pb-3">
+              <p className={`text-xs font-semibold leading-tight ${s.state === 'pending' ? 'text-slate-400' : 'text-slate-700'}`}>{s.icon} {s.label}</p>
+              <p className="text-[10px] text-slate-500 leading-tight">{s.detail}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// Gauge semicircular reutilizable. gradId debe ser único por instancia visible.
+function Gauge({ value, label, gradId }: { value: number; label: string; gradId: string }) {
+  const pct = Math.min(Math.max(value, 0), 100) / 100
+  return (
+    <svg viewBox="0 0 140 84" className="w-full max-w-[170px] mx-auto">
+      <path d="M16 70 A54 54 0 0 1 124 70" fill="none" stroke="#e2e8f0" strokeWidth="12" strokeLinecap="round" />
+      <path d="M16 70 A54 54 0 0 1 124 70" fill="none" stroke={`url(#${gradId})`} strokeWidth="12" strokeLinecap="round" strokeDasharray={`${pct * 170} 400`} />
+      <defs><linearGradient id={gradId} x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stopColor="#10b981" /><stop offset="50%" stopColor="#f59e0b" /><stop offset="100%" stopColor="#ef4444" /></linearGradient></defs>
+      <text x="70" y="64" textAnchor="middle" className="fill-slate-800 text-[18px] font-bold">{value}%</text>
+      <text x="70" y="80" textAnchor="middle" className="fill-slate-400 text-[8px]">{label}</text>
+    </svg>
+  )
+}
+
+function KpiRow({ items }: { items: { label: string; value: string; tone?: 'good' | 'warn' | 'bad' }[] }) {
+  const tone = { good: 'text-emerald-600', warn: 'text-amber-600', bad: 'text-red-600' }
+  return (
+    <div className="grid grid-cols-3 gap-2 mt-3">
+      {items.map((k, i) => (
+        <div key={i} className="bg-white/70 rounded-lg border border-slate-200 px-2 py-1.5 text-center">
+          <p className={`text-sm font-bold ${k.tone ? tone[k.tone] : 'text-slate-800'}`}>{k.value}</p>
+          <p className="text-[9px] text-slate-500 leading-tight mt-0.5">{k.label}</p>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+// Lista de agentes con hover/clic para revelar detalle (patrón de BankingViz)
+function AgentList({ agents, hov, setHov }: {
+  agents: { name: string; icon: string; metric: string; status: 'green' | 'amber' | 'red'; detail: string[] }[]
+  hov: number
+  setHov: (i: number) => void
+}) {
+  return (
+    <div className="space-y-2">
+      {agents.map((a, i) => {
+        const dot = a.status === 'red' ? 'bg-red-500' : a.status === 'amber' ? 'bg-amber-500' : 'bg-emerald-500'
+        return (
+          <div
+            key={i}
+            className={`border rounded-lg p-2.5 cursor-pointer transition-all ${hov === i ? 'border-blue-300 bg-blue-50/40' : 'border-slate-200 hover:border-blue-300 hover:bg-blue-50/40'}`}
+            onMouseEnter={() => setHov(i)}
+            onClick={() => setHov(i)}
+          >
+            <div className="flex items-center gap-1.5">
+              <span className="relative flex h-2 w-2"><span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${dot} opacity-75`} /><span className={`relative inline-flex rounded-full h-2 w-2 ${dot}`} /></span>
+              <span className="text-[11px] font-bold text-slate-700">{a.icon} {a.name}</span>
+            </div>
+            <p className="text-[11px] text-slate-600 mt-0.5">{a.metric}</p>
+            {hov === i && (
+              <div className="mt-1.5 pt-1.5 border-t border-slate-100">
+                {a.detail.map((d, j) => (
+                  <p key={j} className={`text-[10px] leading-tight ${j === a.detail.length - 1 ? 'text-blue-600 font-semibold' : 'text-slate-500'}`}>{d}</p>
+                ))}
+              </div>
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+/* ─────────────────────────── Salud ─────────────────────────── */
+
+const HEALTH_AGENTS = [
+  { name: 'TriageBot', status: 'amber' as const, lines: ['18 pacientes en espera', '3 de prioridad alta · reordenando cola'] },
+  { name: 'CamaBot', status: 'red' as const, lines: ['UCI al 92% de ocupación', '2 altas sugeridas para liberar camas críticas'] },
+  { name: 'DiagBot', status: 'green' as const, lines: ['7 estudios analizados hoy', 'Hallazgo crítico priorizado al radiólogo'] },
+  { name: 'FarmaBot', status: 'green' as const, lines: ['142 órdenes validadas', '1 interacción medicamentosa bloqueada'] },
+]
+
+function HealthViz({ colorText }: IndustryVisualizationProps) {
+  void colorText
+  const [sel, setSel] = useState(0)
+  // Áreas del plano (idx → agente). El plano es un piso hospitalario estilo CAD.
+  const areas = [
+    { idx: 0, label: 'Urgencias / Triaje', x: 12, y: 20, w: 124, h: 62, emoji: '🚑', note: '18 en espera' },
+    { idx: 2, label: 'Imagenología', x: 140, y: 20, w: 74, h: 62, emoji: '🩻', note: '3 en estudio' },
+    { idx: 3, label: 'Farmacia', x: 218, y: 20, w: 90, h: 62, emoji: '💊', note: '142 órdenes' },
+    { idx: 1, label: 'Hospitalización · UCI', x: 12, y: 88, w: 296, h: 80, emoji: '🛏️', note: '' },
+  ]
+  // 18 camas (2 filas × 9). Las 3 primeras son UCI (críticas/ocupadas).
+  const beds = ['crit', 'occ', 'crit', 'occ', 'occ', 'free', 'occ', 'occ', 'free', 'occ', 'free', 'occ', 'occ', 'occ', 'occ', 'free', 'occ', 'occ']
+  const bedColor = (s: string) => (s === 'crit' ? '#ef4444' : s === 'occ' ? '#f59e0b' : '#10b981')
+  const bedTint = (s: string) => (s === 'crit' ? '#fef2f2' : s === 'occ' ? '#fffbeb' : '#ecfdf5')
+  const steps: Step[] = [
+    { icon: '🚑', label: 'Admisión', detail: 'Registro · 24 hoy', state: 'done' },
+    { icon: '🩺', label: 'Triaje', detail: 'Clasificación de severidad', state: 'done' },
+    { icon: '🔬', label: 'Diagnóstico', detail: 'Labs + imágenes en curso', state: 'active' },
+    { icon: '🛏️', label: 'Hospitalización', detail: 'Asignación de cama', state: 'pending' },
+    { icon: '🏠', label: 'Alta', detail: 'Plan de seguimiento', state: 'pending' },
+  ]
+  const selArea = areas.find((a) => a.idx === sel) ?? areas[0]
+
+  return (
+    <div>
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+        <Header title="Centro de operaciones clínicas" subtitle="Plano del hospital y flujo de pacientes · haz clic en un área para ver su agente IA" noMargin />
+        <SupervisorBadge name="MedBot · Supervisor IA" />
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* Plano hospitalario CAD */}
+        <div className="lg:col-span-2 bg-white/70 rounded-xl border border-slate-200 p-4">
+          <p className="text-xs font-semibold text-slate-700 mb-2">Planta hospitalaria · estado en tiempo real</p>
+          <svg viewBox="0 0 320 180" className="w-full h-auto" style={{ maxHeight: 320 }}>
+            <defs>
+              <pattern id="hfloor" width="10" height="10" patternUnits="userSpaceOnUse">
+                <path d="M10 0 L0 0 0 10" fill="none" stroke="#eef2f7" strokeWidth="0.6" />
+              </pattern>
+            </defs>
+            <rect x="8" y="14" width="304" height="160" rx="3" fill="url(#hfloor)" stroke="#475569" strokeWidth="1.6" />
+            {areas.map((a) => (
+              <g key={a.idx} style={{ cursor: 'pointer' }} onMouseEnter={() => setSel(a.idx)} onClick={() => setSel(a.idx)}>
+                <rect x={a.x} y={a.y} width={a.w} height={a.h} rx="2.5"
+                  fill={sel === a.idx ? '#eef2ff' : '#f8fafc'} stroke={sel === a.idx ? '#6366f1' : '#cbd5e1'} strokeWidth={sel === a.idx ? 2 : 1.2} />
+                <text x={a.x + 6} y={a.y + 12} className="fill-slate-600 text-[8px] font-semibold">{a.emoji} {a.label}</text>
+                {a.note && <text x={a.x + 6} y={a.y + 24} className="fill-slate-400 text-[8px]">{a.note}</text>}
+              </g>
+            ))}
+            {/* Camas en hospitalización · UCI */}
+            <text x="22" y="108" className="fill-red-500 text-[7px] font-bold">UCI</text>
+            {beds.map((s, i) => {
+              const col = i % 9, row = Math.floor(i / 9)
+              const x = 24 + col * 31, y = row === 0 ? 112 : 140
+              return (
+                <g key={i}>
+                  <rect x={x} y={y} width="24" height="18" rx="2" fill={bedTint(s)} stroke={bedColor(s)} strokeWidth="1.2">
+                    {s === 'crit' && <animate attributeName="stroke-width" values="1.2;2.6;1.2" dur="1.2s" repeatCount="indefinite" />}
+                  </rect>
+                  <rect x={x + 2.5} y={y + 2.5} width="9" height="4" rx="1" fill={bedColor(s)} opacity="0.75" />
+                </g>
+              )
+            })}
+          </svg>
+          <div className="flex flex-wrap items-center gap-3 mt-2 text-[10px] text-slate-500">
+            <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm border-2 border-emerald-500" /> Libre</span>
+            <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm border-2 border-amber-500" /> Ocupada</span>
+            <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm border-2 border-red-500" /> Crítica</span>
+          </div>
+          <KpiRow items={[
+            { label: 'Ocupación UCI', value: '92%', tone: 'bad' },
+            { label: 'Espera urgencias', value: '34 min', tone: 'warn' },
+            { label: 'Readmisión 30d', value: '8.4%', tone: 'good' },
+          ]} />
+        </div>
+
+        {/* Agente del área + flujo del paciente */}
+        <div className="flex flex-col gap-4">
+          <div className="bg-white/70 rounded-xl border border-slate-200 p-4">
+            <p className="text-xs font-semibold text-slate-700 mb-2">Agente de {selArea.label}</p>
+            <AgentCard agent={HEALTH_AGENTS[sel].name} status={HEALTH_AGENTS[sel].status} lines={HEALTH_AGENTS[sel].lines} />
+          </div>
+          <StepFlow title="Flujo del paciente" steps={steps} />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ─────────────────────────── Seguros ─────────────────────────── */
+
+function InsuranceViz(_: IndustryVisualizationProps) {
+  const [hov, setHov] = useState(0)
+  const agents = [
+    { name: 'ClaimBot', icon: '📋', metric: '128 siniestros en cola', status: 'amber' as const, detail: ['38 listos para pago automático', 'Tiempo medio 2.4 días (-31%)'] },
+    { name: 'FraudBot', icon: '🛡️', metric: '6 reclamos sospechosos', status: 'red' as const, detail: ['Siniestros repetidos · póliza ****4471', 'Derivado a investigación especial'] },
+    { name: 'PricingBot', icon: '📊', metric: 'Prima recalculada por segmento', status: 'green' as const, detail: ['Auto joven · +8% de ajuste técnico', 'Retención proyectada 91%'] },
+  ]
+  const steps: Step[] = [
+    { icon: '📥', label: 'FNOL recibido', detail: 'Aviso de siniestro · auto', state: 'done' },
+    { icon: '📷', label: 'Evaluación de daños', detail: 'Fotos analizadas por IA', state: 'done' },
+    { icon: '🛡️', label: 'Chequeo de fraude', detail: 'Score 0.18 · riesgo bajo', state: 'done' },
+    { icon: '🧮', label: 'Ajuste', detail: 'Liquidación $4,200', state: 'active' },
+    { icon: '💸', label: 'Pago', detail: 'Transferencia programada', state: 'pending' },
+  ]
+
+  return (
+    <div>
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+        <Header title="Centro de siniestros y suscripción" subtitle="Agentes IA gestionando reclamos, fraude y pricing · haz clic para ver el detalle" noMargin />
+        <SupervisorBadge name="PólizaBot · Supervisor IA" />
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Centro de siniestros IA */}
+        <div className="bg-white/70 rounded-xl border border-slate-200 p-4">
+          <p className="text-xs font-semibold text-slate-700 mb-3">Centro de siniestros IA</p>
+          <AgentList agents={agents} hov={hov} setHov={setHov} />
+          <KpiRow items={[
+            { label: 'Loss ratio', value: '62%', tone: 'warn' },
+            { label: 'Liquidación', value: '2.4 d', tone: 'good' },
+            { label: 'Fraude detect.', value: '6', tone: 'bad' },
+          ]} />
+        </div>
+
+        {/* Gauge loss ratio + flujo de reclamo */}
+        <div className="flex flex-col gap-4">
+          <div className="bg-white/70 rounded-xl border border-slate-200 p-4">
+            <p className="text-xs font-semibold text-slate-700 mb-1">Loss ratio (siniestralidad)</p>
+            <Gauge value={62} label="objetivo < 60%" gradId="lossG" />
+          </div>
+          <StepFlow title="Flujo de reclamo en vivo" steps={steps} />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ─────────────────────────── Legal ─────────────────────────── */
+
+const LEGAL_CLAUSES = [
+  { name: 'Objeto del contrato', risk: 'low' as const, agent: 'ClauseBot', lines: ['Cláusula estándar', 'Sin observaciones'] },
+  { name: 'Limitación de responsabilidad', risk: 'med' as const, agent: 'RiskBot', lines: ['Falta tope de responsabilidad', 'Sugerir cap a 12 meses de honorarios'] },
+  { name: 'Penalización y rescisión', risk: 'high' as const, agent: 'ComplianceBot', lines: ['Penalidad desproporcionada (40%)', 'Posible cláusula abusiva — revisar'] },
+  { name: 'Confidencialidad', risk: 'low' as const, agent: 'JurisBot', lines: ['Alineada a jurisprudencia reciente', 'Vigencia de 3 años · OK'] },
+]
+
+function LegalViz(_: IndustryVisualizationProps) {
+  const [sel, setSel] = useState(2)
+  const riskColor = (r: string) => (r === 'high' ? '#ef4444' : r === 'med' ? '#f59e0b' : '#10b981')
+  const riskTint = (r: string) => (r === 'high' ? '#fef2f2' : r === 'med' ? '#fffbeb' : '#ecfdf5')
+  const riskStatus = (r: string): 'green' | 'amber' | 'red' => (r === 'high' ? 'red' : r === 'med' ? 'amber' : 'green')
+  const steps: Step[] = [
+    { icon: '📄', label: 'Ingesta', detail: 'Contrato cargado · 14 págs', state: 'done' },
+    { icon: '🔎', label: 'Extracción de cláusulas', detail: '23 cláusulas identificadas', state: 'done' },
+    { icon: '⚖️', label: 'Análisis de riesgo', detail: '5 de alto riesgo', state: 'active' },
+    { icon: '📋', label: 'Comparación con políticas', detail: 'Plantilla corporativa', state: 'pending' },
+    { icon: '📝', label: 'Resumen ejecutivo', detail: 'Borrador para abogado', state: 'pending' },
+  ]
+  const cy = 30, ch = 36, cgap = 4 // geometría de cada cláusula en la hoja
+
+  return (
+    <div>
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+        <Header title="Revisión inteligente de contratos" subtitle="Cláusulas resaltadas por nivel de riesgo · haz clic para ver el agente IA" noMargin />
+        <SupervisorBadge name="LexBot · Supervisor IA" />
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Hoja de contrato */}
+        <div className="bg-white/70 rounded-xl border border-slate-200 p-4">
+          <p className="text-xs font-semibold text-slate-700 mb-2">Contrato de servicios · análisis de cláusulas</p>
+          <svg viewBox="0 0 236 210" className="w-full h-auto" style={{ maxHeight: 340 }}>
+            {/* sombra + página */}
+            <rect x="36" y="10" width="166" height="194" rx="3" fill="#0f172a" opacity="0.06" />
+            <rect x="32" y="6" width="166" height="194" rx="3" fill="white" stroke="#e2e8f0" strokeWidth="1.2" />
+            {/* encabezado del documento */}
+            <rect x="48" y="16" width="86" height="6" rx="2" fill="#334155" />
+            <rect x="48" y="26" width="134" height="3" rx="1.5" fill="#cbd5e1" />
+            {/* cláusulas */}
+            {LEGAL_CLAUSES.map((c, i) => {
+              const y = cy + i * (ch + cgap)
+              const active = sel === i
+              return (
+                <g key={i} style={{ cursor: 'pointer' }} onMouseEnter={() => setSel(i)} onClick={() => setSel(i)}>
+                  <rect x="44" y={y} width="142" height={ch} rx="2.5" fill={riskTint(c.risk)} stroke={active ? riskColor(c.risk) : 'transparent'} strokeWidth={active ? 1.8 : 0} />
+                  <rect x="44" y={y} width="3.5" height={ch} fill={riskColor(c.risk)} />
+                  {/* texto simulado */}
+                  <rect x="54" y={y + 6} width="70" height="4" rx="2" fill="#475569" />
+                  <rect x="54" y={y + 15} width="124" height="2.6" rx="1.3" fill="#cbd5e1" />
+                  <rect x="54" y={y + 21} width="124" height="2.6" rx="1.3" fill="#cbd5e1" />
+                  <rect x="54" y={y + 27} width="92" height="2.6" rx="1.3" fill="#cbd5e1" />
+                  {/* dot de riesgo */}
+                  <circle cx="180" cy={y + 8} r="3" fill={riskColor(c.risk)}>
+                    {c.risk === 'high' && <animate attributeName="opacity" values="1;0.4;1" dur="1.2s" repeatCount="indefinite" />}
+                  </circle>
+                </g>
+              )
+            })}
+          </svg>
+          <div className="flex flex-wrap items-center gap-3 mt-2 text-[10px] text-slate-500">
+            <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-emerald-500" /> Bajo</span>
+            <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-amber-500" /> Medio</span>
+            <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-red-500" /> Alto</span>
+          </div>
+        </div>
+
+        {/* Observación del agente + flujo de revisión */}
+        <div className="flex flex-col gap-4">
+          <div className="bg-white/70 rounded-xl border border-slate-200 p-4">
+            <p className="text-xs font-semibold text-slate-700 mb-2">Observación de {LEGAL_CLAUSES[sel].agent}</p>
+            <AgentCard agent={`${LEGAL_CLAUSES[sel].agent} · ${LEGAL_CLAUSES[sel].name}`} status={riskStatus(LEGAL_CLAUSES[sel].risk)} lines={LEGAL_CLAUSES[sel].lines} />
+            <KpiRow items={[
+              { label: 'Contratos hoy', value: '47' },
+              { label: 'Alto riesgo', value: '5', tone: 'bad' },
+              { label: 'T. revisión', value: '6 min', tone: 'good' },
+            ]} />
+          </div>
+          <StepFlow title="Flujo de revisión" steps={steps} />
         </div>
       </div>
     </div>
