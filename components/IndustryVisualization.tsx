@@ -886,39 +886,50 @@ function AgentList({ agents, hov, setHov }: {
 const HEALTH_STAGES = ['Admisión', 'Triaje', 'Diagnóstico', 'Hospitalización', 'Alta']
 const HEALTH_STAGE_ICON = ['🚑', '🩺', '🔬', '🛏️', '🏠']
 const HEALTH_STAGE_DETAIL = ['Registro y cobertura', 'Clasificación de la cola', 'Estudios e imágenes', 'Asignación de cama', 'Plan y liberación de cama']
-const HEALTH_STAGE_AGENT: { agent: string; status: 'green' | 'amber' | 'red'; lines: string[] }[] = [
-  { agent: 'AdmiBot', status: 'green', lines: ['Registro y validación de cobertura', 'Admisión en 3 min · sin pendientes'] },
-  { agent: 'TriageBot', status: 'amber', lines: ['Clasificación administrativa de la cola', '18 en espera · prioridad reordenada'] },
-  { agent: 'DiagBot', status: 'green', lines: ['Gestión de turnos de estudios', '3 en cola · tiempo de turno -25%'] },
-  { agent: 'CamaBot', status: 'red', lines: ['Asignación y rotación de camas', 'UCI 92% · 2 altas sugeridas para liberar'] },
-  { agent: 'AltaBot', status: 'green', lines: ['Planificación de alta', 'Alta 14:00 · libera cama para urgencias'] },
-]
 
 // Pacientes ubicados en el plano. stage 0-4. kind 'marker' (zonas) o 'bed' (hospitalización).
-type HPatient = { id: string; stage: number; kind: 'marker' | 'bed'; x: number; y: number; st?: 'crit' | 'occ' }
+// times[]: minutos transcurridos por etapa hasta la actual ('' = aún no llega).
+type HPatient = { id: string; stage: number; kind: 'marker' | 'bed'; x: number; y: number; st?: 'crit' | 'occ'; times: string[] }
 const HEALTH_PATIENTS: HPatient[] = [
-  { id: 'P-07', stage: 0, kind: 'marker', x: 52, y: 70 },
-  { id: 'P-05', stage: 1, kind: 'marker', x: 38, y: 150 },
-  { id: 'P-06', stage: 1, kind: 'marker', x: 68, y: 162 },
-  { id: 'P-04', stage: 2, kind: 'marker', x: 134, y: 66 },
-  { id: 'P-01', stage: 3, kind: 'bed', x: 184, y: 44, st: 'crit' },
-  { id: 'P-02', stage: 3, kind: 'bed', x: 252, y: 44, st: 'occ' },
-  { id: 'P-03', stage: 3, kind: 'bed', x: 184, y: 80, st: 'occ' },
-  { id: 'P-08', stage: 4, kind: 'bed', x: 252, y: 116, st: 'occ' },
+  // Admisión: centrado sobre el mostrador (rect 20,78,60,6)
+  { id: 'P-07', stage: 0, kind: 'marker', x: 50, y: 70, times: ['en curso', '', '', '', ''] },
+  // Triaje: centrados en las dos cajas (20,130,28,22) y (56,130,28,22)
+  { id: 'P-05', stage: 1, kind: 'marker', x: 34, y: 137, times: ['6 min', 'en curso', '', '', ''] },
+  { id: 'P-06', stage: 1, kind: 'marker', x: 70, y: 137, times: ['9 min', 'en curso', '', '', ''] },
+  // Imagenología: centrado en el anillo del escáner (135,66)
+  { id: 'P-04', stage: 2, kind: 'marker', x: 135, y: 62, times: ['5 min', '18 min', 'en curso', '', ''] },
+  { id: 'P-01', stage: 3, kind: 'bed', x: 184, y: 44, st: 'crit', times: ['4 min', '12 min', '40 min', 'en curso', ''] },
+  { id: 'P-02', stage: 3, kind: 'bed', x: 252, y: 44, st: 'occ', times: ['7 min', '22 min', '35 min', '6 h', ''] },
+  { id: 'P-03', stage: 3, kind: 'bed', x: 184, y: 80, st: 'occ', times: ['5 min', '15 min', '50 min', '3 h', ''] },
+  { id: 'P-08', stage: 4, kind: 'bed', x: 252, y: 116, st: 'occ', times: ['6 min', '20 min', '30 min', '8 h', 'alta 14:00'] },
 ]
 const HEALTH_FREE_BEDS = [{ x: 252, y: 80 }, { x: 184, y: 116 }, { x: 184, y: 152 }, { x: 252, y: 152 }]
 
+// Recomendaciones de reasignación del agente de camas (prioridad 1-3, 3 = más alta).
+const HEALTH_RECS: { patientIdx: number; priority: 1 | 2 | 3; action: string }[] = [
+  { patientIdx: 0, priority: 3, action: 'Admitir P-07 a cama libre #6 — URGENTE por saturación de admisión' },
+  { patientIdx: 1, priority: 2, action: 'Mover P-05 a cama #2 dentro de 1 h tras estudios' },
+  { patientIdx: 4, priority: 1, action: 'Mantener P-01 en UCI · reevaluar en 2 h' },
+]
+
 function HealthViz({ colorText }: IndustryVisualizationProps) {
   void colorText
-  const [selIdx, setSelIdx] = useState(4) // P-01 (UCI) por defecto
-  const sel = HEALTH_PATIENTS[selIdx]
-  const steps: Step[] = HEALTH_STAGES.map((label, i) => ({
-    icon: HEALTH_STAGE_ICON[i],
-    label,
-    detail: HEALTH_STAGE_DETAIL[i],
-    state: i < sel.stage ? 'done' : i === sel.stage ? 'active' : 'pending',
-  }))
-  const agent = HEALTH_STAGE_AGENT[sel.stage]
+  // null = sin paciente seleccionado → no se muestra el flujo (aparece solo al hacer clic)
+  const [selIdx, setSelIdx] = useState<number | null>(null)
+  const sel = selIdx !== null ? HEALTH_PATIENTS[selIdx] : null
+  const steps: Step[] = sel
+    ? HEALTH_STAGES.map((label, i) => {
+        const t = sel.times[i]
+        const timeTag = i < sel.stage ? ` · ${t || '—'}` : i === sel.stage ? ` · ${t || 'en curso'}` : ''
+        return {
+          icon: HEALTH_STAGE_ICON[i],
+          label,
+          detail: HEALTH_STAGE_DETAIL[i] + timeTag,
+          state: i < sel.stage ? 'done' : i === sel.stage ? 'active' : 'pending',
+        }
+      })
+    : []
+  const recColor = (p: 1 | 2 | 3): 'green' | 'amber' | 'red' => (p === 3 ? 'red' : p === 2 ? 'amber' : 'green')
   const stageColor = ['#64748b', '#f59e0b', '#6366f1', '#ef4444', '#10b981']
   const bedColor = (s?: string) => (s === 'crit' ? '#ef4444' : '#f59e0b')
 
@@ -1041,13 +1052,47 @@ function HealthViz({ colorText }: IndustryVisualizationProps) {
           ]} />
         </div>
 
-        {/* Agente de la etapa + flujo del paciente seleccionado */}
+        {/* Recomendaciones del agente de camas + flujo bajo demanda */}
         <div className="flex flex-col gap-4">
           <div className="bg-white/70 rounded-xl border border-slate-200 p-4">
-            <p className="text-xs font-semibold text-slate-700 mb-2">Paciente {sel.id} · {HEALTH_STAGES[sel.stage]}</p>
-            <AgentCard agent={`${agent.agent} · ${sel.id}`} status={agent.status} lines={agent.lines} />
+            <div className="flex items-center gap-1.5 mb-1">
+              <span className="relative flex h-2 w-2"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-500 opacity-75" /><span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500" /></span>
+              <span className="text-[11px] font-bold text-slate-700">🤖 CamaBot · Reasignación</span>
+            </div>
+            <p className="text-[10px] text-slate-500 mb-2.5">Prioridad 1–3 (3 = más alta) · haz clic en una tarjeta para ver el flujo del paciente</p>
+            <div className="space-y-2">
+              {HEALTH_RECS.map((r, i) => {
+                const p = HEALTH_PATIENTS[r.patientIdx]
+                const active = selIdx === r.patientIdx
+                const tone = recColor(r.priority)
+                const badge = tone === 'red' ? 'bg-red-100 text-red-700' : tone === 'amber' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'
+                const dot = tone === 'red' ? 'bg-red-500' : tone === 'amber' ? 'bg-amber-500' : 'bg-emerald-500'
+                return (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => setSelIdx(r.patientIdx)}
+                    className={`w-full text-left border rounded-lg px-2.5 py-2 transition-all ${active ? 'border-indigo-300 bg-indigo-50/50 ring-1 ring-indigo-200' : 'border-slate-200 bg-white hover:border-indigo-300 hover:bg-indigo-50/40'}`}
+                  >
+                    <div className="flex items-center justify-between gap-2 mb-0.5">
+                      <span className="flex items-center gap-1.5 text-[11px] font-bold text-slate-700">
+                        <span className={`w-1.5 h-1.5 rounded-full ${dot}`} /> {p.id}
+                      </span>
+                      <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded-full ${badge}`}>Prioridad {r.priority}</span>
+                    </div>
+                    <p className="text-[10px] text-slate-600 leading-tight">{r.action}</p>
+                  </button>
+                )
+              })}
+            </div>
           </div>
-          <StepFlow title="Flujo del paciente seleccionado" steps={steps} />
+          {sel ? (
+            <StepFlow title={`Flujo de ${sel.id} · tiempo por etapa`} steps={steps} />
+          ) : (
+            <div className="bg-white/70 rounded-xl border border-dashed border-slate-300 p-4 text-center">
+              <p className="text-[11px] text-slate-400">Selecciona una recomendación o un paciente del plano para ver su recorrido y tiempos por etapa.</p>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -1072,26 +1117,76 @@ const INS_STAGE_BOT: { agent: string; status: 'green' | 'amber' | 'red'; lines: 
   { agent: 'PagoBot', status: 'green', lines: ['Programa la transferencia', 'SLA 24 h · 88 pagos emitidos hoy'] },
 ]
 
+// Zonas de daño sobre el auto (vista superior, viewBox 0 0 210 96). El frente está a la izquierda.
+type InsZoneKey = 'frente' | 'capo' | 'puerta-der' | 'puerta-izq' | 'trasera' | 'techo'
+const INS_ZONE_RECT: Record<InsZoneKey, { x: number; y: number; w: number; h: number }> = {
+  frente: { x: 38, y: 22, w: 16, h: 52 },
+  capo: { x: 56, y: 26, w: 22, h: 44 },
+  'puerta-der': { x: 80, y: 24, w: 46, h: 8 },
+  'puerta-izq': { x: 80, y: 66, w: 46, h: 8 },
+  trasera: { x: 146, y: 22, w: 16, h: 52 },
+  techo: { x: 82, y: 34, w: 46, h: 28 },
+}
+const INS_ZONE_LABEL: Record<InsZoneKey, string> = {
+  frente: 'parachoques frontal', capo: 'capó', 'puerta-der': 'puerta derecha',
+  'puerta-izq': 'puerta izquierda', trasera: 'parte trasera', techo: 'techo',
+}
+
+type InsStatus = 'aprobado' | 'revisión' | 'fraude'
+type InsCase = {
+  id: string; vehiculo: string; tipo: string; status: InsStatus
+  estimacion: string; confianza: string
+  zones: { key: InsZoneKey; sev: 'alta' | 'media' }[]
+  resumen: string[]
+}
+const INS_CASES: InsCase[] = [
+  {
+    id: 'SIN-2041', vehiculo: 'Sedán · placa ABC-123', tipo: 'Colisión frontal', status: 'revisión',
+    estimacion: '$4,200', confianza: '92%',
+    zones: [{ key: 'frente', sev: 'alta' }, { key: 'puerta-izq', sev: 'media' }],
+    resumen: ['Daño alto en parachoques frontal + puerta izq.', 'Repuestos y mano de obra estimados', 'Liquidación $4,200 · confianza 92%'],
+  },
+  {
+    id: 'SIN-2038', vehiculo: 'SUV · placa XYZ-998', tipo: 'Alcance trasero', status: 'aprobado',
+    estimacion: '$1,850', confianza: '96%',
+    zones: [{ key: 'trasera', sev: 'media' }],
+    resumen: ['Daño medio en parte trasera', 'Sin afectación estructural', 'Aprobado automático $1,850 · confianza 96%'],
+  },
+  {
+    id: 'SIN-2033', vehiculo: 'Hatchback · placa JKL-540', tipo: 'Daño múltiple', status: 'fraude',
+    estimacion: '$7,600', confianza: '54%',
+    zones: [{ key: 'frente', sev: 'alta' }, { key: 'capo', sev: 'alta' }, { key: 'techo', sev: 'media' }],
+    resumen: ['Daños inconsistentes con el relato del parte', 'FraudBot: fechas de fotos no coinciden', 'Derivado a investigación · confianza 54%'],
+  },
+  {
+    id: 'SIN-2029', vehiculo: 'Pickup · placa MNO-310', tipo: 'Raspón lateral', status: 'aprobado',
+    estimacion: '$640', confianza: '98%',
+    zones: [{ key: 'puerta-der', sev: 'media' }],
+    resumen: ['Raspón superficial en puerta derecha', 'Solo pintura y pulido', 'Pago exprés $640 · confianza 98%'],
+  },
+]
+
 function InsuranceViz(_: IndustryVisualizationProps) {
   const [selStage, setSelStage] = useState(2) // Peritaje (cuello de botella)
-  const [hov, setHov] = useState(0)
+  const [selCase, setSelCase] = useState(0)
   const maxVol = INS_FUNNEL[0].vol
   const bot = INS_STAGE_BOT[selStage]
-  // Agentes especializados transversales (fuera del pipeline)
-  const agents = [
-    { name: 'FraudBot', icon: '🛡️', metric: '6 reclamos sospechosos', status: 'red' as const, detail: ['Inconsistencia de fechas · póliza ****4471', 'Derivado a investigación especial'] },
-    { name: 'UnderwritingBot', icon: '📊', metric: 'Suscripción automática', status: 'green' as const, detail: ['Perfil auto joven · +8% técnico', 'Cotización emitida en 12s'] },
-    { name: 'RetentionBot', icon: '🔁', metric: 'Cartera vida · baja 9% anual', status: 'amber' as const, detail: ['340 pólizas en riesgo de cancelación', 'Campaña de retención priorizada'] },
-  ]
+  const c = INS_CASES[selCase]
+  const sevColor = (s: 'alta' | 'media') => (s === 'alta' ? '#ef4444' : '#f59e0b')
+  const statusStyle: Record<InsStatus, { badge: string; agent: 'green' | 'amber' | 'red' }> = {
+    aprobado: { badge: 'bg-emerald-100 text-emerald-700', agent: 'green' },
+    'revisión': { badge: 'bg-amber-100 text-amber-700', agent: 'amber' },
+    fraude: { badge: 'bg-red-100 text-red-700', agent: 'red' },
+  }
 
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
-        <Header title="Centro de operaciones de siniestros y suscripción" subtitle="Embudo de siniestros y peritaje IA · haz clic en una etapa para ver su agente" noMargin />
+        <Header title="Centro de operaciones de siniestros y suscripción" subtitle="Embudo de siniestros y reporte de peritaje · haz clic en un caso para ver su reporte" noMargin />
         <SupervisorBadge name="PólizaBot · Supervisor IA" />
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Embudo + peritaje */}
+        {/* Embudo + reporte de peritaje */}
         <div className="lg:col-span-2 flex flex-col gap-4">
           {/* Embudo de siniestros */}
           <div className="bg-white/70 rounded-xl border border-slate-200 p-4">
@@ -1126,9 +1221,12 @@ function InsuranceViz(_: IndustryVisualizationProps) {
             </div>
           </div>
 
-          {/* Peritaje IA en vivo */}
+          {/* Reporte de peritaje del caso seleccionado */}
           <div className="bg-white/70 rounded-xl border border-slate-200 p-4">
-            <p className="text-xs font-semibold text-slate-700 mb-2">Peritaje IA en vivo · siniestro de auto</p>
+            <div className="flex items-center justify-between gap-2 mb-2">
+              <p className="text-xs font-semibold text-slate-700">Reporte de peritaje · {c.id}</p>
+              <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${statusStyle[c.status].badge}`}>{c.status.toUpperCase()}</span>
+            </div>
             <div className="flex flex-col sm:flex-row items-center gap-4">
               <svg viewBox="0 0 210 96" className="w-full sm:w-1/2 h-auto" style={{ maxHeight: 130 }}>
                 {/* carrocería vista superior */}
@@ -1138,37 +1236,61 @@ function InsuranceViz(_: IndustryVisualizationProps) {
                 {[[52, 16], [140, 16], [52, 74], [140, 74]].map(([wx, wy], i) => (
                   <rect key={i} x={wx} y={wy} width="16" height="8" rx="2" fill="#475569" />
                 ))}
-                {/* faros */}
+                {/* faros (frente a la izquierda) */}
                 <rect x="36" y="28" width="5" height="8" rx="2" fill="#fcd34d" />
                 <rect x="36" y="60" width="5" height="8" rx="2" fill="#fcd34d" />
-                {/* daño: parachoques delantero (rojo) */}
-                <g>
-                  <rect x="38" y="22" width="14" height="52" rx="8" fill="#ef4444" opacity="0.35">
-                    <animate attributeName="opacity" values="0.35;0.6;0.35" dur="1.2s" repeatCount="indefinite" />
-                  </rect>
-                  <text x="20" y="20" className="fill-red-600 text-[7px] font-bold">⚠ parachoques</text>
-                </g>
-                {/* daño: puerta izquierda (ámbar) */}
-                <g>
-                  <rect x="80" y="66" width="46" height="10" rx="3" fill="#f59e0b" opacity="0.4" />
-                  <text x="103" y="92" textAnchor="middle" className="fill-amber-600 text-[7px] font-bold">⚠ puerta izq.</text>
-                </g>
+                {/* zonas de daño del caso seleccionado */}
+                {c.zones.map((z, i) => {
+                  const r = INS_ZONE_RECT[z.key]
+                  return (
+                    <rect key={i} x={r.x} y={r.y} width={r.w} height={r.h} rx="3" fill={sevColor(z.sev)} opacity={z.sev === 'alta' ? 0.4 : 0.32}>
+                      {z.sev === 'alta' && <animate attributeName="opacity" values="0.4;0.65;0.4" dur="1.2s" repeatCount="indefinite" />}
+                    </rect>
+                  )
+                })}
               </svg>
               <div className="w-full sm:w-1/2">
-                <AgentCard agent="PeritoBot · estimación" status="amber" lines={[
-                  'Daños detectados: parachoques delantero + puerta izq.',
-                  'Repuestos y mano de obra estimados',
-                  'Liquidación $4,200 · confianza 92%',
-                ]} />
+                <p className="text-[11px] font-semibold text-slate-700">{c.vehiculo}</p>
+                <p className="text-[10px] text-slate-500 mb-2">{c.tipo}</p>
+                <div className="flex flex-wrap gap-1 mb-2">
+                  {c.zones.map((z, i) => (
+                    <span key={i} className={`text-[8px] font-semibold px-1.5 py-0.5 rounded-full ${z.sev === 'alta' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>
+                      {INS_ZONE_LABEL[z.key]}
+                    </span>
+                  ))}
+                </div>
+                <AgentCard agent="PeritoBot · reporte" status={statusStyle[c.status].agent} lines={c.resumen} />
               </div>
             </div>
           </div>
         </div>
 
-        {/* Agentes especializados + KPIs */}
+        {/* Lista de casos + KPIs */}
         <div className="bg-white/70 rounded-xl border border-slate-200 p-4">
-          <p className="text-xs font-semibold text-slate-700 mb-3">Agentes especializados</p>
-          <AgentList agents={agents} hov={hov} setHov={setHov} />
+          <p className="text-xs font-semibold text-slate-700 mb-3">Casos en peritaje · clasificados por IA</p>
+          <div className="space-y-2">
+            {INS_CASES.map((cs, i) => {
+              const active = selCase === i
+              const dot = cs.status === 'fraude' ? 'bg-red-500' : cs.status === 'revisión' ? 'bg-amber-500' : 'bg-emerald-500'
+              return (
+                <button
+                  key={cs.id}
+                  type="button"
+                  onClick={() => setSelCase(i)}
+                  className={`w-full text-left border rounded-lg px-2.5 py-2 transition-all ${active ? 'border-indigo-300 bg-indigo-50/50 ring-1 ring-indigo-200' : 'border-slate-200 bg-white hover:border-indigo-300 hover:bg-indigo-50/40'}`}
+                >
+                  <div className="flex items-center justify-between gap-2 mb-0.5">
+                    <span className="flex items-center gap-1.5 text-[11px] font-bold text-slate-700">
+                      <span className={`w-1.5 h-1.5 rounded-full ${dot}`} /> {cs.id}
+                    </span>
+                    <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded-full ${statusStyle[cs.status].badge}`}>{cs.status}</span>
+                  </div>
+                  <p className="text-[10px] text-slate-600 leading-tight">{cs.vehiculo}</p>
+                  <p className="text-[10px] text-slate-400 leading-tight">{cs.tipo} · {cs.estimacion}</p>
+                </button>
+              )
+            })}
+          </div>
           <KpiRow items={[
             { label: 'Loss ratio', value: '62%', tone: 'warn' },
             { label: 'Liquidación', value: '2.4 d', tone: 'good' },
@@ -1182,78 +1304,166 @@ function InsuranceViz(_: IndustryVisualizationProps) {
 
 /* ─────────────────────────── Legal ─────────────────────────── */
 
-type LegalRisk = 'low' | 'med' | 'high'
-const LEGAL_CLAUSES: { n: string; name: string; risk: LegalRisk; extract: string; lines: string[] }[] = [
-  { n: '3.1', name: 'Objeto del contrato', risk: 'low', extract: '«El proveedor prestará servicios de desarrollo e implementación de software conforme al Anexo A.»', lines: ['Cláusula estándar, bien delimitada', 'Sin observaciones'] },
-  { n: '7.2', name: 'Limitación de responsabilidad', risk: 'med', extract: '«La responsabilidad del proveedor no excederá ______» (monto en blanco).', lines: ['Falta el tope de responsabilidad', 'Sugerir cap a 12 meses de honorarios'] },
-  { n: '9.4', name: 'Penalización por retraso', risk: 'high', extract: '«15% del valor del contrato por cada semana de retraso, sin límite máximo.»', lines: ['Penalidad desproporcionada y sin tope', 'Posible cláusula abusiva — renegociar con tope y periodo de gracia'] },
-  { n: '11.1', name: 'Confidencialidad', risk: 'low', extract: '«Las partes mantendrán confidencialidad por 3 años tras la terminación.»', lines: ['Alineada a la práctica de mercado', 'Vigencia adecuada · OK'] },
-  { n: '14.3', name: 'Jurisdicción aplicable', risk: 'med', extract: '«Tribunales locales» (14.3) frente a «arbitraje internacional» (2.5).', lines: ['Inconsistencia de foro entre cláusulas', 'Unificar jurisdicción para evitar disputa'] },
+type LegalEstado = 'urgente' | 'pendiente' | 'cerrado'
+type LegalCase = {
+  id: string; title: string; estado: LegalEstado; date: string
+  obs: string[]; status: 'green' | 'amber' | 'red'
+  kpis: { label: string; value: string; tone?: 'good' | 'warn' | 'bad' }[]
+}
+const LEGAL_TYPES: { key: string; label: string; icon: string; count: number }[] = [
+  { key: 'civil', label: 'Civil', icon: '⚖️', count: 48 },
+  { key: 'familiar', label: 'Familiar', icon: '👪', count: 31 },
+  { key: 'penal', label: 'Penal', icon: '🔒', count: 22 },
+  { key: 'laboral', label: 'Laboral', icon: '💼', count: 27 },
+  { key: 'mercantil', label: 'Mercantil', icon: '📈', count: 19 },
+]
+const LEGAL_CASES: Record<string, LegalCase[]> = {
+  civil: [
+    { id: 'C-1042', title: 'Incumplimiento de contrato · Distribuidora Sur', estado: 'urgente', date: 'Audiencia 17 jun', status: 'red',
+      obs: ['Audiencia en 4 días · faltan 2 pruebas documentales', 'LexBot generó el escrito de alegatos (borrador)', 'Priorizar: riesgo de preclusión'],
+      kpis: [{ label: 'Plazo', value: '4 d', tone: 'bad' }, { label: 'Docs', value: '6/8', tone: 'warn' }, { label: 'Cuantía', value: '$120K' }] },
+    { id: 'C-1031', title: 'Reivindicación de inmueble · Familia Ortega', estado: 'pendiente', date: 'Resolución 9 jul', status: 'amber',
+      obs: ['Pendiente de resolución del juzgado', 'LexBot vigila el expediente a diario', 'Sin acciones requeridas esta semana'],
+      kpis: [{ label: 'Plazo', value: '26 d', tone: 'good' }, { label: 'Docs', value: '8/8', tone: 'good' }, { label: 'Cuantía', value: '$85K' }] },
+    { id: 'C-0998', title: 'Cobro de pagaré · Comercial Andina', estado: 'cerrado', date: 'Sentencia 2 jun', status: 'green',
+      obs: ['Caso cerrado con sentencia favorable', 'Honorarios facturados y cobrados', 'Archivado por LexBot'],
+      kpis: [{ label: 'Resultado', value: 'Favorable', tone: 'good' }, { label: 'Duración', value: '7 m' }, { label: 'Cuantía', value: '$40K' }] },
+  ],
+  familiar: [
+    { id: 'F-0521', title: 'Pensión alimenticia · caso Rivas', estado: 'urgente', date: 'Audiencia 16 jun', status: 'red',
+      obs: ['Audiencia en 3 días', 'LexBot detectó actualización de tabla de pensiones', 'Recalcular monto antes de la diligencia'],
+      kpis: [{ label: 'Plazo', value: '3 d', tone: 'bad' }, { label: 'Docs', value: '5/5', tone: 'good' }, { label: 'Etapa', value: 'Audiencia' }] },
+    { id: 'F-0498', title: 'Régimen de visitas · caso Mora', estado: 'pendiente', date: 'Mediación 28 jun', status: 'amber',
+      obs: ['Mediación agendada · propuesta en preparación', 'LexBot redactó el acuerdo tentativo', 'Esperando confirmación del cliente'],
+      kpis: [{ label: 'Plazo', value: '15 d', tone: 'good' }, { label: 'Docs', value: '4/6', tone: 'warn' }, { label: 'Etapa', value: 'Mediación' }] },
+  ],
+  penal: [
+    { id: 'P-0233', title: 'Defensa por estafa · cliente Núñez', estado: 'urgente', date: 'Formulación 15 jun', status: 'red',
+      obs: ['Formulación de cargos en 2 días', 'LexBot preparó la teoría del caso (borrador)', 'Revisar cadena de custodia de evidencia'],
+      kpis: [{ label: 'Plazo', value: '2 d', tone: 'bad' }, { label: 'Docs', value: '9/12', tone: 'warn' }, { label: 'Etapa', value: 'Instrucción' }] },
+    { id: 'P-0210', title: 'Querella por injurias · medio digital', estado: 'cerrado', date: 'Acuerdo 30 may', status: 'green',
+      obs: ['Resuelto por acuerdo reparatorio', 'LexBot archivó el expediente', 'Sin pendientes'],
+      kpis: [{ label: 'Resultado', value: 'Acuerdo', tone: 'good' }, { label: 'Duración', value: '4 m' }, { label: 'Etapa', value: 'Cerrado' }] },
+  ],
+  laboral: [
+    { id: 'L-0712', title: 'Despido injustificado · 5 trabajadores', estado: 'pendiente', date: 'Audiencia 5 jul', status: 'amber',
+      obs: ['Demanda colectiva en trámite', 'LexBot consolidó los 5 expedientes', 'Liquidaciones calculadas automáticamente'],
+      kpis: [{ label: 'Plazo', value: '22 d', tone: 'good' }, { label: 'Docs', value: '18/20', tone: 'warn' }, { label: 'Cuantía', value: '$64K' }] },
+    { id: 'L-0689', title: 'Acoso laboral · caso interno', estado: 'urgente', date: 'Inspección 18 jun', status: 'red',
+      obs: ['Inspección del Ministerio en 5 días', 'LexBot detectó documentación faltante', 'Solicitar declaraciones esta semana'],
+      kpis: [{ label: 'Plazo', value: '5 d', tone: 'bad' }, { label: 'Docs', value: '3/7', tone: 'bad' }, { label: 'Etapa', value: 'Inspección' }] },
+  ],
+  mercantil: [
+    { id: 'M-0344', title: 'Constitución de sociedad · TechCo', estado: 'pendiente', date: 'Registro 1 jul', status: 'amber',
+      obs: ['Estatutos en revisión registral', 'LexBot validó cláusulas contra la ley vigente', 'Sin observaciones de fondo'],
+      kpis: [{ label: 'Plazo', value: '18 d', tone: 'good' }, { label: 'Docs', value: '10/10', tone: 'good' }, { label: 'Etapa', value: 'Registro' }] },
+    { id: 'M-0321', title: 'Conflicto entre socios · Inversiones LM', estado: 'cerrado', date: 'Arbitraje 24 may', status: 'green',
+      obs: ['Resuelto en arbitraje', 'Laudo favorable al cliente', 'Archivado por LexBot'],
+      kpis: [{ label: 'Resultado', value: 'Favorable', tone: 'good' }, { label: 'Duración', value: '9 m' }, { label: 'Cuantía', value: '$210K' }] },
+  ],
+}
+const LEGAL_ESTADO_GROUPS: { key: LegalEstado; label: string; badge: string }[] = [
+  { key: 'urgente', label: 'Urgentes', badge: 'bg-red-100 text-red-700' },
+  { key: 'pendiente', label: 'Pendientes', badge: 'bg-amber-100 text-amber-700' },
+  { key: 'cerrado', label: 'Cerrados', badge: 'bg-emerald-100 text-emerald-700' },
 ]
 
 function LegalViz(_: IndustryVisualizationProps) {
-  const [sel, setSel] = useState(2) // Penalización (alto riesgo)
-  const c = LEGAL_CLAUSES[sel]
-  const riskStatus = (r: LegalRisk): 'green' | 'amber' | 'red' => (r === 'high' ? 'red' : r === 'med' ? 'amber' : 'green')
-  const riskBadge = (r: LegalRisk) => (r === 'high' ? 'bg-red-100 text-red-700' : r === 'med' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700')
-  const riskBorder = (r: LegalRisk) => (r === 'high' ? 'border-l-red-500' : r === 'med' ? 'border-l-amber-500' : 'border-l-emerald-500')
-  const riskLabel = (r: LegalRisk) => (r === 'high' ? 'Alto' : r === 'med' ? 'Medio' : 'Bajo')
-  const steps: Step[] = [
-    { icon: '📄', label: 'Ingesta del contrato', detail: 'Contrato de servicios TI · 14 págs', state: 'done' },
-    { icon: '🔎', label: 'Extracción de cláusulas', detail: '23 cláusulas identificadas', state: 'done' },
-    { icon: '⚖️', label: 'Análisis de riesgo', detail: '1 alta · 2 medias detectadas', state: 'active' },
-    { icon: '📋', label: 'Comparación con políticas', detail: 'vs. plantilla corporativa', state: 'pending' },
-    { icon: '📝', label: 'Resumen para el abogado', detail: 'Borrador de observaciones', state: 'pending' },
-  ]
+  const [selType, setSelType] = useState('civil')
+  const [selCaseId, setSelCaseId] = useState('C-1042')
+  const cases = LEGAL_CASES[selType] ?? []
+  const sel = cases.find((c) => c.id === selCaseId) ?? cases[0]
+
+  function pickType(key: string) {
+    setSelType(key)
+    const first = LEGAL_CASES[key]?.[0]
+    if (first) setSelCaseId(first.id)
+  }
+
+  const steps: Step[] = sel
+    ? [
+        { icon: '📄', label: 'Ingesta del expediente', detail: `Caso ${sel.id} digitalizado`, state: 'done' },
+        { icon: '🔎', label: 'Extracción de datos clave', detail: 'Partes, fechas y plazos', state: 'done' },
+        { icon: '⚖️', label: 'Análisis de riesgo y plazos', detail: sel.date, state: 'active' },
+        { icon: '📋', label: 'Comparación con jurisprudencia', detail: 'Precedentes relevantes', state: 'pending' },
+        { icon: '📝', label: 'Resumen para el abogado', detail: 'Borrador de escrito', state: 'pending' },
+      ]
+    : []
 
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
-        <Header title="Revisión inteligente de contratos" subtitle="Un contrato en revisión · haz clic en una cláusula para ver la observación de LexBot" noMargin />
+        <Header title="Agenda jurídica inteligente" subtitle="Cartera del bufete por materia · la IA clasifica y vigila plazos · haz clic en un caso" noMargin />
         <SupervisorBadge name="LexBot · Supervisor IA" />
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Hoja de contrato (cláusulas con texto) */}
+        {/* Cartera de casos por tipo */}
         <div className="bg-white/70 rounded-xl border border-slate-200 p-4">
-          <p className="text-xs font-semibold text-slate-700 mb-2">Contrato de servicios TI · en revisión</p>
-          <div className="rounded-lg border border-slate-200 bg-white shadow-sm p-3 max-h-[340px] overflow-y-auto">
-            <div className="border-b border-slate-100 pb-2 mb-2">
-              <p className="text-[11px] font-bold text-slate-700 tracking-wide">CONTRATO DE PRESTACIÓN DE SERVICIOS DE TI</p>
-              <p className="text-[10px] text-slate-400">Cliente S.A. ⇄ Proveedor Ltda. · valor $500K · 23 cláusulas</p>
-            </div>
-            <div className="space-y-1.5">
-              {LEGAL_CLAUSES.map((cl, i) => (
+          <p className="text-xs font-semibold text-slate-700 mb-2">Casos por materia · gestionados por el bufete</p>
+          <div className="flex flex-wrap gap-1.5 mb-3">
+            {LEGAL_TYPES.map((t) => {
+              const active = selType === t.key
+              return (
                 <button
-                  key={cl.n}
+                  key={t.key}
                   type="button"
-                  onClick={() => setSel(i)}
-                  className={`w-full text-left border-l-4 ${riskBorder(cl.risk)} rounded-r-md px-2.5 py-1.5 transition-all ${
-                    sel === i ? 'bg-slate-100 ring-1 ring-slate-300' : 'bg-slate-50/60 hover:bg-slate-100'
-                  }`}
+                  onClick={() => pickType(t.key)}
+                  className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 transition-all ${active ? 'border-indigo-400 bg-indigo-50 text-indigo-700' : 'border-slate-200 bg-white text-slate-600 hover:border-indigo-300'}`}
                 >
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-[11px] font-semibold text-slate-700">{cl.n} · {cl.name}</span>
-                    <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded-full shrink-0 ${riskBadge(cl.risk)}`}>{riskLabel(cl.risk)}</span>
-                  </div>
-                  <p className="text-[10px] text-slate-500 italic leading-snug mt-0.5">{cl.extract}</p>
+                  <span className="text-[11px]">{t.icon}</span>
+                  <span className="text-[10px] font-semibold">{t.label}</span>
+                  <span className={`text-[9px] font-bold rounded-full px-1.5 ${active ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-100 text-slate-500'}`}>{t.count}</span>
                 </button>
-              ))}
-            </div>
+              )
+            })}
+          </div>
+          <div className="rounded-lg border border-slate-200 bg-white shadow-sm p-3 max-h-[320px] overflow-y-auto space-y-3">
+            {LEGAL_ESTADO_GROUPS.map((g) => {
+              const list = cases.filter((c) => c.estado === g.key)
+              if (list.length === 0) return null
+              return (
+                <div key={g.key}>
+                  <p className="flex items-center gap-1.5 mb-1.5">
+                    <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded-full ${g.badge}`}>{g.label}</span>
+                    <span className="text-[9px] text-slate-400">{list.length}</span>
+                  </p>
+                  <div className="space-y-1.5">
+                    {list.map((c) => {
+                      const active = selCaseId === c.id
+                      return (
+                        <button
+                          key={c.id}
+                          type="button"
+                          onClick={() => setSelCaseId(c.id)}
+                          className={`w-full text-left rounded-md px-2.5 py-1.5 transition-all ${active ? 'bg-slate-100 ring-1 ring-slate-300' : 'bg-slate-50/60 hover:bg-slate-100'}`}
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-[11px] font-semibold text-slate-700">{c.id}</span>
+                            <span className="text-[9px] text-slate-400 shrink-0">{c.date}</span>
+                          </div>
+                          <p className="text-[10px] text-slate-500 leading-snug mt-0.5">{c.title}</p>
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              )
+            })}
           </div>
         </div>
 
-        {/* Observación de LexBot + flujo de revisión */}
-        <div className="flex flex-col gap-4">
-          <div className="bg-white/70 rounded-xl border border-slate-200 p-4">
-            <p className="text-xs font-semibold text-slate-700 mb-2">Observación de LexBot · cláusula {c.n}</p>
-            <AgentCard agent={`LexBot · ${c.name}`} status={riskStatus(c.risk)} lines={c.lines} />
-            <KpiRow items={[
-              { label: 'Cláusulas', value: '23' },
-              { label: 'Alto riesgo', value: '1', tone: 'bad' },
-              { label: 'T. revisión', value: '6 min', tone: 'good' },
-            ]} />
-          </div>
-          <StepFlow title="Revisión de este contrato" steps={steps} />
+        {/* Observación de LexBot del caso + flujo documental */}
+        <div className="bg-white/70 rounded-xl border border-slate-200 p-4">
+          {sel && (
+            <>
+              <p className="text-xs font-semibold text-slate-700 mb-2">LexBot · caso {sel.id}</p>
+              <AgentCard agent={`LexBot · ${sel.title}`} status={sel.status} lines={sel.obs} />
+              <KpiRow items={sel.kpis} />
+              <div className="mt-4">
+                <StepFlow title="Revisión documental del caso" steps={steps} />
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
