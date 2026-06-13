@@ -172,6 +172,7 @@ export default function ResultsPage() {
                   </p>
                 </div>
                 <SimulationApp
+                  key={result.industry}
                   config={getSimulation(result.industry)}
                   interactionModel={result.interactionModel}
                   industryId={result.industry}

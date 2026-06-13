@@ -100,12 +100,12 @@ ANÁLISIS COMERCIAL Y DEMANDA:
 - Información a pedir: ventas históricas, márgenes, costos de almacenamiento, comportamiento por canal
 - IA: forecasting de demanda, pricing dinámico, recomendación y personalización`,
   health: `
-SOPORTE CLÍNICO Y GESTIÓN:
-- Prioriza por gravedad y tiempo-dependencia (triage); identifica banderas rojas y ventanas terapéuticas
-- Banderas: signos de alarma (ej. cefalea súbita + HTA, déficit neurológico), tiempos críticos, no-shows altos, pacientes crónicos sin control
-- Recomendación CONCRETA: nivel de prioridad, protocolo a activar, siguiente paso clínico/operativo
-- Importante: la IA ASISTE, la decisión final es del profesional de salud
-- IA: estratificación de riesgo, recordatorios, soporte a diagnóstico diferencial (con supervisión)`,
+GESTIÓN Y OPERACIÓN HOSPITALARIA (no clínica):
+- Enfócate en eficiencia operativa: flujo de pacientes, ocupación y rotación de camas, tiempos de espera en urgencias, agendamiento, no-shows, codificación y facturación administrativa
+- Banderas: congestión en horarios pico, camas bloqueadas por altas tardías, no-shows altos, listas de espera, cuellos de botella administrativos
+- Recomendación CONCRETA: cómo rebalancear capacidad y agenda, qué proceso automatizar, ahorro/impacto estimado
+- IMPORTANTE: NO entregues diagnóstico, triaje clínico ni tratamiento de pacientes individuales. Si el caso plantea una decisión clínica, reencuádralo hacia la eficiencia operativa y la gestión del proceso
+- IA: predicción de demanda y no-shows, optimización de agenda y camas, automatización documental/administrativa`,
   logistics: `
 OPTIMIZACIÓN DE RUTAS Y FLOTA:
 - Calcula: rebalanceo de carga, km en vacío, cumplimiento de ventanas/SLA, costo por entrega

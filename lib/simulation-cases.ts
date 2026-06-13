@@ -15,9 +15,9 @@ const INDUSTRY_CASES: Record<string, string[]> = {
     'Mi e-commerce tiene 45K visitas/mes con tasa de conversión del 1.8% (industria: 2.5%). El abandono de carrito es 68%, concentrado en el paso de envío. Ticket promedio $52. ¿Qué analizarías para subir la conversión y dónde aplicarías personalización con IA?',
   ],
   health: [
-    'Paciente de 62 años, hipertensión conocida, llega a urgencias con cefalea intensa súbita 9/10 sin fiebre, presión arterial 185/115, leve dificultad para hablar iniciada hace 40 minutos. Hay 4 pacientes más en espera. ¿Cómo priorizas la atención y qué protocolo activarías?',
-    'Nuestra clínica tiene 30% de no-shows en citas programadas, lo que genera $80K/año en pérdidas y listas de espera de 3 semanas. Los no-shows se concentran en horarios de la tarde y en pacientes de seguimiento crónico. ¿Qué patrones analizarías y cómo reducirías las ausencias?',
-    'Gestionamos 850 pacientes con diabetes tipo 2. El 35% tiene hemoglobina glicosilada fuera de meta y 120 no asisten a controles hace más de 6 meses. El equipo es de 3 médicos y 2 enfermeras. ¿Cómo priorizarías el seguimiento y dónde entraría IA para estratificar riesgo?',
+    'Nuestra sala de urgencias atiende 220 pacientes/día con un tiempo de espera promedio de 2h40 (meta: 45 min) y picos de congestión entre 18:00 y 22:00. La UCI está al 92% de ocupación y las altas se procesan en bloque por la mañana, lo que traba la asignación de camas. ¿Cómo optimizarías el flujo de pacientes y la gestión de camas, y dónde aplicarías IA?',
+    'Nuestra red de clínicas tiene 30% de no-shows en citas programadas, lo que genera $80K/año en pérdidas y listas de espera de 3 semanas. Los no-shows se concentran en horarios de la tarde y en pacientes de seguimiento crónico. ¿Qué patrones analizarías y cómo reducirías las ausencias con recordatorios y sobreagendamiento inteligente?',
+    'Gestionamos un programa de 850 pacientes crónicos. 120 no asisten a sus controles agendados hace más de 6 meses y el equipo administrativo (3 personas) prioriza el seguimiento de forma manual. ¿Cómo organizarías y priorizarías la gestión de citas y recordatorios, y dónde entraría IA para optimizar la agenda y la cobertura de controles?',
   ],
   logistics: [
     'Dos rutas de entrega se cruzan en la zona norte. Un conductor terminó su ruta 90 minutos antes de lo previsto y otro lleva 50 minutos de retraso con 12 entregas pendientes y un SLA de entrega same-day en riesgo. Tengo 8 vehículos en operación. ¿Cómo rebalanceas en tiempo real y qué decisiones automatizarías?',
