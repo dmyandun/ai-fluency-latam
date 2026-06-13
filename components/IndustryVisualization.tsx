@@ -73,6 +73,9 @@ export default function IndustryVisualization(props: IndustryVisualizationProps)
     case 'health':    viz = <HealthViz {...props} />; break
     case 'insurance': viz = <InsuranceViz {...props} />; break
     case 'legal':     viz = <LegalViz {...props} />; break
+    case 'agro':      viz = <AgroViz {...props} />; break
+    case 'telecom':   viz = <TelecomViz {...props} />; break
+    case 'construction': viz = <ConstructionViz {...props} />; break
     default:          viz = <GenericViz {...props} />
   }
 
@@ -1464,6 +1467,384 @@ function LegalViz(_: IndustryVisualizationProps) {
               </div>
             </>
           )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ─────────────────────────── Agroindustria ─────────────────────────── */
+
+// Lotes del campo (grilla 3x2) con rinde y zona de manejo
+type AgroStatus = 'alto' | 'medio' | 'bajo'
+const AGRO_ZONES: { id: string; rinde: number; status: AgroStatus; rec: string[] }[] = [
+  { id: 'L-1', rinde: 12, status: 'alto', rec: ['Rinde 12 ton/ha · sin estrés', 'Mantener dosis · sin acción'] },
+  { id: 'L-2', rinde: 9, status: 'medio', rec: ['Rinde 9 ton/ha · leve déficit hídrico', 'Riego dirigido +15% esta semana'] },
+  { id: 'L-3', rinde: 6, status: 'bajo', rec: ['Rinde 6 ton/ha · suelo pobre en N', 'Fertilización variable +40 kg N/ha'] },
+  { id: 'L-4', rinde: 8, status: 'medio', rec: ['Rinde 8 ton/ha · compactación parcial', 'Descompactar y ajustar densidad'] },
+  { id: 'L-5', rinde: 11, status: 'alto', rec: ['Rinde 11 ton/ha · óptimo', 'Solo monitoreo satelital'] },
+  { id: 'L-6', rinde: 6, status: 'bajo', rec: ['Rinde 6 ton/ha · borde con sombra', 'Aplicación variable de insumos'] },
+]
+const AGRO_FILL: Record<AgroStatus, string> = { alto: '#16a34a', medio: '#facc15', bajo: '#f97316' }
+
+// Grupos del hato lechero (establo)
+type CowStatus = 'sana' | 'mastitis' | 'seguim'
+const AGRO_HERD: { group: string; vacas: number; litros: number; status: CowStatus; lines: string[] }[] = [
+  { group: 'Ordeño A', vacas: 160, litros: 26, status: 'sana', lines: ['160 vacas · 26 L/día promedio', 'Dieta y sanidad al día · sin acción'] },
+  { group: 'Ordeño B', vacas: 150, litros: 22, status: 'seguim', lines: ['150 vacas · 22 L/día (bajo potencial)', 'Ajuste de dieta +20% concentrado'] },
+  { group: 'Enfermería', vacas: 90, litros: 16, status: 'mastitis', lines: ['90 vacas · 15% con mastitis subclínica', 'Protocolo sanitario · recuperar a ~26 L'] },
+]
+const COW_FILL: Record<CowStatus, string> = { sana: '#16a34a', seguim: '#facc15', mastitis: '#ef4444' }
+
+function AgroViz(_: IndustryVisualizationProps) {
+  const [selZone, setSelZone] = useState(2) // L-3 (bajo rinde)
+  const [selGroup, setSelGroup] = useState(2) // Enfermería (mastitis)
+  const z = AGRO_ZONES[selZone]
+  const g = AGRO_HERD[selGroup]
+  const zStatus = (s: AgroStatus): 'green' | 'amber' | 'red' => (s === 'alto' ? 'green' : s === 'medio' ? 'amber' : 'red')
+  const gStatus = (s: CowStatus): 'green' | 'amber' | 'red' => (s === 'sana' ? 'green' : s === 'seguim' ? 'amber' : 'red')
+
+  return (
+    <div>
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+        <Header title="Agricultura de precisión y hato lechero" subtitle="Mapa de lotes por rinde y estado del establo · haz clic para ver la recomendación" noMargin />
+        <SupervisorBadge name="AgroBot · Supervisor IA" />
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Mapa de lotes (cultivos de precisión) */}
+        <div className="bg-white/70 rounded-xl border border-slate-200 p-4">
+          <p className="text-xs font-semibold text-slate-700 mb-2">Mapa de lotes · rinde y zonas de manejo</p>
+          <svg viewBox="0 0 300 200" className="w-full h-auto" style={{ maxHeight: 260 }}>
+            {AGRO_ZONES.map((zone, i) => {
+              const col = i % 3, row = Math.floor(i / 3)
+              const x = 8 + col * 96, y = 8 + row * 94
+              const active = selZone === i
+              return (
+                <g key={zone.id} style={{ cursor: 'pointer' }} onMouseEnter={() => setSelZone(i)} onClick={() => setSelZone(i)}>
+                  <rect x={x} y={y} width="92" height="90" rx="4" fill={AGRO_FILL[zone.status]} fillOpacity={active ? 0.85 : 0.6} stroke={active ? '#1e293b' : '#ffffff'} strokeWidth={active ? 2.5 : 1.5} />
+                  {/* surcos del cultivo */}
+                  {[0, 1, 2, 3].map((s) => (
+                    <line key={s} x1={x + 8} y1={y + 18 + s * 16} x2={x + 84} y2={y + 18 + s * 16} stroke="#ffffff" strokeOpacity="0.35" strokeWidth="1.2" />
+                  ))}
+                  <text x={x + 8} y={y + 16} className="fill-white text-[8px] font-bold">{zone.id}</text>
+                  <text x={x + 84} y={y + 84} textAnchor="end" className="fill-white text-[8px] font-semibold">{zone.rinde} t/ha</text>
+                  {active && <circle cx={x + 84} cy={y + 10} r="3.5" fill="#fff" />}
+                </g>
+              )
+            })}
+          </svg>
+          <div className="flex flex-wrap items-center gap-3 mt-2 text-[10px] text-slate-500">
+            <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm" style={{ background: AGRO_FILL.alto }} /> Alto rinde</span>
+            <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm" style={{ background: AGRO_FILL.medio }} /> Medio</span>
+            <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm" style={{ background: AGRO_FILL.bajo }} /> Bajo · acción</span>
+          </div>
+          <div className="mt-2">
+            <AgentCard agent={`RindeBot · ${z.id}`} status={zStatus(z.status)} lines={z.rec} />
+          </div>
+          <KpiRow items={[
+            { label: 'Rinde promedio', value: '8.7 t/ha' },
+            { label: 'Déficit hídrico', value: '+4°C', tone: 'warn' },
+            { label: 'Ahorro insumos', value: '$90K', tone: 'good' },
+          ]} />
+        </div>
+
+        {/* Establo (hato lechero) */}
+        <div className="bg-white/70 rounded-xl border border-slate-200 p-4">
+          <p className="text-xs font-semibold text-slate-700 mb-2">Establo · hato lechero por grupo</p>
+          <div className="space-y-2">
+            {AGRO_HERD.map((grp, i) => {
+              const active = selGroup === i
+              return (
+                <button
+                  key={grp.group}
+                  type="button"
+                  onClick={() => setSelGroup(i)}
+                  className={`w-full text-left border rounded-lg px-2.5 py-2 transition-all ${active ? 'border-indigo-300 bg-indigo-50/50 ring-1 ring-indigo-200' : 'border-slate-200 bg-white hover:border-indigo-300 hover:bg-indigo-50/40'}`}
+                >
+                  <div className="flex items-center justify-between gap-2 mb-1">
+                    <span className="flex items-center gap-1.5 text-[11px] font-bold text-slate-700">
+                      <span className="w-1.5 h-1.5 rounded-full" style={{ background: COW_FILL[grp.status] }} /> {grp.group}
+                    </span>
+                    <span className="text-[10px] text-slate-500">{grp.vacas} vacas · {grp.litros} L/día</span>
+                  </div>
+                  {/* muestra del grupo: íconos de vaca por estado */}
+                  <div className="flex flex-wrap gap-0.5">
+                    {Array.from({ length: 10 }).map((_, k) => {
+                      const sick = grp.status === 'mastitis' && k < 2
+                      const watch = grp.status === 'seguim' && k < 3
+                      const col = sick ? COW_FILL.mastitis : watch ? COW_FILL.seguim : COW_FILL.sana
+                      return <span key={k} className="text-[11px] leading-none" style={{ color: col, filter: 'saturate(1.4)' }}>🐄</span>
+                    })}
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+          <div className="mt-2">
+            <AgentCard agent={`SanidadBot · ${g.group}`} status={gStatus(g.status)} lines={g.lines} />
+          </div>
+          <KpiRow items={[
+            { label: 'Producción', value: '22 L/día', tone: 'warn' },
+            { label: 'Mastitis', value: '15%', tone: 'bad' },
+            { label: 'Potencial', value: '28 L/día', tone: 'good' },
+          ]} />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ─────────────────────────── Telecomunicaciones ─────────────────────────── */
+
+// Celdas/torres de la red de acceso (coordenadas en viewBox 0 0 300 220)
+type CellStatus = 'ok' | 'warn' | 'crit'
+const TELECOM_CELLS: { id: string; zona: string; load: number; status: CellStatus; x: number; y: number; lines: string[] }[] = [
+  { id: 'N-01', zona: 'Norte', load: 85, status: 'crit', x: 150, y: 38, lines: ['Carga 85% en hora pico · congestión', 'Ampliar capacidad · prioridad alta'] },
+  { id: 'E-02', zona: 'Este', load: 71, status: 'warn', x: 244, y: 96, lines: ['Carga 71% · al límite en pico', 'Balancear tráfico con celda vecina'] },
+  { id: 'S-03', zona: 'Sur', load: 48, status: 'ok', x: 196, y: 178, lines: ['Carga 48% · estable', 'Sin acción requerida'] },
+  { id: 'O-04', zona: 'Oeste', load: 62, status: 'ok', x: 60, y: 150, lines: ['Carga 62% · estable', 'Monitoreo continuo'] },
+  { id: 'C-05', zona: 'Centro', load: 74, status: 'warn', x: 92, y: 70, lines: ['Carga 74% · creciente', 'Programar upgrade en 30 días'] },
+]
+const CELL_COLOR: Record<CellStatus, string> = { ok: '#16a34a', warn: '#f59e0b', crit: '#ef4444' }
+
+function TelecomViz(_: IndustryVisualizationProps) {
+  const [selCell, setSelCell] = useState(0) // N-01 congestionada
+  const [hov, setHov] = useState(0)
+  const core = { x: 150, y: 110 }
+  const cell = TELECOM_CELLS[selCell]
+  const cellStatus = (s: CellStatus): 'green' | 'amber' | 'red' => (s === 'ok' ? 'green' : s === 'warn' ? 'amber' : 'red')
+  const support = [
+    { name: 'ChurnBot', icon: '👥', metric: 'Churn 6% en zona norte', status: 'red' as const, detail: ['Clientes con 2+ tickets y consumo a la baja', 'Retención proactiva antes del 3er ticket'] },
+    { name: 'TicketBot', icon: '🎫', metric: '12K tickets/semana', status: 'amber' as const, detail: ['55% son consultas repetitivas', 'IA conversacional resolvería el 55% sin agente'] },
+  ]
+
+  return (
+    <div>
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+        <Header title="Centro de operaciones de red (NOC)" subtitle="Carga por celda, churn y soporte · haz clic en una celda para ver su agente" noMargin />
+        <SupervisorBadge name="RedBot · Supervisor IA" />
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* Topología de red */}
+        <div className="lg:col-span-2 bg-white/70 rounded-xl border border-slate-200 p-4">
+          <p className="text-xs font-semibold text-slate-700 mb-2">Red de acceso · carga por celda</p>
+          <svg viewBox="0 0 300 220" className="w-full h-auto" style={{ maxHeight: 300 }}>
+            {/* enlaces core → celdas */}
+            {TELECOM_CELLS.map((c, i) => (
+              <line key={`l${i}`} x1={core.x} y1={core.y} x2={c.x} y2={c.y} stroke={CELL_COLOR[c.status]} strokeOpacity="0.4" strokeWidth="1.6" strokeDasharray="4 4">
+                <animate attributeName="stroke-dashoffset" values="8;0" dur="1.2s" repeatCount="indefinite" begin={`${i * 0.15}s`} />
+              </line>
+            ))}
+            {/* core */}
+            <circle cx={core.x} cy={core.y} r="14" fill="#1e293b" />
+            <text x={core.x} y={core.y + 3} textAnchor="middle" className="fill-white text-[8px] font-bold">CORE</text>
+            {/* celdas */}
+            {TELECOM_CELLS.map((c, i) => {
+              const active = selCell === i
+              const col = CELL_COLOR[c.status]
+              return (
+                <g key={c.id} style={{ cursor: 'pointer' }} onMouseEnter={() => setSelCell(i)} onClick={() => setSelCell(i)}>
+                  {/* cobertura */}
+                  <circle cx={c.x} cy={c.y} r="26" fill={col} fillOpacity={active ? 0.16 : 0.08} stroke={col} strokeOpacity="0.3" strokeWidth="1">
+                    {c.status === 'crit' && <animate attributeName="r" values="24;30;24" dur="1.4s" repeatCount="indefinite" />}
+                  </circle>
+                  {/* torre */}
+                  <circle cx={c.x} cy={c.y} r={active ? 9 : 7.5} fill={col} stroke="#fff" strokeWidth="1.5" />
+                  <text x={c.x} y={c.y + 2.5} textAnchor="middle" className="fill-white text-[7px] font-bold">{c.load}</text>
+                  <text x={c.x} y={c.y + 22} textAnchor="middle" className="fill-slate-600 text-[7px] font-semibold">{c.id} · {c.zona}</text>
+                  {active && <circle cx={c.x} cy={c.y} r="13" fill="none" stroke="#6366f1" strokeWidth="1.4" strokeDasharray="3 2" />}
+                </g>
+              )
+            })}
+          </svg>
+          <div className="flex flex-wrap items-center gap-3 mt-1 text-[10px] text-slate-500">
+            <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full" style={{ background: CELL_COLOR.ok }} /> Estable</span>
+            <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full" style={{ background: CELL_COLOR.warn }} /> Al límite</span>
+            <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full" style={{ background: CELL_COLOR.crit }} /> Congestión</span>
+          </div>
+          <div className="mt-2">
+            <AgentCard agent={`RedBot · ${cell.id} (${cell.zona})`} status={cellStatus(cell.status)} lines={cell.lines} />
+          </div>
+        </div>
+
+        {/* Clientes y soporte */}
+        <div className="bg-white/70 rounded-xl border border-slate-200 p-4">
+          <p className="text-xs font-semibold text-slate-700 mb-3">Clientes y soporte</p>
+          <AgentList agents={support} hov={hov} setHov={setHov} />
+          <KpiRow items={[
+            { label: 'Churn', value: '2.8%/mes', tone: 'bad' },
+            { label: 'CSAT', value: '6.2/10', tone: 'warn' },
+            { label: 'Pico red', value: '85%', tone: 'bad' },
+          ]} />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ─────────────────────────── Construcción ─────────────────────────── */
+
+const CONSTRUCTION_STAGES = ['Cimentación', 'Estructura', 'Instalaciones', 'Acabados', 'Entrega']
+type ConStatus = 'obra' | 'atrasado' | 'entregado'
+type Project = {
+  id: string; name: string; location: string; inversion: string
+  estado: ConStatus; avance: number; presupuesto: number; etapaIdx: number
+  cuadrillas: { name: string; personas: number; status: 'green' | 'amber' | 'red' }[]
+  obs: string[]; status: 'green' | 'amber' | 'red'
+  kpis: { label: string; value: string; tone?: 'good' | 'warn' | 'bad' }[]
+}
+const CONSTRUCTION_PROJECTS: Project[] = [
+  {
+    id: 'OBR-01', name: 'Torre Norte · 18 pisos', location: 'Zona financiera', inversion: '$12.4M',
+    estado: 'atrasado', avance: 45, presupuesto: 62, etapaIdx: 1,
+    cuadrillas: [
+      { name: 'Estructura (subcontrato)', personas: 42, status: 'red' },
+      { name: 'Encofrado', personas: 18, status: 'amber' },
+      { name: 'Eléctricos', personas: 12, status: 'green' },
+    ],
+    obs: ['Presupuesto 62% vs avance físico 45% — sobrecosto proyectado', '3 subcontratistas con retraso · riesgo de overrun', 'Acción correctiva inmediata recomendada'],
+    status: 'red',
+    kpis: [{ label: 'Presupuesto', value: '62%', tone: 'bad' }, { label: 'Accidentes', value: '3.2', tone: 'warn' }, { label: 'Desperdicio', value: '14%', tone: 'bad' }],
+  },
+  {
+    id: 'OBR-02', name: 'Centro Comercial Sur', location: 'Av. Circunvalación', inversion: '$8.1M',
+    estado: 'obra', avance: 70, presupuesto: 68, etapaIdx: 2,
+    cuadrillas: [
+      { name: 'Instalaciones MEP', personas: 30, status: 'green' },
+      { name: 'Albañilería', personas: 24, status: 'green' },
+      { name: 'Seguridad', personas: 6, status: 'green' },
+    ],
+    obs: ['Avance 70% alineado al presupuesto · en plazo', 'Pedidos de materiales planificados por IA', 'Sin riesgos críticos esta semana'],
+    status: 'green',
+    kpis: [{ label: 'Presupuesto', value: '68%', tone: 'good' }, { label: 'Accidentes', value: '1.1', tone: 'good' }, { label: 'Desperdicio', value: '6%', tone: 'good' }],
+  },
+  {
+    id: 'OBR-03', name: 'Hospital Regional', location: 'Distrito Este', inversion: '$21.0M',
+    estado: 'obra', avance: 28, presupuesto: 25, etapaIdx: 0,
+    cuadrillas: [
+      { name: 'Movimiento de tierras', personas: 36, status: 'green' },
+      { name: 'Cimentación', personas: 28, status: 'amber' },
+    ],
+    obs: ['Etapa de cimentación · 28% de avance', 'Clima retrasó 4 días el vaciado de concreto', 'Replanificar cronograma con holgura'],
+    status: 'amber',
+    kpis: [{ label: 'Presupuesto', value: '25%', tone: 'good' }, { label: 'Accidentes', value: '0.8', tone: 'good' }, { label: 'Desperdicio', value: '9%', tone: 'warn' }],
+  },
+  {
+    id: 'OBR-04', name: 'Condominio Las Lomas', location: 'Zona residencial', inversion: '$5.6M',
+    estado: 'entregado', avance: 100, presupuesto: 97, etapaIdx: 4,
+    cuadrillas: [
+      { name: 'Acabados', personas: 0, status: 'green' },
+    ],
+    obs: ['Obra entregada bajo presupuesto (97%)', 'Cero accidentes en los últimos 3 meses', 'Archivado por ObraBot'],
+    status: 'green',
+    kpis: [{ label: 'Presupuesto', value: '97%', tone: 'good' }, { label: 'Accidentes', value: '0', tone: 'good' }, { label: 'Desperdicio', value: '4%', tone: 'good' }],
+  },
+]
+const CON_BADGE: Record<ConStatus, string> = {
+  obra: 'bg-amber-100 text-amber-700', atrasado: 'bg-red-100 text-red-700', entregado: 'bg-emerald-100 text-emerald-700',
+}
+const CON_LABEL: Record<ConStatus, string> = { obra: 'En obra', atrasado: 'Atrasado', entregado: 'Entregado' }
+
+function ConstructionViz(_: IndustryVisualizationProps) {
+  const [sel, setSel] = useState(0) // Torre Norte (atrasado)
+  const p = CONSTRUCTION_PROJECTS[sel]
+  const steps: Step[] = CONSTRUCTION_STAGES.map((label, i) => ({
+    icon: ['🏗️', '🧱', '🔌', '🎨', '🔑'][i],
+    label,
+    detail: i < p.etapaIdx ? 'Completada' : i === p.etapaIdx ? 'En ejecución' : 'Pendiente',
+    state: i < p.etapaIdx ? 'done' : i === p.etapaIdx ? 'active' : 'pending',
+  }))
+  const totalInv = '$47.1M'
+
+  return (
+    <div>
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+        <Header title="Portafolio de obras · project manager IA" subtitle="Proyectos, inversión, etapas y cuadrillas · haz clic en una obra para ver el detalle" noMargin />
+        <SupervisorBadge name="ObraBot · Supervisor IA" />
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Cartera de proyectos */}
+        <div className="bg-white/70 rounded-xl border border-slate-200 p-4">
+          <KpiRow items={[
+            { label: 'Proyectos', value: '4' },
+            { label: 'Inversión total', value: totalInv },
+            { label: 'En plazo', value: '75%', tone: 'warn' },
+          ]} />
+          <p className="text-xs font-semibold text-slate-700 mt-3 mb-2">Obras gestionadas</p>
+          <div className="space-y-2">
+            {CONSTRUCTION_PROJECTS.map((pr, i) => {
+              const active = sel === i
+              return (
+                <button
+                  key={pr.id}
+                  type="button"
+                  onClick={() => setSel(i)}
+                  className={`w-full text-left border rounded-lg px-2.5 py-2 transition-all ${active ? 'border-indigo-300 bg-indigo-50/50 ring-1 ring-indigo-200' : 'border-slate-200 bg-white hover:border-indigo-300 hover:bg-indigo-50/40'}`}
+                >
+                  <div className="flex items-center justify-between gap-2 mb-1">
+                    <span className="text-[11px] font-bold text-slate-700">{pr.name}</span>
+                    <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded-full shrink-0 ${CON_BADGE[pr.estado]}`}>{CON_LABEL[pr.estado]}</span>
+                  </div>
+                  <div className="flex items-center justify-between gap-2 mb-1">
+                    <span className="text-[10px] text-slate-400">{pr.location} · {pr.inversion}</span>
+                    <span className="text-[10px] text-slate-500 font-semibold">{pr.avance}%</span>
+                  </div>
+                  <div className="h-1.5 rounded-full bg-slate-200 overflow-hidden">
+                    <div className="h-full rounded-full" style={{ width: `${pr.avance}%`, background: pr.estado === 'atrasado' ? '#ef4444' : pr.estado === 'entregado' ? '#10b981' : '#6366f1' }} />
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Detalle del proyecto seleccionado */}
+        <div className="bg-white/70 rounded-xl border border-slate-200 p-4">
+          <div className="flex items-center justify-between gap-2 mb-1">
+            <p className="text-xs font-semibold text-slate-700">{p.name}</p>
+            <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${CON_BADGE[p.estado]}`}>{CON_LABEL[p.estado]}</span>
+          </div>
+          <p className="text-[10px] text-slate-400 mb-3">{p.location} · inversión {p.inversion}</p>
+
+          {/* Avance físico vs presupuesto ejecutado */}
+          <div className="space-y-2 mb-3">
+            {[
+              { label: 'Avance físico', val: p.avance, color: '#6366f1' },
+              { label: 'Presupuesto ejecutado', val: p.presupuesto, color: p.presupuesto > p.avance + 8 ? '#ef4444' : '#10b981' },
+            ].map((bar) => (
+              <div key={bar.label}>
+                <div className="flex justify-between text-[10px] text-slate-500 mb-0.5">
+                  <span>{bar.label}</span><span className="font-semibold">{bar.val}%</span>
+                </div>
+                <div className="h-2 rounded-full bg-slate-200 overflow-hidden">
+                  <div className="h-full rounded-full" style={{ width: `${bar.val}%`, background: bar.color }} />
+                </div>
+              </div>
+            ))}
+            {p.presupuesto > p.avance + 8 && (
+              <p className="text-[10px] text-red-600 font-semibold">⚠ Gasto adelantado al avance · riesgo de sobrecosto</p>
+            )}
+          </div>
+
+          {/* Cuadrillas */}
+          <p className="text-[11px] font-semibold text-slate-700 mb-1.5">Cuadrillas · personal contratado</p>
+          <div className="space-y-1 mb-3">
+            {p.cuadrillas.map((cu, i) => {
+              const dot = cu.status === 'red' ? 'bg-red-500' : cu.status === 'amber' ? 'bg-amber-500' : 'bg-emerald-500'
+              return (
+                <div key={i} className="flex items-center justify-between gap-2 text-[10px]">
+                  <span className="flex items-center gap-1.5 text-slate-600"><span className={`w-1.5 h-1.5 rounded-full ${dot}`} /> {cu.name}</span>
+                  <span className="text-slate-500 font-semibold">{cu.personas} pers.</span>
+                </div>
+              )
+            })}
+          </div>
+
+          <AgentCard agent={`ObraBot · ${p.id}`} status={p.status} lines={p.obs} />
+          <KpiRow items={p.kpis} />
+          <div className="mt-3">
+            <StepFlow title="Etapa del proyecto" steps={steps} />
+          </div>
         </div>
       </div>
     </div>
