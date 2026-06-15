@@ -19,7 +19,8 @@ import RoadmapFlowBoard from '@/components/RoadmapFlowBoard'
 import AIPolicyGenerator from '@/components/AIPolicyGenerator'
 import ConsultationModal from '@/components/ConsultationModal'
 
-const DEFAULT_INTERACTION_MODEL: InteractionModel = 'agency'
+const PREVIEW_VARIANTS: InteractionModel[] = ['automation', 'agency', 'augmentation']
+const CHAT_MODEL: InteractionModel = 'agency'
 const LINKEDIN_URL = 'https://www.linkedin.com/in/dmyandun/'
 
 type ScoreInput = Omit<
@@ -202,7 +203,8 @@ export default function ExploreFlow() {
               <SimulationApp
                 key={`${industry}-${country}`}
                 config={getSimulation(industry)}
-                interactionModel={DEFAULT_INTERACTION_MODEL}
+                interactionModel={CHAT_MODEL}
+                variants={PREVIEW_VARIANTS}
                 industryId={industry}
                 country={country}
                 onSchedule={() => setScheduleOpen(true)}
@@ -215,7 +217,7 @@ export default function ExploreFlow() {
           <div ref={diagnosisRef}>
             <SectionShell
               title="¿Qué tipo de IA conviene implementar primero en tu organización?"
-              description="Responde un diagnóstico breve y descubre si tu mejor punto de partida es automatización, agentes o copilotos de aumentación."
+              description=""
               action={
                 !diagnosisUnlocked ? (
                   <button
@@ -276,65 +278,7 @@ export default function ExploreFlow() {
           </div>
         )}
 
-        {simulationReady && (
-          <SectionShell
-            title="¿Cómo se vería tu plan de adopción de IA para los próximos 12 meses?"
-            description="Genera un Roadmap 4D basado en Delegation, Description, Discernment y Diligence para convertir el diagnóstico en una ruta accionable."
-            action={
-              !roadmap && result ? (
-                <button
-                  type="button"
-                  onClick={handleGenerateRoadmap}
-                  className="rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:bg-blue-700"
-                >
-                  Generar Roadmap 4D →
-                </button>
-              ) : !result ? (
-                <button
-                  type="button"
-                  onClick={handleUnlockDiagnosis}
-                  className="rounded-xl border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-600 shadow-sm transition-all hover:border-blue-400 hover:text-blue-700"
-                >
-                  Primero completar diagnóstico →
-                </button>
-              ) : null
-            }
-          >
-            <div className="space-y-5">
-              {roadmap && <RoadmapFlowBoard roadmap={roadmap} onUpdateRoadmap={handleUpdateRoadmap} />}
-            </div>
-          </SectionShell>
-        )}
-
-        {simulationReady && (
-          <SectionShell
-            title="¿Qué reglas debería seguir tu equipo antes de usar IA con datos reales?"
-            description="Crea un borrador de política interna alineado al diagnóstico y al framework 4D. Solo necesitas escribir el nombre de la empresa."
-            action={
-              !policyUnlocked && result ? (
-                <button
-                  type="button"
-                  onClick={() => setPolicyUnlocked(true)}
-                  className="rounded-xl bg-slate-900 px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:bg-slate-800"
-                >
-                  Preparar generador de política →
-                </button>
-              ) : !result ? (
-                <button
-                  type="button"
-                  onClick={handleUnlockDiagnosis}
-                  className="rounded-xl border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-600 shadow-sm transition-all hover:border-blue-400 hover:text-blue-700"
-                >
-                  Primero completar diagnóstico →
-                </button>
-              ) : null
-            }
-          >
-            <div className="space-y-5">
-              {policyUnlocked && result && <AIPolicyGenerator result={result} />}
-            </div>
-          </SectionShell>
-        )}
+        {/* Roadmap and Policy sections removed per request */}
 
         <section className="border-t border-blue-200 py-10 text-center animate-fade-in">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-blue-600">Contacto</p>

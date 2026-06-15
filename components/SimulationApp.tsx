@@ -1,20 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
 import type { InteractionModel } from '@/types/assessment'
-import type { SimulationConfig, SimImpact, SimAIInsight } from '@/lib/simulations'
+import type { SimulationConfig, SimVariant } from '@/lib/simulations'
 import SimulationChat from '@/components/SimulationChat'
 import IndustryVisualization from '@/components/IndustryVisualization'
-
-type SimState = 'idle' | 'analyzing' | 'results' | 'applied'
-
-interface SimulationAppProps {
-  config: SimulationConfig
-  interactionModel: InteractionModel
-  industryId: string
-  country?: string
-  onSchedule?: () => void
-}
+import BankingWidget, { BANKING_CASES_BY_MODEL } from '@/components/BankingWidgets'
 
 const STATUS_STYLES = {
   ok:       'bg-emerald-50 text-emerald-700',
@@ -22,43 +12,126 @@ const STATUS_STYLES = {
   critical: 'bg-red-50 text-red-700',
 }
 
-const INSIGHT_STYLES: Record<SimAIInsight['type'], string> = {
-  prediction:     'border-l-blue-400 bg-blue-50',
-  alert:          'border-l-red-400 bg-red-50',
-  recommendation: 'border-l-indigo-400 bg-indigo-50',
-  automation:     'border-l-emerald-400 bg-emerald-50',
-  insight:        'border-l-violet-400 bg-violet-50',
+const INTERACTION_MODEL_META: Record<InteractionModel, {
+  icon: string; label: string
+  pill: string
+}> = {
+  automation:   { icon: '⚙️', label: 'Automation',   pill: 'bg-indigo-100 text-indigo-700 border-indigo-200' },
+  agency:       { icon: '🤖', label: 'Agency',       pill: 'bg-violet-100 text-violet-700 border-violet-200' },
+  augmentation: { icon: '🧠', label: 'Augmentation', pill: 'bg-cyan-100   text-cyan-700   border-cyan-200'   },
 }
 
-function ImpactRow({ item }: { item: SimImpact }) {
+function BibliographyParagraph({ variants }: { variants: InteractionModel[] }) {
+  const parts = variants
+    .map((m) => {
+      const entry = BANKING_CASES_BY_MODEL[m]
+      const meta = INTERACTION_MODEL_META[m]
+      if (!entry || entry.cases.length === 0) return null
+      return `${meta.label}: ${entry.cases.join('; ')}`
+    })
+    .filter(Boolean)
+    .join('. ')
+
   return (
-    <div className="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
-      <span className="text-xs text-slate-600 flex-1">{item.label}</span>
-      <div className="flex items-center gap-3 shrink-0">
-        <span className="text-xs text-slate-400 line-through">{item.before}</span>
-        <span className="text-xs">→</span>
-        <span className="text-xs font-semibold text-emerald-700">{item.after}</span>
-      </div>
+    <div className="border-t border-slate-100 bg-slate-50/40 px-6 py-4">
+      <p className="text-[11px] leading-relaxed text-slate-400">
+        <span className="font-semibold text-slate-500">Bibliografía — </span>
+        casos reales que inspiraron las simulaciones. {parts}.
+      </p>
     </div>
   )
 }
 
-export default function SimulationApp({ config, interactionModel, industryId, country, onSchedule }: SimulationAppProps) {
-  const [simState, setSimState] = useState<SimState>('idle')
-  const [dotCount, setDotCount] = useState(0)
-  const variant = config.variants[interactionModel] ?? config.variants['augmentation'] ?? Object.values(config.variants)[0]
+interface VariantBodyProps {
+  variant: SimVariant
+  config: SimulationConfig
+  modelMeta?: { icon: string; label: string; pill: string }
+  patternIndex?: number
+  patternTotal?: number
+}
 
-  useEffect(() => {
-    if (simState !== 'analyzing') return
-    const interval = setInterval(() => setDotCount((d) => (d + 1) % 4), 400)
-    const timeout  = setTimeout(() => setSimState('results'), 2200)
-    return () => { clearInterval(interval); clearTimeout(timeout) }
-  }, [simState])
+function VariantBody({ variant, config, modelMeta, patternIndex, patternTotal }: VariantBodyProps) {
+  return (
+    <div className="grid grid-cols-1 gap-0 divide-y divide-slate-100 border-t border-slate-100">
 
-  function handleReset() {
-    setSimState('idle')
-    setDotCount(0)
-  }
+      {/* Tabla de datos o widget visual */}
+      <div className="p-5">
+        <div className="mb-3 flex items-center gap-2 flex-wrap">
+          <h3 className="text-sm font-semibold text-slate-700">{config.tableTitle}</h3>
+          {modelMeta && (
+            <>
+              <span className="text-slate-300">·</span>
+              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[11px] font-semibold ${modelMeta.pill}`}>
+                <span>{modelMeta.icon}</span>
+                <span>{modelMeta.label}</span>
+              </span>
+              {patternIndex !== undefined && patternTotal !== undefined && patternTotal > 1 && (
+                <span className="ml-auto text-[10px] uppercase tracking-wide text-slate-400 font-semibold">
+                  Patrón {patternIndex + 1} / {patternTotal}
+                </span>
+              )}
+            </>
+          )}
+        </div>
+        {variant.visualWidget ? (
+          <BankingWidget widget={variant.visualWidget} />
+        ) : (
+          <div className="overflow-x-auto rounded-xl border border-slate-200">
+            <table className="w-full text-xs">
+              <thead>
+                <tr className="bg-slate-50 border-b border-slate-200">
+                  {config.tableHeaders.map((h) => (
+                    <th key={h} className="text-left px-3 py-2.5 text-slate-500 font-semibold whitespace-nowrap">
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {config.tableRows.map((row, i) => (
+                  <tr
+                    key={i}
+                    className={`border-b border-slate-100 last:border-0 transition-colors ${
+                      row.highlight ? 'bg-amber-50/40' : 'hover:bg-slate-50'
+                    }`}
+                  >
+                    {row.cells.map((cell, j) => (
+                      <td
+                        key={j}
+                        className={`px-3 py-2.5 whitespace-nowrap ${
+                          j === row.cells.length - 1 && row.status
+                            ? `font-semibold text-xs px-2 py-1 rounded-full ${STATUS_STYLES[row.status] ?? ''}`
+                            : 'text-slate-700'
+                        }`}
+                      >
+                        {cell}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      
+    </div>
+  )
+}
+
+interface SimulationAppProps {
+  config: SimulationConfig
+  interactionModel: InteractionModel
+  industryId: string
+  country?: string
+  onSchedule?: () => void
+  variants?: InteractionModel[]
+}
+
+export default function SimulationApp({ config, interactionModel, industryId, country, onSchedule, variants }: SimulationAppProps) {
+  const isMulti = Boolean(variants && variants.length > 1)
+  const variantsToRender = variants && variants.length > 0 ? variants : [interactionModel]
 
   return (
     <div className="rounded-2xl overflow-hidden border border-slate-200 shadow-xl bg-white">
@@ -73,13 +146,7 @@ export default function SimulationApp({ config, interactionModel, industryId, co
         <span className="text-slate-400 text-xs font-mono flex-1 text-center">
           app.{config.appName.toLowerCase().replace(/\s/g, '')}.ai — simulación interactiva
         </span>
-        <button
-          type="button"
-          onClick={handleReset}
-          className="text-slate-500 hover:text-slate-300 text-xs transition-colors"
-        >
-          ↺ Reiniciar
-        </button>
+        {!isMulti && <span className="text-slate-500 text-xs">↺ Reiniciar por sección</span>}
       </div>
 
       {/* Navbar de la app simulada */}
@@ -126,7 +193,7 @@ export default function SimulationApp({ config, interactionModel, industryId, co
         ))}
       </div>
 
-      {/* Visualización por industria */}
+      {/* Visualización por industria (null para banking) */}
       <IndustryVisualization
         industryId={industryId}
         country={country}
@@ -136,144 +203,23 @@ export default function SimulationApp({ config, interactionModel, industryId, co
         colorBorder={config.colorBorder}
       />
 
-      {/* Contenido principal */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-0 divide-y lg:divide-y-0 lg:divide-x divide-slate-100">
+      {/* Secciones por variante (1 o N) */}
+      {variantsToRender.map((m, idx) => {
+        const variant = config.variants[m] ?? config.variants['augmentation'] ?? Object.values(config.variants)[0]
+        const meta = INTERACTION_MODEL_META[m]
+        return (
+          <VariantBody
+            key={m}
+            variant={variant}
+            config={config}
+            modelMeta={isMulti ? meta : undefined}
+            patternIndex={idx}
+            patternTotal={variantsToRender.length}
+          />
+        )
+      })}
 
-        {/* Tabla de datos — 2/3 */}
-        <div className="lg:col-span-2 p-5">
-          <h3 className="text-sm font-semibold text-slate-700 mb-3">{config.tableTitle}</h3>
-          <div className="overflow-x-auto rounded-xl border border-slate-200">
-            <table className="w-full text-xs">
-              <thead>
-                <tr className="bg-slate-50 border-b border-slate-200">
-                  {config.tableHeaders.map((h) => (
-                    <th key={h} className="text-left px-3 py-2.5 text-slate-500 font-semibold whitespace-nowrap">
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {config.tableRows.map((row, i) => (
-                  <tr
-                    key={i}
-                    className={`border-b border-slate-100 last:border-0 transition-colors ${
-                      row.highlight ? 'bg-amber-50/40' : 'hover:bg-slate-50'
-                    }`}
-                  >
-                    {row.cells.map((cell, j) => (
-                      <td
-                        key={j}
-                        className={`px-3 py-2.5 whitespace-nowrap ${
-                          j === row.cells.length - 1 && row.status
-                            ? `font-semibold text-xs px-2 py-1 rounded-full ${STATUS_STYLES[row.status] ?? ''}`
-                            : 'text-slate-700'
-                        }`}
-                      >
-                        {cell}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Panel de IA — 1/3 */}
-        <div className="p-5 flex flex-col">
-          <div className="flex items-center gap-2 mb-2">
-            <div className={`w-2 h-2 rounded-full ${simState === 'analyzing' ? 'bg-amber-400 animate-pulse' : simState === 'results' || simState === 'applied' ? 'bg-emerald-400' : 'bg-slate-300'}`} />
-            <h3 className="text-sm font-semibold text-slate-700">{variant.panelTitle}</h3>
-          </div>
-
-          {simState === 'idle' && (
-            <div className="flex-1 flex flex-col">
-              <p className="text-xs text-slate-500 leading-relaxed mb-5">{variant.panelIntro}</p>
-              <button
-                type="button"
-                onClick={() => setSimState('analyzing')}
-                className={`w-full py-3 px-4 rounded-xl text-sm font-semibold text-white transition-all shadow-md hover:shadow-lg ${config.colorAccent} hover:opacity-90`}
-              >
-                {variant.actionLabel}
-              </button>
-            </div>
-          )}
-
-          {simState === 'analyzing' && (
-            <div className="flex-1 flex flex-col items-center justify-center gap-4 py-6">
-              <div className={`w-12 h-12 rounded-full ${config.colorLight} flex items-center justify-center`}>
-                <span className="text-2xl animate-spin">⚙️</span>
-              </div>
-              <div className="text-center">
-                <p className={`text-sm font-semibold ${config.colorText} mb-2`}>
-                  Procesando{'.'.repeat(dotCount + 1)}
-                </p>
-                <p className="text-xs text-slate-400 leading-relaxed max-w-[200px] text-center">
-                  {variant.processingMessage}
-                </p>
-              </div>
-              <div className="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
-                <div className={`h-full ${config.colorAccent} rounded-full animate-pulse`} style={{ width: '75%' }} />
-              </div>
-            </div>
-          )}
-
-          {simState === 'results' && (
-            <div className="flex-1 flex flex-col gap-3 overflow-y-auto max-h-[340px] pr-1">
-              {variant.insights.map((insight, i) => (
-                <div
-                  key={i}
-                  className={`border-l-4 rounded-r-xl px-3 py-2.5 animate-fade-in ${INSIGHT_STYLES[insight.type]}`}
-                  style={{ animationDelay: `${i * 150}ms` }}
-                >
-                  <p className="text-xs font-semibold text-slate-800 mb-0.5 flex items-center gap-1.5">
-                    <span>{insight.icon}</span>
-                    {insight.title}
-                  </p>
-                  <p className="text-xs text-slate-600 leading-relaxed">{insight.description}</p>
-                </div>
-              ))}
-              <button
-                type="button"
-                onClick={() => setSimState('applied')}
-                className="w-full mt-2 py-2.5 rounded-xl text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 transition-all shadow-sm"
-              >
-                ✓ Aplicar recomendaciones
-              </button>
-            </div>
-          )}
-
-          {simState === 'applied' && (
-            <div className="flex-1 flex flex-col gap-2 animate-fade-in">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-emerald-500 text-lg">✓</span>
-                <p className="text-sm font-semibold text-emerald-700">Impacto proyectado</p>
-              </div>
-              <p className="text-xs text-slate-500 mb-2">Con IA implementada vs. proceso actual:</p>
-              <div className="flex-1">
-                {variant.impacts.map((impact, i) => (
-                  <ImpactRow key={i} item={impact} />
-                ))}
-              </div>
-              <div className={`mt-3 rounded-xl px-3 py-2.5 text-center ${config.colorLight}`}>
-                <p className={`text-xs font-semibold ${config.colorText}`}>
-                  🎯 Esto es lo que la IA puede lograr en tu organización
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={handleReset}
-                className="w-full mt-1 py-2 text-xs text-slate-500 hover:text-slate-700 border border-slate-200 rounded-xl transition-all"
-              >
-                ↺ Ver de nuevo
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Chat con IA real — visible siempre debajo de la simulación */}
+      {/* Chat con IA real — una sola vez, debajo de todas las secciones */}
       <SimulationChat
         industryId={industryId}
         interactionModel={interactionModel}
@@ -283,6 +229,11 @@ export default function SimulationApp({ config, interactionModel, industryId, co
         colorText={config.colorText}
         onSchedule={onSchedule}
       />
+
+      {/* Bibliografía — al final de todo, en párrafo gris pequeño */}
+      {industryId === 'banking' && (
+        <BibliographyParagraph variants={variantsToRender} />
+      )}
 
       {/* Footer de la app simulada */}
       <div className="border-t border-slate-100 px-6 py-2.5 bg-slate-50 flex items-center justify-between">

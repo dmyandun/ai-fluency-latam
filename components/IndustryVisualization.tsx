@@ -63,13 +63,14 @@ function SupervisorBadge({ name = 'AFIA · Supervisor IA' }: { name?: string }) 
 export default function IndustryVisualization(props: IndustryVisualizationProps) {
   const { industryId } = props
 
+  if (industryId === 'banking') return null
+
   let viz: React.ReactNode
   switch (industryId) {
     case 'logistics': viz = <LogisticsViz {...props} />; break
     case 'retail':    viz = <RetailViz {...props} />; break
     case 'energy':    viz = <EnergyViz {...props} />; break
     case 'manufacturing': viz = <ManufacturingViz {...props} />; break
-    case 'banking':   viz = <BankingViz {...props} />; break
     case 'health':    viz = <HealthViz {...props} />; break
     case 'insurance': viz = <InsuranceViz {...props} />; break
     case 'legal':     viz = <LegalViz {...props} />; break
@@ -697,87 +698,6 @@ function ManufacturingViz(_: IndustryVisualizationProps) {
               '2. Stock mínimo de repuestos críticos',
               '3. Mantenimiento predictivo en soldadura',
             ]} />
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-/* ─────────────────────────── Banca ─────────────────────────── */
-
-function BankingViz(_: IndustryVisualizationProps) {
-  const [hov, setHov] = useState(0)
-  // Centro de riesgo: 3 agentes especializados
-  const agents = [
-    { name: 'FraudBot', icon: '🛡️', metric: '3 transacciones bloqueadas hoy', status: 'red' as const, detail: ['Patrón de layering en cuenta ****8821', 'Reporte enviado a cumplimiento'] },
-    { name: 'MoraBot', icon: '📨', metric: '$320K en mora priorizada', status: 'amber' as const, detail: ['47 cuentas > 60 días', 'Plan de recuperación · prob. de cobro 64%'] },
-    { name: 'RiskBot', icon: '📉', metric: '12 créditos en deterioro', status: 'amber' as const, detail: ['DSCR < 1.2 en 12 clientes', 'Alerta temprana de default activada'] },
-  ]
-  // Flujo de decisión de crédito en vivo
-  const steps = [
-    { icon: '📥', label: 'Solicitud recibida', detail: 'PYME · $120K · 24 meses', state: 'done' as const },
-    { icon: '📊', label: 'Scoring automático', detail: 'Score 68 / 100', state: 'done' as const },
-    { icon: '🧮', label: 'Análisis de ratios', detail: 'DSCR 1.3 · Leverage 46%', state: 'done' as const },
-    { icon: '✅', label: 'Decisión', detail: 'Aprobar con garantía', state: 'active' as const },
-  ]
-
-  return (
-    <div>
-      <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
-        <Header title="Centro de riesgo y decisión de crédito" subtitle="Agentes IA monitoreando fraude, mora y riesgo · haz clic para ver el detalle" noMargin />
-        <SupervisorBadge name="CreditBot · Supervisor IA" />
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {/* Centro de riesgo: agentes IA */}
-        <div className="bg-white/70 rounded-xl border border-slate-200 p-4">
-          <p className="text-xs font-semibold text-slate-700 mb-3">Centro de riesgo IA</p>
-          <div className="space-y-2">
-            {agents.map((a, i) => {
-              const dot = a.status === 'red' ? 'bg-red-500' : a.status === 'amber' ? 'bg-amber-500' : 'bg-emerald-500'
-              return (
-                <div
-                  key={i}
-                  className="border border-slate-200 rounded-lg p-2.5 cursor-pointer transition-all hover:border-blue-300 hover:bg-blue-50/40"
-                  onMouseEnter={() => setHov(i)}
-                  onClick={() => setHov(i)}
-                >
-                  <div className="flex items-center gap-1.5">
-                    <span className="relative flex h-2 w-2"><span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${dot} opacity-75`} /><span className={`relative inline-flex rounded-full h-2 w-2 ${dot}`} /></span>
-                    <span className="text-[11px] font-bold text-slate-700">{a.icon} {a.name}</span>
-                  </div>
-                  <p className="text-[11px] text-slate-600 mt-0.5">{a.metric}</p>
-                  {hov === i && (
-                    <div className="mt-1.5 pt-1.5 border-t border-slate-100">
-                      {a.detail.map((d, j) => (
-                        <p key={j} className={`text-[10px] leading-tight ${j === a.detail.length - 1 ? 'text-blue-600 font-semibold' : 'text-slate-500'}`}>{d}</p>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-        </div>
-
-        {/* Flujo de decisión en vivo */}
-        <div className="bg-white/70 rounded-xl border border-slate-200 p-4">
-          <p className="text-xs font-semibold text-slate-700 mb-3">Flujo de decisión</p>
-          <div className="space-y-0">
-            {steps.map((s, i) => (
-              <div key={i} className="flex gap-2.5">
-                <div className="flex flex-col items-center">
-                  <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] shrink-0 ${s.state === 'done' ? 'bg-emerald-100' : 'bg-amber-100'}`}>
-                    {s.state === 'done' ? <span className="text-emerald-600 font-bold">✓</span> : <span className="relative flex h-2.5 w-2.5"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" /><span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500" /></span>}
-                  </div>
-                  {i < steps.length - 1 && <div className="w-0.5 flex-1 bg-slate-200 my-0.5" style={{ minHeight: 14 }} />}
-                </div>
-                <div className="pb-3">
-                  <p className="text-xs font-semibold text-slate-700 leading-tight">{s.icon} {s.label}</p>
-                  <p className="text-[10px] text-slate-500 leading-tight">{s.detail}</p>
-                </div>
-              </div>
-            ))}
           </div>
         </div>
       </div>

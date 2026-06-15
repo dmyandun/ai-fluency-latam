@@ -261,7 +261,7 @@ export default function SimulationChat({
           <div className="flex items-center gap-1.5 mb-2.5">
             <span className="text-xs font-semibold text-slate-500">{appName}</span>
             <span className="text-xs text-slate-400">·</span>
-            <span className={`text-xs font-medium ${colorText}`}>Síntesis del orquestador</span>
+            <span className={`text-xs font-medium ${colorText}`}>Respuesta final</span>
           </div>
           <div className="space-y-2">
             <ReactMarkdown
@@ -289,7 +289,7 @@ export default function SimulationChat({
             <span className="font-semibold">Redactando respuesta final...</span>
           </div>
           <p className="mt-1 text-xs text-amber-700">
-            Los agentes ya completaron el análisis. El modelo está terminando de emitir la síntesis visible.
+            Los agentes ya completaron el análisis. El modelo está terminando de emitir la respuesta final.
           </p>
         </div>
       )}

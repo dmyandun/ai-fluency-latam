@@ -27,6 +27,11 @@ export interface SimImpact {
   unit: string
 }
 
+export type SimVisualWidget =
+  | { kind: 'amlInvestigationGraph' }
+  | { kind: 'agencyShowcase' }
+  | { kind: 'clientCopilotSplit' }
+
 export interface SimVariant {
   actionLabel: string
   processingMessage: string
@@ -34,6 +39,7 @@ export interface SimVariant {
   panelIntro: string
   insights: SimAIInsight[]
   impacts: SimImpact[]
+  visualWidget?: SimVisualWidget
 }
 
 export interface SimulationConfig {
@@ -133,77 +139,76 @@ const SIMULATIONS: Record<string, SimulationConfig> = {
   },
 
   banking: {
-    appName: 'RiskSense AI',
+    appName: 'BankCore AI',
     appIcon: '🏦',
-    tagline: 'Análisis de riesgo crediticio con IA',
-    navItems: ['Dashboard', 'Solicitudes', 'Portafolio', 'Riesgo', 'IA'],
+    tagline: 'Operaciones bancarias con IA — fraude, onboarding y atención',
+    navItems: ['Dashboard', 'Fraude', 'KYC', 'Clientes', 'IA'],
     colorAccent: 'bg-blue-700', colorLight: 'bg-blue-50',
     colorText: 'text-blue-700', colorBorder: 'border-blue-200',
     kpis: [
-      { label: 'Solicitudes hoy', value: '1,247', change: '+18% vs ayer', positive: true },
-      { label: 'Tasa de aprobación', value: '64.3%', change: '+2.1 pp', positive: true },
-      { label: 'Mora > 90 días', value: '3.2%', change: '-0.4 pp', positive: true },
-      { label: 'Tiempo promedio análisis', value: '4.2 min', change: '-68%', positive: true },
+      { label: 'Transacciones monitoreadas', value: '2.4M', change: '+18% vs ayer', positive: true },
+      { label: 'Onboardings completados', value: '1,847', change: '78% straight-through', positive: true },
+      { label: 'Contención en atención', value: '87%', change: '+24 pp con IA', positive: true },
+      { label: 'Pérdidas por fraude', value: '-50%', change: 'vs sistema legacy', positive: true },
     ],
-    tableTitle: 'Solicitudes de crédito en revisión',
-    tableHeaders: ['ID', 'Cliente', 'Monto', 'Score actual', 'Segmento', 'Acción'],
+    tableTitle: 'Centro de operaciones IA',
+    tableHeaders: ['ID', 'Cliente', 'Monto', 'Estado', 'Acción'],
     tableRows: [
-      { cells: ['#CR-4821', 'Empresa XYZ S.A.', '$250,000', '720', 'PYME', 'Revisar'], status: 'ok' },
-      { cells: ['#CR-4822', 'Juan Pérez', '$45,000', '580', 'Personal', 'Análisis IA'], status: 'warning', highlight: true },
-      { cells: ['#CR-4823', 'Textiles ABC', '$890,000', '695', 'Corporativo', 'Aprobada'], status: 'ok' },
-      { cells: ['#CR-4824', 'María González', '$12,000', '430', 'Personal', '🔴 Alto riesgo'], status: 'critical', highlight: true },
-      { cells: ['#CR-4825', 'Constructora DEF', '$1,200,000', '750', 'Corporativo', 'Revisar'], status: 'ok' },
+      { cells: ['#CR-4821', 'Empresa XYZ S.A.', '$250,000', 'En revisión', 'Revisar'], status: 'ok' },
     ],
     variants: {
       automation: {
-        actionLabel: '▶ Procesar solicitudes automáticamente',
-        processingMessage: 'La IA está calculando scores de riesgo, verificando buró y aplicando políticas de crédito...',
-        panelTitle: 'Motor de Decisión Automática',
-        panelIntro: 'La IA aplica las políticas de crédito automáticamente a solicitudes estándar, liberando al analista para casos complejos.',
+        actionLabel: '🕸️ Investigar red AML',
+        processingMessage: 'El motor AML mapea cuentas relacionadas, detecta patrones de structuring y construye la red de relaciones sospechosas...',
+        panelTitle: 'Motor Antifraude / AML',
+        panelIntro: 'Inspirado en HSBC AML AI (-60% falsos positivos, +50% sospechosas interceptadas) y JPMorgan. La IA detecta automáticamente patrones de lavado, expande la red de cuentas vinculadas y genera el reporte UAF.',
+        visualWidget: { kind: 'amlInvestigationGraph' },
         insights: [
-          { type: 'automation', icon: '✅', title: '1,089 solicitudes procesadas automáticamente', description: '87.3% del volumen resuelto sin intervención humana en < 2 minutos. Decisiones trazables y auditables.' },
-          { type: 'alert', icon: '🔴', title: '158 casos requieren revisión humana', description: 'Perfil atípico, inconsistencia en datos o monto fuera de política. Asignados al equipo de analistas.' },
-          { type: 'prediction', icon: '📊', title: 'Score alternativo calculado para CR-4822', description: 'Datos transaccionales sugieren score real de 640 (vs 580 en buró). Modelo recomienda aprobación condicional con menor monto.' },
-          { type: 'recommendation', icon: '💡', title: 'Optimización de política detectada', description: 'El modelo sugiere ampliar el segmento de aprobación automática para PYMEs con > 24 meses de historial. +$4.2M en cartera sin aumentar mora.' },
+          { type: 'alert',      icon: '🔴', title: 'TX-9823 bloqueada — $14,200 a Hong Kong',  description: 'Dispositivo nuevo + geolocalización atípica + monto fuera del rango histórico. Probabilidad de fraude 96%.' },
+          { type: 'automation', icon: '🤖', title: '2.4M transacciones analizadas hoy',         description: 'Decisión en <10ms cada una. 312 bloqueadas automáticamente, 18 escaladas a investigador, $1.84M en pérdidas evitadas.' },
+          { type: 'prediction', icon: '📊', title: 'Nuevo patrón de smurfing detectado',         description: 'Cluster de 47 cuentas relacionadas operando justo bajo el umbral de reporte. Modelo lo aprendió en 6 días y reportó a UAF.' },
+          { type: 'recommendation', icon: '💡', title: 'Optimización: reducir umbral zona X',  description: 'Backtest 90 días sugiere bajar falsos positivos 12% sin perder detecciones reales. Ahorro: 340 horas/mes de analistas.' },
         ],
         impacts: [
-          { label: 'Tiempo promedio de resolución', before: '3.2 días', after: '18 minutos', unit: '' },
-          { label: 'Costo por solicitud procesada', before: '$28', after: '$3.40', unit: '' },
-          { label: 'Solicitudes procesadas por analista/día', before: '25', after: '180', unit: '' },
+          { label: 'Pérdidas por fraude transaccional',  before: 'Referencia', after: '-50%',         unit: '' },
+          { label: 'Falsos positivos AML',               before: 'Referencia', after: '-60%',         unit: '' },
+          { label: 'Tiempo de decisión por transacción', before: 'Semanas',    after: '< 10 ms',      unit: '' },
         ],
       },
       agency: {
-        actionLabel: '🤖 Activar agente de análisis crediticio',
-        processingMessage: 'El agente está recopilando datos de múltiples fuentes, calculando ratios y preparando el expediente...',
-        panelTitle: 'Agente de Análisis',
-        panelIntro: 'El agente consulta buró, estados financieros, historial interno y redes de relaciones para construir el expediente crediticio completo.',
+        actionLabel: '🤖 Desplegar agentes autónomos',
+        processingMessage: 'Los agentes están resolviendo créditos y cobranza end-to-end sin intervención humana...',
+        panelTitle: 'Agentes Autónomos',
+        panelIntro: 'Dos escenarios reales: (1) orquestación multi-agente para underwriting de créditos comerciales (patrón JPMorgan COiN + Nubank nuFormer), y (2) agente de cobranza autónoma vía WhatsApp que negocia planes de pago (patrón Nubank + Mercado Pago).',
+        visualWidget: { kind: 'agencyShowcase' },
         insights: [
-          { type: 'automation', icon: '🤖', title: 'Expediente CR-4825 completado en 90 segundos', description: 'El agente recopiló: estados financieros 3 años, consulta buró, análisis de industria (construcción) y verificación de garantías.' },
-          { type: 'prediction', icon: '📈', title: 'Scoring multivariable calculado', description: 'Score compuesto 762: Financiero 78/100, Sectorial 71/100, Comportamental 85/100. Riesgo: BAJO. Recomendación: Aprobar.' },
-          { type: 'alert', icon: '⚠️', title: 'Señal de alerta en red de relaciones', description: 'El agente detectó que un director de Constructora DEF tiene deuda vencida en otra institución. Escalar para revisión senior.' },
-          { type: 'recommendation', icon: '💡', title: 'Condiciones óptimas calculadas', description: 'Tasa sugerida: 9.8%. Plazo: 48 meses. Garantía: hipotecaria. Reduce la mora esperada en 2.3 pp vs política estándar.' },
+          { type: 'automation', icon: '🤖', title: 'Expediente CR-4821 resuelto en 90 segundos',     description: 'Los 4 agentes consolidaron 11 fuentes de datos, simularon estrés a +400 bps, cruzaron AML/OFAC y produjeron condiciones óptimas — sin intervención humana.' },
+          { type: 'alert',      icon: '⚠️', title: 'Compliance escaló alerta a Decisión',            description: 'Agente Compliance detectó deuda vencida de un director en otra institución. Agente Decisión incorporó la señal en su scoring final (-12 pts).' },
+          { type: 'prediction', icon: '📈', title: 'Score compuesto: 762 / Riesgo BAJO',              description: 'Datos 78/100 · Riesgo 71/100 · Comportamental 85/100. Recomendación final: aprobar a 9.8% con garantía hipotecaria.' },
+          { type: 'recommendation', icon: '💡', title: 'Auditoría completa generada automáticamente', description: 'Cada agente dejó trazabilidad en la bitácora de orquestación. La decisión es defendible ante el comité de crédito y los reguladores (SBS/CNBV/Superfinanciera).' },
         ],
         impacts: [
-          { label: 'Tiempo de análisis por expediente', before: '4.5 horas', after: '8 minutos', unit: '' },
-          { label: 'Cobertura de verificación de datos', before: '3 fuentes', after: '11 fuentes', unit: '' },
-          { label: 'Alertas de fraude detectadas', before: '12/mes', after: '67/mes', unit: '' },
+          { label: 'Tiempo de análisis end-to-end',          before: '4.5 horas',  after: '90 segundos', unit: '' },
+          { label: 'Cobertura de verificación de datos',     before: '3 fuentes',  after: '11 fuentes',  unit: '' },
+          { label: 'Expedientes procesados por analista/día', before: '6',          after: '180',         unit: '' },
         ],
       },
       augmentation: {
-        actionLabel: '🧠 Asistir al analista senior',
-        processingMessage: 'La IA está preparando el briefing de análisis para el analista...',
-        panelTitle: 'Copiloto del Analista',
-        panelIntro: 'La IA provee contexto profundo, señales de riesgo y comparables de mercado para que el analista tome la mejor decisión en menos tiempo.',
+        actionLabel: '🧠 Activar copiloto del asesor',
+        processingMessage: 'La IA consolida el historial del cliente, detecta señales de churn y prepara las sugerencias para la llamada del asesor...',
+        panelTitle: 'Copiloto del Asesor',
+        panelIntro: 'Patrón Bradesco BIA (87% de contención), Wells Fargo Fargo (245M interacciones) y DBS nudges (clientes ahorran 2x, invierten 5x). La IA prepara contexto y sugerencias; el asesor decide y ejecuta.',
+        visualWidget: { kind: 'clientCopilotSplit' },
         insights: [
-          { type: 'insight', icon: '🔍', title: 'Contexto sectorial — Construcción', description: 'El sector construcción en México creció 6.8% en Q3. Sin embargo, la empresa opera en el segmento residencial que mostró señales de desaceleración.' },
-          { type: 'prediction', icon: '📊', title: 'Comparación con cartera similar', description: 'De 47 empresas similares en portafolio, 89% cumplieron sin atrasos. El perfil de Constructora DEF es mejor que el promedio del segmento.' },
-          { type: 'recommendation', icon: '💡', title: '3 condiciones que reducen el riesgo', description: '1) Cláusula de revisión anual, 2) Reportes trimestrales de avance de obra, 3) Cuenta de resultados vinculada. El analista decide cuáles aplicar.' },
-          { type: 'alert', icon: '⚠️', title: 'Pregunta sugerida para el comité', description: '¿La garantía hipotecaria está libre de cargas? El expediente no lo confirma. Solicitar certificado registral antes de aprobar.' },
+          { type: 'insight',        icon: '🔍', title: 'M. Salazar — perfil sintetizado en 2.1s', description: '8 años cliente premium, AUM $48.2K (+18% YoY), NPS 9/10, sin productos de inversión. Listo para llamada de las 11:30.' },
+          { type: 'alert',          icon: '⚠️', title: 'Riesgo de churn 73% próximos 60 días',   description: '3 transferencias salientes a banco rival en últimos 30 días + consulta de hipoteca por WhatsApp. Llamada proactiva HOY.' },
+          { type: 'recommendation', icon: '💡', title: 'Next-best-product: Fondo conservador',   description: 'Match perfil 94%. Sin productos de inversión activos en 8 años. Producto cumple su tolerancia al riesgo declarada.' },
+          { type: 'prediction',     icon: '📊', title: 'Comparable con cohorte similar',          description: 'De 213 clientes con perfil idéntico, los que recibieron nudge proactivo: ahorran 2.1x, invierten 5x y suben NPS +6 puntos.' },
         ],
         impacts: [
-          { label: 'Tiempo de preparación del analista', before: '3.5 horas', after: '25 minutos', unit: '' },
-          { label: 'Calidad de decisiones (tasa de mora)', before: '3.8%', after: '2.1%', unit: '' },
-          { label: 'Satisfacción del equipo analista', before: '6.2/10', after: '8.7/10', unit: '' },
+          { label: 'Contención de consultas sin escalar', before: '63%',          after: '87%',          unit: '' },
+          { label: 'NPS post-interacción',                before: '42',           after: '71',           unit: '' },
+          { label: 'Tiempo de preparación pre-llamada',   before: '12 min',       after: '2 s',          unit: '' },
         ],
       },
     },
