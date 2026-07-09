@@ -70,11 +70,12 @@ const MODEL_BEHAVIOR: Record<InteractionModel, string> = {
 const INDUSTRY_ENHANCED: Record<string, string> = {
   manufacturing: `
 ANÁLISIS DE PRODUCCIÓN E INVENTARIO:
-- Calcula: stock de seguridad por SKU según variabilidad de demanda y lead time; punto de reorden; rotación; OEE si aplica
-- Banderas: quiebres frecuentes en SKUs de alta rotación, sobrestock que inmoviliza capital, defectos sobre meta, OEE < 65%
-- Recomendación CONCRETA: política de inventario diferenciada (ABC/XYZ), nivel de servicio objetivo, qué SKUs priorizar
+- Calcula: stock de seguridad por SKU según variabilidad de demanda y lead time; punto de reorden; rotación; OEE si aplica (world-class ≥ 85%); usa el costo de hora de paro no planificado como driver
+- Banderas: quiebres frecuentes en SKUs de alta rotación, sobrestock que inmoviliza capital, defectos sobre meta, OEE < 65%, inspección por muestreo donde cabe cobertura 100% con visión IA
+- Benchmarks reales citables: inspección visual IA cubre el 100% de unidades vs muestreo (BMW AIQX, 30+ plantas); plantas Lighthouse logran -30% costos (WEF/Foxconn); copilotos industriales reducen ~30% el tiempo de diagnóstico/código (Siemens)
+- Recomendación CONCRETA: política de inventario diferenciada (ABC/XYZ), nivel de servicio objetivo, qué SKUs o estaciones priorizar
 - Información a pedir: histórico de consumo, lead times reales, costos de quiebre vs almacenamiento
-- IA: forecasting de demanda, reorden automático, mantenimiento predictivo`,
+- IA: forecasting de demanda, reorden automático, inspección visual, mantenimiento predictivo`,
   banking: `
 ANÁLISIS DE RIESGO CREDITICIO (usa fórmulas correctas):
 - Cuota mensual estimada ≈ monto / plazo (más interés). Ratio CLAVE = cuota mensual ÷ cash flow mensual disponible
@@ -94,25 +95,28 @@ OPTIMIZACIÓN DE CARTERA:
 - Segmenta por rentabilidad, costo de servir y probabilidad de churn; calcula ROI incremental por segmento`,
   retail: `
 ANÁLISIS COMERCIAL Y DEMANDA:
-- Calcula: elasticidad/curva de descuento para liquidar, margen por SKU, días de inventario, tasa de conversión
-- Banderas: stock estacional sin rotar, quiebres en top sellers, sobrestock, conversión bajo benchmark, abandono de carrito alto
-- Recomendación CONCRETA: estrategia de pricing/markdown con % y plazo, rebalanceo entre tiendas, qué descontinuar
+- Calcula: elasticidad/escalera de markdown (descuento creciente por semanas restantes), margen por SKU, días de inventario y capital inmovilizado, tasa de conversión
+- Banderas: stock estacional sin rotar, quiebres en top sellers, sobrestock, conversión bajo benchmark (~2.5%), abandono de carrito alto
+- Benchmarks reales citables: forecasting con reposición automática reduce quiebres 15-25% (Walmart); sobrestock -20% (Zara); asistentes de compra conversacionales logran ~3x conversión (Amazon Rufus; Magalu Lu por WhatsApp en LATAM)
+- Recomendación CONCRETA: estrategia de pricing/markdown con % y plazo semana a semana, rebalanceo entre tiendas, qué descontinuar
 - Información a pedir: ventas históricas, márgenes, costos de almacenamiento, comportamiento por canal
-- IA: forecasting de demanda, pricing dinámico, recomendación y personalización`,
+- IA: forecasting de demanda, pricing dinámico, recomendación y personalización, asistente de compra conversacional`,
   health: `
 GESTIÓN Y OPERACIÓN HOSPITALARIA (no clínica):
-- Enfócate en eficiencia operativa: flujo de pacientes, ocupación y rotación de camas, tiempos de espera en urgencias, agendamiento, no-shows, codificación y facturación administrativa
-- Banderas: congestión en horarios pico, camas bloqueadas por altas tardías, no-shows altos, listas de espera, cuellos de botella administrativos
+- Enfócate en eficiencia operativa: flujo de pacientes, ocupación y rotación de camas, tiempos de espera en urgencias, agendamiento, no-shows, documentación, codificación y facturación administrativa
+- Banderas: congestión en horarios pico, camas bloqueadas por altas tardías, no-shows altos, listas de espera, carga documental excesiva (1-2 h extra/día por médico), errores de codificación (~$3,200 por caso)
+- Benchmarks reales citables: coordinación asistida por agentes reduce reingresos 15-30% (Nature Biomed Eng 2025); codificación ICD-10 automática con concordancia κ≈0.87 (JMIR 2024); cuidado con cifras de vendor — dictado ambiental prometía -50% de tiempo de nota y el RCT independiente midió -9.5% (NEJM AI 2025): recomienda validar localmente
 - Recomendación CONCRETA: cómo rebalancear capacidad y agenda, qué proceso automatizar, ahorro/impacto estimado
 - IMPORTANTE: NO entregues diagnóstico, triaje clínico ni tratamiento de pacientes individuales. Si el caso plantea una decisión clínica, reencuádralo hacia la eficiencia operativa y la gestión del proceso
-- IA: predicción de demanda y no-shows, optimización de agenda y camas, automatización documental/administrativa`,
+- IA: predicción de demanda y no-shows, optimización de agenda y camas, documentación ambiental y codificación automática`,
   logistics: `
 OPTIMIZACIÓN DE RUTAS Y FLOTA:
-- Calcula: rebalanceo de carga, km en vacío, cumplimiento de ventanas/SLA, costo por entrega
+- Calcula SIEMPRE: costo por entrega, % de km en vacío, rebalanceo de carga, cumplimiento de ventanas/SLA
 - Banderas: rutas cruzadas, conductor ocioso vs sobrecargado, SLA en riesgo, % alto de km muertos
+- Benchmarks reales citables: optimización de rutas ahorra 6-8 millas/conductor/día y ~10% de combustible (UPS ORION, 55.000 rutas); copiloto de excepciones con drafts aceptados 70-80% de las veces (patrón Flexport); orquestación last-mile con ML a escala LATAM (Rappi, 9 países)
 - Recomendación CONCRETA: reasignación específica, qué entregas mover, ahorro estimado
 - Información a pedir: ubicaciones, ventanas horarias, capacidad y disponibilidad de flota
-- IA: optimización de rutas en tiempo real, ETA predictivo, asignación dinámica`,
+- IA: optimización de rutas en tiempo real, ETA predictivo, asignación dinámica, copiloto de excepciones`,
   legal: `
 ANÁLISIS CONTRACTUAL Y DE RIESGO JURÍDICO:
 - Identifica cláusulas de riesgo (penalidades sin tope, cambio de control, jurisdicción ambigua, renovación automática)
@@ -140,10 +144,11 @@ AGRICULTURA DE PRECISIÓN:
 - IA: predicción de rendimiento, riego/fertilización variable, detección temprana por sensores/imágenes`,
   telecom: `
 RED Y EXPERIENCIA DE CLIENTE:
-- Diagnostica causa raíz (capacidad de nodo en pico, congestión), correlaciona tickets con churn
-- Banderas: nodo saturado, churn elevado en cohorte con tickets sin resolver, consumo decreciente
-- Recomendación CONCRETA: qué priorizar (ampliar capacidad, retención proactiva), impacto estimado
-- IA: predicción de churn, clasificación/enrutamiento de tickets, IA conversacional para soporte`,
+- Diagnostica causa raíz (capacidad de nodo en pico, congestión), correlaciona tickets con churn; considera la energía (20-40% del OPEX de red)
+- Banderas: nodo saturado, churn sobre benchmark regional (2-3% mensual prepago), cohorte con tickets sin resolver, consumo decreciente, celdas encendidas con tráfico mínimo
+- Benchmarks reales citables: cell sleep con ML ahorra 25-33% de energía de RAN (Vodafone/Ericsson); copiloto de agentes: AHT -9% (Vivo I.Ajuda, 23.000 agentes en Brasil) y primera resolución de 15% a 60% (Vodafone SuperTOBi); advertencia: accuracy de churn de 99% es de laboratorio — en producción espera 80-92%
+- Recomendación CONCRETA: qué priorizar (ampliar capacidad, retención proactiva, ahorro energético), impacto estimado
+- IA: predicción de churn, cell sleep, clasificación/enrutamiento de tickets, copiloto de agentes de soporte`,
   insurance: `
 SUSCRIPCIÓN Y SINIESTROS:
 - Perfila riesgo (edad, exposición, siniestralidad de zona); estima prima y deducible adecuados
