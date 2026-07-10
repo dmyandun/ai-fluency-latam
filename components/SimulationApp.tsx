@@ -5,6 +5,7 @@ import type { SimulationConfig, SimVariant } from '@/lib/simulations'
 import SimulationChat from '@/components/SimulationChat'
 import IndustryVisualization from '@/components/IndustryVisualization'
 import BankingWidget, { BANKING_CASES_BY_MODEL } from '@/components/BankingWidgets'
+import { REAL_CASES_BY_INDUSTRY } from '@/lib/real-cases'
 
 const STATUS_STYLES = {
   ok:       'bg-emerald-50 text-emerald-700',
@@ -21,10 +22,13 @@ const INTERACTION_MODEL_META: Record<InteractionModel, {
   augmentation: { icon: '🧠', label: 'Augmentation', pill: 'bg-cyan-100   text-cyan-700   border-cyan-200'   },
 }
 
-function BibliographyParagraph({ variants }: { variants: InteractionModel[] }) {
+function BibliographyParagraph({ variants, casesByModel }: {
+  variants: InteractionModel[]
+  casesByModel: Record<InteractionModel, { cases: string[] }>
+}) {
   const parts = variants
     .map((m) => {
-      const entry = BANKING_CASES_BY_MODEL[m]
+      const entry = casesByModel[m]
       const meta = INTERACTION_MODEL_META[m]
       if (!entry || entry.cases.length === 0) return null
       return `${meta.label}: ${entry.cases.join('; ')}`
@@ -132,6 +136,7 @@ interface SimulationAppProps {
 export default function SimulationApp({ config, interactionModel, industryId, country, onSchedule, variants }: SimulationAppProps) {
   const isMulti = Boolean(variants && variants.length > 1)
   const variantsToRender = variants && variants.length > 0 ? variants : [interactionModel]
+  const bibliographyCases = industryId === 'banking' ? BANKING_CASES_BY_MODEL : REAL_CASES_BY_INDUSTRY[industryId]
 
   return (
     <div className="rounded-2xl overflow-hidden border border-slate-200 shadow-xl bg-white">
@@ -231,8 +236,8 @@ export default function SimulationApp({ config, interactionModel, industryId, co
       />
 
       {/* Bibliografía — al final de todo, en párrafo gris pequeño */}
-      {industryId === 'banking' && (
-        <BibliographyParagraph variants={variantsToRender} />
+      {bibliographyCases && (
+        <BibliographyParagraph variants={variantsToRender} casesByModel={bibliographyCases} />
       )}
 
       {/* Footer de la app simulada */}
