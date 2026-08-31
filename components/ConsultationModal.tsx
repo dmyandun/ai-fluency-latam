@@ -5,6 +5,7 @@ import Script from 'next/script'
 import type { AssessmentResult, WorkActivity } from '@/types/assessment'
 import { CALENDLY_URL, buildDiagnosisSummary } from '@/lib/contact'
 import ActivityListInput from './ActivityListInput'
+import { LATAM_COUNTRIES } from '@/lib/countries'
 
 interface ConsultationModalProps {
   result: AssessmentResult
@@ -33,6 +34,7 @@ export default function ConsultationModal({ result, open, onClose }: Consultatio
   const [activities, setActivities] = useState<WorkActivity[]>([])
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
+  const [country, setCountry] = useState('')
   const [scriptReady, setScriptReady] = useState(false)
   const [calendarLoaded, setCalendarLoaded] = useState(false)
   const widgetRef = useRef<HTMLDivElement>(null)
@@ -59,10 +61,13 @@ export default function ConsultationModal({ result, open, onClose }: Consultatio
       prefill: {
         name: name.trim() || undefined,
         email: email.trim() || undefined,
-        customAnswers: { a1: buildDiagnosisSummary(result, activities) },
+        customAnswers: { a1: buildDiagnosisSummary(result, activities, country) },
       },
     })
-  }, [step, scriptReady, name, email, activities, result])
+  }, [step, scriptReady, name, email, country, activities, result])
+
+  // El país es obligatorio: define la zona horaria y el contexto de la reunión.
+  const canContinue = activities.length > 0 && country !== ''
 
   function handleClose() {
     onClose()
@@ -70,6 +75,7 @@ export default function ConsultationModal({ result, open, onClose }: Consultatio
     setActivities([])
     setName('')
     setEmail('')
+    setCountry('')
     setCalendarLoaded(false)
   }
 
@@ -141,18 +147,41 @@ export default function ConsultationModal({ result, open, onClose }: Consultatio
                   className="w-full bg-white border border-slate-300 text-slate-900 text-sm rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-slate-400"
                 />
               </div>
+              <div>
+                <label htmlFor="consultation-country" className="text-xs font-medium text-slate-600 mb-1 block">
+                  Tu país <span className="text-red-500" aria-hidden="true">*</span>
+                </label>
+                <select
+                  id="consultation-country"
+                  value={country}
+                  required
+                  onChange={(e) => setCountry(e.target.value)}
+                  className="w-full bg-white border border-slate-300 text-slate-900 text-sm rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                >
+                  <option value="">— Elige tu país —</option>
+                  {LATAM_COUNTRIES.map((option) => (
+                    <option key={option.code} value={option.code}>
+                      {option.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             <button
               type="button"
               onClick={() => setStep('schedule')}
-              disabled={activities.length === 0}
+              disabled={!canContinue}
               className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-200 disabled:text-slate-400 text-white font-semibold py-3 rounded-xl text-sm transition-all shadow-sm"
             >
               Continuar a agendar →
             </button>
-            {activities.length === 0 && (
-              <p className="text-xs text-slate-400 text-center">Agrega al menos una actividad para continuar.</p>
+            {!canContinue && (
+              <p className="text-xs text-slate-400 text-center">
+                {activities.length === 0
+                  ? 'Agrega al menos una actividad y elige tu país para continuar.'
+                  : 'Elige tu país para continuar.'}
+              </p>
             )}
           </div>
         )}
