@@ -2,7 +2,7 @@ import Link from 'next/link'
 
 export default function FinalCta() {
   return (
-    <section className="px-6 py-20 lg:py-24 bg-slate-50 border-t border-slate-200">
+    <section className="px-6 py-20 lg:py-24 bg-white border-t border-slate-200">
       <div className="max-w-4xl mx-auto relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 to-slate-800 px-8 py-14 sm:px-14 text-center">
         <div className="absolute -top-24 -right-16 w-72 h-72 rounded-full bg-blue-500/20 blur-3xl" />
         <div className="absolute -bottom-24 -left-16 w-72 h-72 rounded-full bg-indigo-500/20 blur-3xl" />

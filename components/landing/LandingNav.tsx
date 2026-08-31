@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Brandmark from '@/components/Brandmark'
 import { useEffect, useState } from 'react'
 
 const NAV_LINKS = [
@@ -34,14 +35,7 @@ export default function LandingNav() {
       }`}
     >
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2.5 group">
-          <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white text-sm font-bold shadow-sm transition-transform group-hover:scale-105">
-            AI
-          </span>
-          <span className="text-lg font-semibold text-slate-900 tracking-tight">
-            AI Fluency <span className="text-blue-600">LATAM</span>
-          </span>
-        </Link>
+        <Brandmark />
 
         <div className="hidden md:flex items-center gap-1">
           {NAV_LINKS.map((link) => (
