@@ -66,6 +66,7 @@ export default function ExploreFlow() {
   const simulationRef = useRef<HTMLDivElement>(null)
   const diagnosisRef = useRef<HTMLDivElement>(null)
   const resultsRef = useRef<HTMLDivElement>(null)
+  const roadmapRef = useRef<HTMLDivElement>(null)
 
   const simulationReady = Boolean(country && industry)
   const allQuestionsAnswered = QUESTIONS.every((q) => answers[q.dimension] !== undefined)
@@ -85,14 +86,27 @@ export default function ExploreFlow() {
   }, [country, industry, result])
 
   const progress = useMemo(() => {
-    if (result) return 100
-    if (diagnosisUnlocked && allQuestionsAnswered) return 75
-    if (diagnosisUnlocked) return 65
-    if (simulationReady && allQuestionsAnswered) return 75
+    // El recorrido no termina en el resultado: el roadmap y la política son los
+    // dos pasos finales, así que el 100% se reserva para cuando ambos existen.
+    if (result && roadmap && policyUnlocked) return 100
+    if (result && (roadmap || policyUnlocked)) return 90
+    if (result) return 80
+    if (diagnosisUnlocked && allQuestionsAnswered) return 70
+    if (diagnosisUnlocked) return 60
+    if (simulationReady && allQuestionsAnswered) return 70
     if (simulationReady) return 50
     if (country || industry) return 25
     return 10
-  }, [allQuestionsAnswered, country, diagnosisUnlocked, industry, result, simulationReady])
+  }, [
+    allQuestionsAnswered,
+    country,
+    diagnosisUnlocked,
+    industry,
+    policyUnlocked,
+    result,
+    roadmap,
+    simulationReady,
+  ])
 
   function handleCountryChange(nextCountry: string) {
     setCountry(nextCountry)
@@ -147,6 +161,10 @@ export default function ExploreFlow() {
     const nextRoadmap = generateDefaultRoadmap(result)
     setRoadmap(nextRoadmap)
     saveRoadmap(nextRoadmap)
+
+    window.setTimeout(() => {
+      roadmapRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 120)
   }
 
   const handleUpdateRoadmap = useCallback((updated: Roadmap) => {
@@ -238,7 +256,9 @@ export default function ExploreFlow() {
                   <div className="flex flex-col items-start justify-between gap-3 bg-blue-50 px-5 py-4 sm:flex-row sm:items-center">
                     <div>
                       <p className="text-sm font-semibold text-slate-900">Genera tus resultados del diagnóstico</p>
-                      <p className="text-xs text-slate-500">Después podrás activar tu roadmap y la política de IA.</p>
+                      <p className="text-xs text-slate-500">
+                        Al terminar podrás generar tu Roadmap 4D y un borrador de política de IA.
+                      </p>
                     </div>
                     <button
                       type="button"
@@ -278,7 +298,59 @@ export default function ExploreFlow() {
           </div>
         )}
 
-        {/* Roadmap and Policy sections removed per request */}
+        {result && (
+          <div ref={roadmapRef}>
+            <SectionShell
+              title="¿Cómo se vería tu plan de adopción de IA para los próximos 12 meses?"
+              description="Un Roadmap 4D basado en Delegation, Description, Discernment y Diligence, que convierte el diagnóstico en una ruta accionable por fases. Puedes editar, agregar o eliminar iniciativas."
+              action={
+                !roadmap ? (
+                  <button
+                    type="button"
+                    onClick={handleGenerateRoadmap}
+                    className="rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:bg-blue-700"
+                  >
+                    Generar Roadmap 4D →
+                  </button>
+                ) : null
+              }
+            >
+              {roadmap ? (
+                <RoadmapFlowBoard roadmap={roadmap} onUpdateRoadmap={handleUpdateRoadmap} />
+              ) : (
+                <p className="text-sm text-slate-500">
+                  El roadmap se arma a partir de tu resultado y queda guardado en este navegador.
+                </p>
+              )}
+            </SectionShell>
+          </div>
+        )}
+
+        {result && (
+          <SectionShell
+            title="¿Qué reglas debería seguir tu equipo antes de usar IA con datos reales?"
+            description="Un borrador de política interna alineado al diagnóstico y al framework 4D. Solo necesitas escribir el nombre de la empresa."
+            action={
+              !policyUnlocked ? (
+                <button
+                  type="button"
+                  onClick={() => setPolicyUnlocked(true)}
+                  className="rounded-xl bg-slate-900 px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:bg-slate-800"
+                >
+                  Preparar generador de política →
+                </button>
+              ) : null
+            }
+          >
+            {policyUnlocked ? (
+              <AIPolicyGenerator result={result} />
+            ) : (
+              <p className="text-sm text-slate-500">
+                Se genera a partir de tu recomendación, sin enviar datos a ningún servidor.
+              </p>
+            )}
+          </SectionShell>
+        )}
 
         <section className="border-t border-blue-200 py-10 text-center animate-fade-in">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-blue-600">Contacto</p>
