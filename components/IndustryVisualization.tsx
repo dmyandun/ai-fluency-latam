@@ -1,22 +1,22 @@
 'use client'
 
 import { useRef, useState, useEffect } from 'react'
-import { LATAM_COUNTRIES } from '@/lib/countries'
 import { getCountryShape } from '@/lib/country-shapes'
 
 interface IndustryVisualizationProps {
   industryId: string
-  country?: string
   colorAccent: string
   colorLight: string
   colorText: string
   colorBorder: string
 }
 
-function countryName(code?: string): string {
-  if (!code) return 'tu país'
-  return LATAM_COUNTRIES.find((c) => c.code === code)?.name ?? code
-}
+/**
+ * Las simulaciones aplican a toda la región, así que el mapa deja de depender del
+ * país elegido: se dibuja siempre un país de referencia y el rótulo habla de red
+ * regional. El trazado es ilustrativo, no un dato del diagnóstico.
+ */
+const REFERENCE_COUNTRY = 'CO'
 
 // Tarjeta de agente IA reutilizable (usada en hovers y paneles de alertas)
 function AgentCard({ agent, lines, status = 'green', className = '' }: {
@@ -157,8 +157,8 @@ const PICK_ROUTES = [
   'M12 130 L32 130 L32 33 L110 33 L188 33 L188 130 L208 130',
 ]
 
-function LogisticsViz({ country, colorText }: IndustryVisualizationProps) {
-  const shape = getCountryShape(country)
+function LogisticsViz({ colorText }: IndustryVisualizationProps) {
+  const shape = getCountryShape(REFERENCE_COUNTRY)
   const pathRef = useRef<SVGPathElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const [bbox, setBbox] = useState(shape?.bboxOverride ?? null)
@@ -179,7 +179,7 @@ function LogisticsViz({ country, colorText }: IndustryVisualizationProps) {
     } else {
       setBbox(null)
     }
-  }, [country, shape])
+  }, [shape])
   /* eslint-enable react-hooks/set-state-in-effect */
 
   // Genera hasta 5 nodos DENTRO del polígono del país (test point-in-polygon del DOM),
@@ -245,7 +245,7 @@ function LogisticsViz({ country, colorText }: IndustryVisualizationProps) {
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
-        <Header title={`Red de distribución — ${countryName(country)}`} subtitle="Haz clic en una bodega para ver su agente IA y su picking" noMargin />
+        <Header title="Red de distribución regional" subtitle="Haz clic en una bodega para ver su agente IA y su picking" noMargin />
         <SupervisorBadge />
       </div>
 

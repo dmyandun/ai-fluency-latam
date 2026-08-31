@@ -19,8 +19,8 @@ soporta `output: 'standalone'`; sirve la app igual y el aviso es esperado.
 **Next.js 16 App Router** con estas rutas:
 - `/` → landing (`app/page.tsx`, compone las secciones de `components/landing/`)
 - `/explore` → recorrido completo en una sola página (`components/ExploreFlow.tsx`):
-  país e industria → simulación → diagnóstico → resultados → Roadmap 4D → política de IA
-- `/assessment` → el mismo diagnóstico sin simulación, en 3 pasos (`app/assessment/page.tsx`)
+  industria → simulación → diagnóstico → resultados → Roadmap 4D → política de IA
+- `/assessment` → el mismo diagnóstico sin simulación, en 2 pasos (`app/assessment/page.tsx`)
 - `/results` → resultados + roadmap; sólo alcanzable desde `/assessment`
 - `/privacy` → política de privacidad (`components/PrivacyPolicy.tsx`)
 - `/api/chat` → única ruta dinámica; proxy del chat de simulación
@@ -36,6 +36,12 @@ coherente — la suite E2E cubre los dos.
 
 Ambos flujos escriben `afl_result` y borran `afl_roadmap` al recalcular, para
 que un diagnóstico nuevo no arrastre el roadmap del anterior.
+
+**El diagnóstico ya no pregunta el país**: los casos de las simulaciones aplican
+a toda la región. `AssessmentResult.country` sigue existiendo y se rellena con
+`DEFAULT_REGION` (`'LATAM'`) para no invalidar los resultados que los usuarios ya
+tengan guardados; `resolveLocationName()` en `lib/countries.ts` traduce tanto ese
+valor como los códigos de país antiguos.
 
 **Variables de entorno.** `/api/chat` necesita `HF_TOKEN` (inferencia en Hugging
 Face). Sin él, el chat de simulación falla; el resto de la app funciona igual.
@@ -128,7 +134,7 @@ contenido. Es material divulgativo, no entra en el scoring.
 **Camino directo** (dos páginas):
 
 ```
-/assessment  (país → industria → 10 preguntas)
+/assessment  (industria → 10 preguntas)
   → buildAssessmentResult()  [llama a calculateScores() por dentro]
   → localStorage.setItem('afl_result', JSON) + removeItem('afl_roadmap')
   → router.push('/results')
@@ -144,7 +150,7 @@ contenido. Es material divulgativo, no entra en el scoring.
 
 ```
 /explore  (ExploreFlow mantiene todo en estado local)
-  país + industria → simulación (saltable) → 10 preguntas
+  industria → simulación (saltable) → 10 preguntas
   → buildAssessmentResult() → setResult() + guarda 'afl_result'
   → "Generar Roadmap 4D" → generateDefaultRoadmap() → saveRoadmap()
   → "Preparar generador de política" → AIPolicyGenerator

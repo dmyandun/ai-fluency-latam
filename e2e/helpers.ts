@@ -20,9 +20,8 @@ export async function answerAllQuestions(page: Page, value = 4) {
   return total
 }
 
-/** Elige país (un <select>) e industria (una grilla de botones). */
-export async function pickCountryAndIndustry(page: Page) {
-  await page.getByLabel('Selecciona tu país').selectOption({ label: 'Ecuador' })
+/** Elige industria. El diagnóstico ya no pregunta el país. */
+export async function pickIndustry(page: Page) {
   await page.getByRole('button', { name: 'Banca y Finanzas' }).first().click()
 }
 

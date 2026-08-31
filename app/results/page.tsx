@@ -177,7 +177,6 @@ export default function ResultsPage() {
                   config={getSimulation(result.industry)}
                   interactionModel={result.interactionModel}
                   industryId={result.industry}
-                  country={result.country}
                   onSchedule={() => setScheduleOpen(true)}
                 />
               </div>

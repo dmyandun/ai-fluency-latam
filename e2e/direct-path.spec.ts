@@ -11,15 +11,11 @@ test('desde la landing hasta el roadmap sin ver simulaciones', async ({ page }) 
   await page.getByRole('link', { name: /^Iniciar diagnóstico/ }).first().click()
   await expect(page).toHaveURL(/\/assessment/)
 
-  // Paso 1 de 3: país.
-  await page.getByLabel('Selecciona tu país').selectOption({ label: 'Ecuador' })
-  await page.getByRole('button', { name: /Continuar/ }).click()
-
-  // Paso 2 de 3: industria.
+  // Paso 1 de 2: industria.
   await page.getByRole('button', { name: 'Banca y Finanzas' }).click()
   await page.getByRole('button', { name: /Continuar/ }).click()
 
-  // Paso 3 de 3: las 13 dimensiones en una sola tabla.
+  // Paso 2 de 2: las preguntas en una sola tabla.
   expect(await answerAllQuestions(page)).toBe(QUESTION_COUNT)
   await page.getByRole('button', { name: /Ver mis resultados/ }).click()
 
@@ -35,8 +31,6 @@ test('desde la landing hasta el roadmap sin ver simulaciones', async ({ page }) 
 
 test('el diagnóstico persiste al recargar la página de resultados', async ({ page }) => {
   await page.goto('/assessment')
-  await page.getByLabel('Selecciona tu país').selectOption({ label: 'Ecuador' })
-  await page.getByRole('button', { name: /Continuar/ }).click()
   await page.getByRole('button', { name: 'Banca y Finanzas' }).click()
   await page.getByRole('button', { name: /Continuar/ }).click()
   await answerAllQuestions(page)
@@ -52,4 +46,12 @@ test('el diagnóstico persiste al recargar la página de resultados', async ({ p
 test('/results sin diagnóstico previo redirige al diagnóstico', async ({ page }) => {
   await page.goto('/results')
   await expect(page).toHaveURL(/\/assessment/)
+})
+
+test('el diagnóstico ya no pregunta el país', async ({ page }) => {
+  await page.goto('/assessment')
+
+  await expect(page.getByText('Paso 1 de 2')).toBeVisible()
+  await expect(page.getByLabel('Selecciona tu país')).toHaveCount(0)
+  await expect(page.getByRole('heading', { name: /industria/i })).toBeVisible()
 })

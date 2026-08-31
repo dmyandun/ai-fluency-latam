@@ -128,12 +128,11 @@ interface SimulationAppProps {
   config: SimulationConfig
   interactionModel: InteractionModel
   industryId: string
-  country?: string
   onSchedule?: () => void
   variants?: InteractionModel[]
 }
 
-export default function SimulationApp({ config, interactionModel, industryId, country, onSchedule, variants }: SimulationAppProps) {
+export default function SimulationApp({ config, interactionModel, industryId, onSchedule, variants }: SimulationAppProps) {
   const isMulti = Boolean(variants && variants.length > 1)
   const variantsToRender = variants && variants.length > 0 ? variants : [interactionModel]
   const bibliographyCases = industryId === 'banking' ? BANKING_CASES_BY_MODEL : REAL_CASES_BY_INDUSTRY[industryId]
@@ -201,7 +200,6 @@ export default function SimulationApp({ config, interactionModel, industryId, co
       {/* Visualización por industria (null para banking) */}
       <IndustryVisualization
         industryId={industryId}
-        country={country}
         colorAccent={config.colorAccent}
         colorLight={config.colorLight}
         colorText={config.colorText}

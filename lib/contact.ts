@@ -1,5 +1,6 @@
 import type { AssessmentResult, WorkActivity } from '@/types/assessment'
 import { MODEL_LABELS } from '@/lib/recommendations'
+import { resolveLocationName } from '@/lib/countries'
 
 // URL del inline embed de Calendly. Reemplazar con la URL real del evento.
 // (Share → Add to website → Inline Embed → copiar el valor de data-url)
@@ -27,14 +28,24 @@ const ACTIVITY_CATEGORY_LABEL: Record<string, string> = {
   human_only: 'Solo humano',
 }
 
-// Resumen compacto del diagnóstico para pre-llenar en la reserva de Calendly.
-export function buildDiagnosisSummary(result: AssessmentResult, activities: WorkActivity[]): string {
+/**
+ * Resumen compacto del diagnóstico para pre-llenar en la reserva de Calendly.
+ *
+ * El país se pide en el formulario de consultoría, no en el diagnóstico: los
+ * casos aplican a toda la región, pero para agendar sí importa la zona horaria y
+ * el contexto local de quien reserva.
+ */
+export function buildDiagnosisSummary(
+  result: AssessmentResult,
+  activities: WorkActivity[],
+  country?: string
+): string {
   const interaction = MODEL_LABELS[result.interactionModel] ?? result.interactionModel
   const implementation = MODEL_LABELS[result.implementationType] ?? result.implementationType
 
   const lines: string[] = []
   lines.push('DIAGNÓSTICO AI FLUENCY LATAM')
-  lines.push(`País: ${result.country} · Industria: ${result.industry}`)
+  lines.push(`País: ${resolveLocationName(country || result.country)} · Industria: ${result.industry}`)
   lines.push(`Recomendación: ${interaction} + ${implementation}`)
   lines.push('')
 

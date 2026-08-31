@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test'
-import { QUESTION_COUNT, answerAllQuestions, expectRecommendation, pickCountryAndIndustry } from './helpers'
+import { QUESTION_COUNT, answerAllQuestions, expectRecommendation, pickIndustry } from './helpers'
 
 /**
  * Camino guiado: /explore usa las simulaciones para despertar curiosidad y de ahí
@@ -7,7 +7,7 @@ import { QUESTION_COUNT, answerAllQuestions, expectRecommendation, pickCountryAn
  */
 test('la simulación se puede saltar para ir directo al diagnóstico', async ({ page }) => {
   await page.goto('/explore')
-  await pickCountryAndIndustry(page)
+  await pickIndustry(page)
 
   // La salida existe justo donde se elige el contexto, sin scroll por la simulación.
   await page.getByRole('button', { name: /Saltar al diagnóstico/ }).click()
@@ -17,7 +17,7 @@ test('la simulación se puede saltar para ir directo al diagnóstico', async ({ 
 
 test('de las simulaciones al roadmap y a la política de IA', async ({ page }) => {
   await page.goto('/explore')
-  await pickCountryAndIndustry(page)
+  await pickIndustry(page)
 
   await page.getByRole('button', { name: /Saltar al diagnóstico/ }).click()
   expect(await answerAllQuestions(page)).toBe(QUESTION_COUNT)
