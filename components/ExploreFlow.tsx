@@ -198,13 +198,24 @@ export default function ExploreFlow() {
             Explora una simulación con IA y genera tu ruta de adopción en una sola página
           </h1>
           <p className="mt-5 max-w-3xl text-lg leading-relaxed text-slate-600">
-            Primero eliges país e industria, luego pruebas una simulación con agentes de IA. Si te hace sentido, desbloqueas el diagnóstico, el Roadmap 4D, la política de IA y la agenda de consultoría.
+            Eliges país e industria y pruebas una simulación con agentes de IA. Si prefieres ir directo, puedes saltar al diagnóstico y de ahí al Roadmap 4D, la política de IA y la agenda de consultoría.
           </p>
         </header>
 
         <SectionShell
           title="Selecciona país e industria"
           description="Con esto adaptamos la visualización, los casos ficticios y el contexto del diagnóstico a la realidad de tu organización."
+          action={
+            simulationReady && !diagnosisUnlocked ? (
+              <button
+                type="button"
+                onClick={handleUnlockDiagnosis}
+                className="rounded-xl border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-600 shadow-sm transition-all hover:border-blue-400 hover:text-blue-700"
+              >
+                Saltar al diagnóstico →
+              </button>
+            ) : null
+          }
         >
           <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
             <CountrySelector value={country} onChange={handleCountryChange} />

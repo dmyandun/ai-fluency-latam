@@ -57,18 +57,18 @@ export default function HeroSection() {
             style={{ animationDelay: '180ms' }}
           >
             <Link
-              href="/explore"
+              href="/assessment"
               className="group bg-blue-600 hover:bg-blue-700 text-white font-semibold px-7 py-3.5 rounded-xl text-base transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5"
             >
               Iniciar diagnóstico
               <span className="inline-block ml-2 transition-transform group-hover:translate-x-0.5">→</span>
             </Link>
-            <a
-              href="#como-funciona"
+            <Link
+              href="/explore"
               className="bg-white border border-slate-300 hover:border-blue-300 text-slate-700 hover:text-blue-700 font-medium px-7 py-3.5 rounded-xl text-base transition-all shadow-sm"
             >
-              Ver cómo funciona
-            </a>
+              Ver simulaciones primero
+            </Link>
           </div>
 
           <ul
