@@ -11,7 +11,11 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 1 : 0,
-  reporter: process.env.CI ? 'github' : 'list',
+  // En CI: anotaciones en el diff (github) + informe navegable que se sube como
+  // artefacto, con las trazas del reintento.
+  reporter: process.env.CI
+    ? [['github'], ['html', { open: 'never' }]]
+    : [['list']],
   use: {
     baseURL: BASE_URL,
     trace: 'on-first-retry',
