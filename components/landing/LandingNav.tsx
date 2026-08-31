@@ -10,6 +10,10 @@ const NAV_LINKS = [
   { href: '#preguntas', label: 'Preguntas' },
 ]
 
+// Las dos entradas al producto: el diagnóstico directo y el recorrido guiado.
+const PRIMARY_CTA = { href: '/assessment', label: 'Empezar' }
+const SECONDARY_CTA = { href: '/explore', label: 'Simulaciones' }
+
 export default function LandingNav() {
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -53,10 +57,16 @@ export default function LandingNav() {
 
         <div className="flex items-center gap-2">
           <Link
-            href="/explore"
+            href={SECONDARY_CTA.href}
+            className="hidden sm:inline-flex text-sm text-slate-600 hover:text-slate-900 font-medium px-3 py-2 rounded-lg hover:bg-slate-100 transition-colors"
+          >
+            {SECONDARY_CTA.label}
+          </Link>
+          <Link
+            href={PRIMARY_CTA.href}
             className="text-sm bg-slate-900 hover:bg-slate-800 text-white font-medium px-4 py-2 rounded-lg transition-colors shadow-sm"
           >
-            Empezar
+            {PRIMARY_CTA.label}
           </Link>
           <button
             type="button"
@@ -82,6 +92,13 @@ export default function LandingNav() {
               {link.label}
             </a>
           ))}
+          <Link
+            href={SECONDARY_CTA.href}
+            onClick={() => setMenuOpen(false)}
+            className="text-sm text-slate-600 hover:text-blue-700 font-medium py-2.5"
+          >
+            {SECONDARY_CTA.label}
+          </Link>
         </div>
       )}
     </nav>

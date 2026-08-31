@@ -1,4 +1,12 @@
-const STEPS = [
+interface Step {
+  number: string
+  title: string
+  description: string
+  accent: string
+  optional?: boolean
+}
+
+const STEPS: Step[] = [
   {
     number: '01',
     title: 'Contextualiza tu organización',
@@ -9,8 +17,9 @@ const STEPS = [
   {
     number: '02',
     title: 'Explora simulaciones reales',
+    optional: true,
     description:
-      'Ve cómo se comportan la automatización, la agencia y la aumentación sobre un caso de tu propia industria antes de decidir nada.',
+      'Ve cómo se comportan la automatización, la agencia y la aumentación sobre un caso de tu propia industria. Si ya sabes lo que buscas, este paso se puede saltar.',
     accent: 'from-indigo-500 to-indigo-600',
   },
   {
@@ -42,7 +51,9 @@ export default function HowItWorks() {
           </h2>
           <p className="text-slate-600 leading-relaxed">
             No es un test genérico de madurez digital. Cada respuesta mueve el resultado hacia una
-            combinación específica de modelo y tecnología.
+            combinación específica de modelo y tecnología. Las simulaciones existen para que veas
+            la IA operando antes de responder nada, pero son opcionales: puedes ir directo al
+            diagnóstico.
           </p>
         </div>
 
@@ -57,7 +68,14 @@ export default function HowItWorks() {
               >
                 {step.number}
               </span>
-              <h3 className="text-base font-semibold text-slate-900 mb-2">{step.title}</h3>
+              <h3 className="text-base font-semibold text-slate-900 mb-2">
+                {step.title}
+                {step.optional && (
+                  <span className="ml-2 align-middle text-[10px] font-medium uppercase tracking-wide text-slate-400">
+                    opcional
+                  </span>
+                )}
+              </h3>
               <p className="text-sm text-slate-600 leading-relaxed">{step.description}</p>
             </div>
           ))}

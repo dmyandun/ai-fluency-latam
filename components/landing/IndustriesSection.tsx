@@ -35,7 +35,7 @@ export default function IndustriesSection() {
 
         <p className="text-sm text-slate-500">
           ¿Tu sector no está en la lista?{' '}
-          <Link href="/explore" className="text-blue-600 hover:text-blue-700 underline underline-offset-2">
+          <Link href="/assessment" className="text-blue-600 hover:text-blue-700 underline underline-offset-2">
             El diagnóstico funciona igual
           </Link>{' '}
           — las 13 dimensiones son transversales a cualquier operación.

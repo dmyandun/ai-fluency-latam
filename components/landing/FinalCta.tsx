@@ -17,17 +17,17 @@ export default function FinalCta() {
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
-              href="/explore"
+              href="/assessment"
               className="bg-white hover:bg-slate-100 text-slate-900 font-semibold px-8 py-4 rounded-xl text-base transition-all shadow-lg hover:-translate-y-0.5"
             >
               Iniciar diagnóstico gratis →
             </Link>
-            <a
-              href="#modelos"
+            <Link
+              href="/explore"
               className="border border-white/25 hover:border-white/50 text-white font-medium px-8 py-4 rounded-xl text-base transition-colors"
             >
-              Revisar el marco primero
-            </a>
+              Ver simulaciones primero
+            </Link>
           </div>
           <p className="text-xs text-slate-400 mt-6">
             Sin registro · Sin tarjeta · Tus respuestas no salen de tu navegador

@@ -23,6 +23,9 @@ export default function LandingFooter() {
           <Link href="/explore" className="hover:text-slate-800 transition-colors">
             Simulaciones
           </Link>
+          <Link href="/assessment" className="hover:text-slate-800 transition-colors">
+            Diagnóstico
+          </Link>
           <Link
             href="/privacy"
             className="hover:text-slate-800 transition-colors underline underline-offset-2"

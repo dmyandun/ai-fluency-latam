@@ -9,6 +9,11 @@ const FAQS = [
       'No. El diagnóstico corre completo en tu navegador y los resultados se guardan solo en el almacenamiento local de tu dispositivo. No hay cuenta, no hay base de datos y nadie más ve tus respuestas.',
   },
   {
+    question: '¿Tengo que ver las simulaciones para obtener mi roadmap?',
+    answer:
+      'No. Hay dos caminos y ambos terminan en el mismo roadmap: puedes ir directo al diagnóstico, o pasar antes por las simulaciones de tu industria para ver cómo se comporta cada modelo de IA sobre un caso concreto. Si empiezas por las simulaciones, también puedes saltar al diagnóstico en cualquier momento.',
+  },
+  {
     question: '¿Cuánto tiempo toma?',
     answer:
       'Entre 5 y 8 minutos. Son 13 preguntas de escala sobre tu operación, más la selección de país e industria. Las simulaciones previas son opcionales y puedes saltarlas.',
