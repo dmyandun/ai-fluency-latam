@@ -57,6 +57,8 @@ export default function QuestionsTable({ questions, answers, onAnswer }: Questio
                   <button
                     key={val}
                     type="button"
+                    aria-label={`${question.text}: ${val} de 5`}
+                    aria-pressed={selected === val}
                     onClick={() => onAnswer(question.dimension, val)}
                     className={`w-9 h-9 rounded-lg text-sm font-semibold transition-all ${
                       selected === val

@@ -47,7 +47,7 @@ export default function HeroSection() {
             className="text-lg text-slate-600 max-w-xl mx-auto lg:mx-0 leading-relaxed mb-8 animate-fade-up"
             style={{ animationDelay: '120ms' }}
           >
-            Responde 13 preguntas sobre tu operación y obtén el modelo de interacción y el tipo de
+            Responde 10 preguntas sobre tu operación y obtén el modelo de interacción y el tipo de
             implementación que mejor encajan con tu contexto — más un roadmap concreto para los
             próximos 12 meses.
           </p>

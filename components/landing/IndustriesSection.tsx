@@ -38,7 +38,7 @@ export default function IndustriesSection() {
           <Link href="/assessment" className="text-blue-600 hover:text-blue-700 underline underline-offset-2">
             El diagnóstico funciona igual
           </Link>{' '}
-          — las 13 dimensiones son transversales a cualquier operación.
+          — las dimensiones que evalúa son transversales a cualquier operación.
         </p>
       </div>
     </section>

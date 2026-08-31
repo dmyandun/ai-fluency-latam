@@ -26,7 +26,7 @@ const STEPS: Step[] = [
     number: '03',
     title: 'Responde el diagnóstico',
     description:
-      '13 preguntas sobre volumen, complejidad, datos, privacidad y madurez del equipo. Sin registro y sin dejar datos en un servidor.',
+      '10 preguntas sobre volumen, complejidad, datos, privacidad y madurez del equipo. Sin registro y sin dejar datos en un servidor.',
     accent: 'from-violet-500 to-violet-600',
   },
   {

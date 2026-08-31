@@ -16,7 +16,7 @@ const FAQS = [
   {
     question: '¿Cuánto tiempo toma?',
     answer:
-      'Entre 5 y 8 minutos. Son 13 preguntas de escala sobre tu operación, más la selección de país e industria. Las simulaciones previas son opcionales y puedes saltarlas.',
+      'Entre 5 y 8 minutos. Son 10 preguntas de escala sobre tu operación, más la selección de país e industria. Las simulaciones previas son opcionales y puedes saltarlas.',
   },
   {
     question: '¿En qué se basa la recomendación?',
