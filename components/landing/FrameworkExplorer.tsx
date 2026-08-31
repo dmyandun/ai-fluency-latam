@@ -7,6 +7,7 @@ import {
   INTERACTION_MODELS,
   getCombinationNote,
 } from '@/lib/framework-matrix'
+import FrameworkFlowchart from './FrameworkFlowchart'
 
 export default function FrameworkExplorer() {
   const [model, setModel] = useState<InteractionModel>('augmentation')
@@ -37,63 +38,15 @@ export default function FrameworkExplorer() {
   return (
     <div className="rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden">
       <div className="grid lg:grid-cols-[1fr_1.15fr]">
-        {/* Selectores */}
-        <div className="p-6 sm:p-8 border-b lg:border-b-0 lg:border-r border-slate-200 bg-slate-50/60">
-          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
-            1 · Cómo trabaja tu gente con la IA
-          </p>
-          <div className="space-y-2.5 mb-8">
-            {INTERACTION_MODELS.map((option) => {
-              const isActive = option.id === model
-              return (
-                <button
-                  key={option.id}
-                  type="button"
-                  onClick={() => setModel(option.id)}
-                  aria-pressed={isActive}
-                  className={`w-full text-left rounded-xl border p-4 transition-all ${
-                    isActive
-                      ? `bg-white shadow-sm ring-2 ${option.ring}`
-                      : 'border-slate-200 bg-white/70 hover:border-slate-300'
-                  }`}
-                >
-                  <span className="flex items-center gap-2.5 mb-1">
-                    <span className={`w-2 h-2 rounded-full ${option.dot}`} />
-                    <span className="text-sm font-semibold text-slate-900">{option.name}</span>
-                  </span>
-                  <span className="block text-xs text-slate-500 leading-relaxed pl-[18px]">
-                    {option.tagline}
-                  </span>
-                </button>
-              )
-            })}
-          </div>
-
-          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
-            2 · Sobre qué tecnología se apoya
-          </p>
-          <p className="text-xs text-slate-500 mb-3">
-            Puedes combinar varias — la mayoría de organizaciones acaban haciéndolo.
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {IMPLEMENTATION_TYPES.map((impl) => {
-              const isActive = layers.includes(impl.id)
-              return (
-                <button
-                  key={impl.id}
-                  type="button"
-                  onClick={() => toggleLayer(impl.id)}
-                  aria-pressed={isActive}
-                  className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-2 text-xs font-semibold transition-all ${
-                    isActive ? impl.activeChip : impl.chip
-                  }`}
-                >
-                  <span>{impl.icon}</span>
-                  {impl.name}
-                </button>
-              )
-            })}
-          </div>
+        {/* Selectores: el recorrido se elige sobre un flujograma con ramas */}
+        <div className="border-b lg:border-b-0 lg:border-r border-slate-200 bg-slate-50/60">
+          <FrameworkFlowchart
+            model={model}
+            layers={layers}
+            onSelectModel={setModel}
+            onToggleLayer={toggleLayer}
+            activeModelInfo={activeModel}
+          />
         </div>
 
         {/* Resultado de la combinación */}
