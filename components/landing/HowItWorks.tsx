@@ -40,7 +40,7 @@ const STEPS: Step[] = [
 
 export default function HowItWorks() {
   return (
-    <section id="como-funciona" className="px-6 py-20 lg:py-24 bg-slate-50">
+    <section id="como-funciona" className="px-6 py-20 lg:py-24 bg-slate-50 border-t border-slate-200">
       <div className="max-w-7xl mx-auto">
         <div className="max-w-2xl mb-14">
           <p className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-3">
