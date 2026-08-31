@@ -47,6 +47,10 @@ Face). Sin él, el chat de simulación falla; el resto de la app funciona igual.
 - No poner lógica de negocio en `page.tsx` — solo composición de componentes
 - TypeScript strict: no usar `any`, no ignorar errores de tipos
 - Comentarios solo cuando el WHY no es obvio
+- Antes de editar un componente, comprueba que alguien lo importa. ESLint no
+  detecta archivos huérfanos completos, así que es posible trabajar durante un
+  rato sobre código que no se renderiza. Las preguntas, por ejemplo, se dibujan
+  siempre con `QuestionsTable`, en ambos flujos
 - `react-hooks/set-state-in-effect` está activa: no derives estado de otro estado
   en un `useEffect`. Si el `setState` es inevitable (medir el DOM, hidratar desde
   `localStorage`), suprime la regla con un comentario que explique por qué
@@ -101,7 +105,7 @@ Cinco fases (`ROADMAP_PHASES`), que son el framework 4D más la consolidación:
 interacción ganador + 3 del tipo de implementación ganador.
 
 El tablero que se renderiza es **`RoadmapFlowBoard`**, tanto en `/results` como
-en `/explore`. `RoadmapBoard.tsx` existe pero no lo usa nadie.
+en `/explore`.
 
 El roadmap ya se puede sacar de la app sin backend: `downloadRoadmap()` lo baja
 como texto plano y `buildMailtoLink()` arma un `mailto:` con el contenido; ambos
@@ -186,16 +190,6 @@ El Space construye con el `Dockerfile` del repo, que usa `output: 'standalone'`
 
 **Convención de ramas:** merges siempre con `--no-ff`, y cada hallazgo nuevo va a
 su propia rama en vez de acumularse en la que está en curso.
-
-## Componentes sin uso
-
-Estos existen pero no los importa nadie. No los tomes como referencia de patrones
-vigentes ni asumas que un cambio en ellos afecta a la app:
-
-`ActivityClassifier` · `ActivityInput` · `ProgressBar` · `QuestionCard` ·
-`RoadmapBoard`
-
-Las preguntas se renderizan siempre con `QuestionsTable`, en ambos flujos.
 
 ## Extensiones futuras sugeridas
 
