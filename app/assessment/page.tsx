@@ -2,13 +2,13 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 import type { AssessmentState } from '@/types/assessment'
 import { QUESTIONS } from '@/lib/questions'
 import { buildAssessmentResult } from '@/lib/scoring'
 import CountrySelector from '@/components/CountrySelector'
 import IndustrySelector from '@/components/IndustrySelector'
 import QuestionsTable from '@/components/QuestionsTable'
+import Brandmark from '@/components/Brandmark'
 
 const INITIAL_STATE: AssessmentState = {
   step: 'country',
@@ -66,9 +66,7 @@ export default function AssessmentPage() {
       {/* Navbar */}
       <nav className="bg-white border-b border-slate-200 px-6 py-4 sticky top-0 z-10">
         <div className="max-w-3xl mx-auto flex items-center justify-between">
-          <Link href="/" className="text-lg font-semibold text-slate-900 tracking-tight">
-            AI Fluency <span className="text-blue-600">LATAM</span>
-          </Link>
+          <Brandmark />
         </div>
       </nav>
 

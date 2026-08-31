@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Brandmark from '@/components/Brandmark'
 
 const EFFECTIVE_DATE = '28 de mayo de 2026'
 const CONTACT_EMAIL = 'dyandun@outlook.com'
@@ -9,11 +10,7 @@ export default function PrivacyPolicy() {
       {/* Navbar */}
       <nav className="border-b border-gray-800 px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <span className="text-lg font-semibold text-white tracking-tight">
-              AI Fluency <span className="text-indigo-400">LATAM</span>
-            </span>
-          </Link>
+          <Brandmark />
           <Link
             href="/assessment"
             className="text-sm bg-indigo-600 hover:bg-indigo-500 text-white font-medium px-4 py-2 rounded-lg transition-colors"

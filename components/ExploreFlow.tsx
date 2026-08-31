@@ -1,7 +1,6 @@
 'use client'
 
 import { useCallback, useMemo, useRef, useState } from 'react'
-import Link from 'next/link'
 import type { ReactNode } from 'react'
 import type { AssessmentResult, DimensionKey, DimensionScore, InteractionModel, Roadmap } from '@/types/assessment'
 import { QUESTIONS } from '@/lib/questions'
@@ -18,6 +17,7 @@ import RecommendationMatrix from '@/components/RecommendationMatrix'
 import RoadmapFlowBoard from '@/components/RoadmapFlowBoard'
 import AIPolicyGenerator from '@/components/AIPolicyGenerator'
 import ConsultationModal from '@/components/ConsultationModal'
+import Brandmark from '@/components/Brandmark'
 
 const PREVIEW_VARIANTS: InteractionModel[] = ['automation', 'agency', 'augmentation']
 const CHAT_MODEL: InteractionModel = 'agency'
@@ -176,9 +176,7 @@ export default function ExploreFlow() {
     <div className="min-h-screen bg-slate-50">
       <nav className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 px-6 py-4 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
-          <Link href="/" className="text-lg font-semibold tracking-tight text-slate-900">
-            AI Fluency <span className="text-blue-600">LATAM</span>
-          </Link>
+          <Brandmark />
           <div className="hidden min-w-[220px] items-center gap-3 sm:flex">
             <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-100">
               <div className="h-full rounded-full bg-blue-600 transition-all" style={{ width: `${progress}%` }} />
