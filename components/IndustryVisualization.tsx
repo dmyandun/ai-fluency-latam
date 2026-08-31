@@ -744,20 +744,6 @@ function StepFlow({ title, steps }: { title: string; steps: Step[] }) {
   )
 }
 
-// Gauge semicircular reutilizable. gradId debe ser único por instancia visible.
-function Gauge({ value, label, gradId }: { value: number; label: string; gradId: string }) {
-  const pct = Math.min(Math.max(value, 0), 100) / 100
-  return (
-    <svg viewBox="0 0 140 84" className="w-full max-w-[170px] mx-auto">
-      <path d="M16 70 A54 54 0 0 1 124 70" fill="none" stroke="#e2e8f0" strokeWidth="12" strokeLinecap="round" />
-      <path d="M16 70 A54 54 0 0 1 124 70" fill="none" stroke={`url(#${gradId})`} strokeWidth="12" strokeLinecap="round" strokeDasharray={`${pct * 170} 400`} />
-      <defs><linearGradient id={gradId} x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stopColor="#10b981" /><stop offset="50%" stopColor="#f59e0b" /><stop offset="100%" stopColor="#ef4444" /></linearGradient></defs>
-      <text x="70" y="64" textAnchor="middle" className="fill-slate-800 text-[18px] font-bold">{value}%</text>
-      <text x="70" y="80" textAnchor="middle" className="fill-slate-400 text-[8px]">{label}</text>
-    </svg>
-  )
-}
-
 function KpiRow({ items }: { items: { label: string; value: string; tone?: 'good' | 'warn' | 'bad' }[] }) {
   const tone = { good: 'text-emerald-600', warn: 'text-amber-600', bad: 'text-red-600' }
   return (
@@ -768,42 +754,6 @@ function KpiRow({ items }: { items: { label: string; value: string; tone?: 'good
           <p className="text-[9px] text-slate-500 leading-tight mt-0.5">{k.label}</p>
         </div>
       ))}
-    </div>
-  )
-}
-
-// Lista de agentes con hover/clic para revelar detalle (patrón de BankingViz)
-function AgentList({ agents, hov, setHov }: {
-  agents: { name: string; icon: string; metric: string; status: 'green' | 'amber' | 'red'; detail: string[] }[]
-  hov: number
-  setHov: (i: number) => void
-}) {
-  return (
-    <div className="space-y-2">
-      {agents.map((a, i) => {
-        const dot = a.status === 'red' ? 'bg-red-500' : a.status === 'amber' ? 'bg-amber-500' : 'bg-emerald-500'
-        return (
-          <div
-            key={i}
-            className={`border rounded-lg p-2.5 cursor-pointer transition-all ${hov === i ? 'border-blue-300 bg-blue-50/40' : 'border-slate-200 hover:border-blue-300 hover:bg-blue-50/40'}`}
-            onMouseEnter={() => setHov(i)}
-            onClick={() => setHov(i)}
-          >
-            <div className="flex items-center gap-1.5">
-              <span className="relative flex h-2 w-2"><span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${dot} opacity-75`} /><span className={`relative inline-flex rounded-full h-2 w-2 ${dot}`} /></span>
-              <span className="text-[11px] font-bold text-slate-700">{a.icon} {a.name}</span>
-            </div>
-            <p className="text-[11px] text-slate-600 mt-0.5">{a.metric}</p>
-            {hov === i && (
-              <div className="mt-1.5 pt-1.5 border-t border-slate-100">
-                {a.detail.map((d, j) => (
-                  <p key={j} className={`text-[10px] leading-tight ${j === a.detail.length - 1 ? 'text-blue-600 font-semibold' : 'text-slate-500'}`}>{d}</p>
-                ))}
-              </div>
-            )}
-          </div>
-        )
-      })}
     </div>
   )
 }
