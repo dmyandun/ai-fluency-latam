@@ -107,7 +107,7 @@ export default function AssessmentPage() {
             </div>
           )}
 
-          {/* Step: Preguntas — tabla única con las 10 dimensiones */}
+          {/* Step: Preguntas — tabla única con las 10 preguntas */}
           {state.step === 'questions' && (
             <div className="animate-fade-in space-y-6">
               <div>
@@ -116,7 +116,7 @@ export default function AssessmentPage() {
                   Evalúa tu organización
                 </h1>
                 <p className="text-slate-500 leading-relaxed">
-                  Responde las 10 dimensiones en escala del <strong className="text-slate-700">1</strong> (bajo) al <strong className="text-slate-700">5</strong> (alto).
+                  Responde las 10 preguntas en escala del <strong className="text-slate-700">1</strong> (bajo) al <strong className="text-slate-700">5</strong> (alto).
                   Puedes ajustar cualquier respuesta antes de continuar.
                 </p>
               </div>
