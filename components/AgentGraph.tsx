@@ -27,13 +27,17 @@ const GENERIC_FINDINGS = [
 
 export default function AgentGraph({ industryId, loading, streamDone, caseIndex, genericFindings, onComplete }: AgentGraphProps) {
   const config = getAgentGraph(industryId)
-  const [orchestratorState, setOrchestratorState] = useState<AgentState>('pending')
-  const [agentStates, setAgentStates] = useState<AgentState[]>(['pending', 'pending', 'pending'])
+  // La cascada arranca en 'loading' desde el primer render: fijarlo aquí en vez de
+  // dentro del efecto evita un frame en 'pending' y un render en cascada.
+  const [orchestratorState, setOrchestratorState] = useState<AgentState>('loading')
+  const [agentStates, setAgentStates] = useState<AgentState[]>(['loading', 'loading', 'loading'])
 
   const completedRef = useRef(false)
   const timersRef = useRef<NodeJS.Timeout[]>([])
   const onCompleteRef = useRef(onComplete)
-  onCompleteRef.current = onComplete
+  useEffect(() => {
+    onCompleteRef.current = onComplete
+  })
 
   function markAgentDone(idx: number) {
     setAgentStates((prev) => {
@@ -58,9 +62,6 @@ export default function AgentGraph({ industryId, loading, streamDone, caseIndex,
     timersRef.current.forEach(clearTimeout)
     timersRef.current = []
     completedRef.current = false
-
-    setOrchestratorState('loading')
-    setAgentStates(['loading', 'loading', 'loading'])
 
     timersRef.current = [
       setTimeout(() => markAgentDone(0), T1),

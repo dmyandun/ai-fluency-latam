@@ -168,6 +168,9 @@ function LogisticsViz({ country, colorText }: IndustryVisualizationProps) {
   const [nodes, setNodes] = useState<{ x: number; y: number }[]>([])
 
   // Encuadre robusto: override si existe, si no getBBox() del path renderizado.
+  // La medición del DOM sólo es posible después del render, así que el setState
+  // dentro del efecto es intencional.
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (shape?.bboxOverride) { setBbox(shape.bboxOverride); return }
     if (pathRef.current) {
@@ -177,6 +180,7 @@ function LogisticsViz({ country, colorText }: IndustryVisualizationProps) {
       setBbox(null)
     }
   }, [country, shape])
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   // Genera hasta 5 nodos DENTRO del polígono del país (test point-in-polygon del DOM),
   // distribuidos por regiones (centro + 4 cuadrantes).
