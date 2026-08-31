@@ -96,7 +96,7 @@ export default function HeroSection() {
                 <span className="ml-3 text-xs text-slate-400">Resultado del diagnóstico</span>
               </div>
 
-              <div className="p-6">
+              <div className="p-6 pb-16">
                 <p className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-1">
                   Modelo recomendado
                 </p>
