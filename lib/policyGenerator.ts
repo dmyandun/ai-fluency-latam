@@ -1,6 +1,6 @@
 import type { AssessmentResult } from '@/types/assessment'
 import { MODEL_LABELS } from '@/lib/recommendations'
-import { LATAM_COUNTRIES } from '@/lib/countries'
+import { resolveLocationName } from '@/lib/countries'
 import { INDUSTRIES } from '@/lib/industries'
 
 export interface PolicySection {
@@ -20,7 +20,7 @@ export function generateAIPolicy(
   result: AssessmentResult,
   companyName: string
 ): AIPolicy {
-  const country  = LATAM_COUNTRIES.find((c) => c.code === result.country)?.name ?? result.country
+  const country  = resolveLocationName(result.country)
   const industry = INDUSTRIES.find((i) => i.id === result.industry)?.label ?? result.industry
   const modelLabel = MODEL_LABELS[result.interactionModel] ?? result.interactionModel
   const implLabel  = MODEL_LABELS[result.implementationType] ?? result.implementationType

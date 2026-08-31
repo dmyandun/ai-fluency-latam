@@ -8,7 +8,7 @@ import { buildAssessmentResult } from '@/lib/scoring'
 import { getRecommendation, MODEL_LABELS } from '@/lib/recommendations'
 import { generateDefaultRoadmap, saveRoadmap } from '@/lib/roadmap'
 import { getSimulation } from '@/lib/simulations'
-import CountrySelector from '@/components/CountrySelector'
+import { DEFAULT_REGION } from '@/lib/countries'
 import IndustrySelector from '@/components/IndustrySelector'
 import QuestionsTable from '@/components/QuestionsTable'
 import SimulationApp from '@/components/SimulationApp'
@@ -54,7 +54,6 @@ function SectionShell({
 }
 
 export default function ExploreFlow() {
-  const [country, setCountry] = useState('')
   const [industry, setIndustry] = useState('')
   const [answers, setAnswers] = useState<Partial<DimensionScore>>({})
   const [result, setResult] = useState<AssessmentResult | null>(null)
@@ -68,7 +67,7 @@ export default function ExploreFlow() {
   const resultsRef = useRef<HTMLDivElement>(null)
   const roadmapRef = useRef<HTMLDivElement>(null)
 
-  const simulationReady = Boolean(country && industry)
+  const simulationReady = Boolean(industry)
   const allQuestionsAnswered = QUESTIONS.every((q) => answers[q.dimension] !== undefined)
   const recommendation = result ? getRecommendation(result) : null
   const scheduleResult = useMemo(() => {
@@ -79,11 +78,11 @@ export default function ExploreFlow() {
     }, {})
     return buildAssessmentResult(
       neutralAnswers as ScoreInput,
-      country || 'LATAM',
+      DEFAULT_REGION,
       industry || 'general',
       []
     )
-  }, [country, industry, result])
+  }, [industry, result])
 
   const progress = useMemo(() => {
     // El recorrido no termina en el resultado: el roadmap y la política son los
@@ -95,11 +94,10 @@ export default function ExploreFlow() {
     if (diagnosisUnlocked) return 60
     if (simulationReady && allQuestionsAnswered) return 70
     if (simulationReady) return 50
-    if (country || industry) return 25
+    if (industry) return 25
     return 10
   }, [
     allQuestionsAnswered,
-    country,
     diagnosisUnlocked,
     industry,
     policyUnlocked,
@@ -107,14 +105,6 @@ export default function ExploreFlow() {
     roadmap,
     simulationReady,
   ])
-
-  function handleCountryChange(nextCountry: string) {
-    setCountry(nextCountry)
-    setResult(null)
-    setRoadmap(null)
-    setPolicyUnlocked(false)
-    setDiagnosisUnlocked(false)
-  }
 
   function handleIndustryChange(nextIndustry: string) {
     setIndustry(nextIndustry)
@@ -142,9 +132,9 @@ export default function ExploreFlow() {
   }
 
   function handleGenerateResult() {
-    if (!country || !industry || !allQuestionsAnswered) return
+    if (!industry || !allQuestionsAnswered) return
 
-    const assessmentResult = buildAssessmentResult(answers as ScoreInput, country, industry, [])
+    const assessmentResult = buildAssessmentResult(answers as ScoreInput, DEFAULT_REGION, industry, [])
     setResult(assessmentResult)
     setRoadmap(null)
     setPolicyUnlocked(false)
@@ -215,10 +205,7 @@ export default function ExploreFlow() {
             ) : null
           }
         >
-          <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
-            <CountrySelector value={country} onChange={handleCountryChange} />
-            <IndustrySelector value={industry} onChange={handleIndustryChange} />
-          </div>
+          <IndustrySelector value={industry} onChange={handleIndustryChange} />
         </SectionShell>
 
         {simulationReady && (
@@ -228,12 +215,11 @@ export default function ExploreFlow() {
               description="Esta es la primera experiencia de valor para el usuario que llega desde LinkedIn: ve agentes, visualizaciones y análisis antes de llenar el diagnóstico."
             >
               <SimulationApp
-                key={`${industry}-${country}`}
+                key={industry}
                 config={getSimulation(industry)}
                 interactionModel={CHAT_MODEL}
                 variants={PREVIEW_VARIANTS}
                 industryId={industry}
-                country={country}
                 onSchedule={() => setScheduleOpen(true)}
               />
             </SectionShell>

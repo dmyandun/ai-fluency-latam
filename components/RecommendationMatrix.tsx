@@ -1,7 +1,7 @@
 'use client'
 
 import type { AssessmentResult, Recommendation } from '@/types/assessment'
-import { LATAM_COUNTRIES } from '@/lib/countries'
+import { resolveLocationName } from '@/lib/countries'
 import { INDUSTRIES } from '@/lib/industries'
 
 interface RecommendationMatrixProps {
@@ -10,7 +10,7 @@ interface RecommendationMatrixProps {
 }
 
 export default function RecommendationMatrix({ result, recommendation }: RecommendationMatrixProps) {
-  const country = LATAM_COUNTRIES.find((c) => c.code === result.country)?.name ?? result.country
+  const country = resolveLocationName(result.country)
   const industry = INDUSTRIES.find((i) => i.id === result.industry)?.label ?? result.industry
 
   return (

@@ -5,26 +5,26 @@ import { useRouter } from 'next/navigation'
 import type { AssessmentState } from '@/types/assessment'
 import { QUESTIONS } from '@/lib/questions'
 import { buildAssessmentResult } from '@/lib/scoring'
-import CountrySelector from '@/components/CountrySelector'
 import IndustrySelector from '@/components/IndustrySelector'
 import QuestionsTable from '@/components/QuestionsTable'
+import { DEFAULT_REGION } from '@/lib/countries'
 import Brandmark from '@/components/Brandmark'
 
 const INITIAL_STATE: AssessmentState = {
-  step: 'country',
+  step: 'industry',
   currentQuestionIndex: 0,
-  country: '',
+  country: DEFAULT_REGION,
   industry: '',
   activities: [],
   answers: {},
 }
 
 const STEP_LABELS: Record<AssessmentState['step'], string> = {
-  country: 'Paso 1 de 3',
-  industry: 'Paso 2 de 3',
+  country: '',
+  industry: 'Paso 1 de 2',
   activities: '',
   classify: '',
-  questions: 'Paso 3 de 3',
+  questions: 'Paso 2 de 2',
   done: '',
 }
 
@@ -35,7 +35,6 @@ export default function AssessmentPage() {
   const allQuestionsAnswered = QUESTIONS.every((q) => state.answers[q.dimension] !== undefined)
 
   function handleNext() {
-    if (state.step === 'country')    { setState((p) => ({ ...p, step: 'industry' })); return }
     if (state.step === 'industry')   { setState((p) => ({ ...p, step: 'questions' })); return }
 
     if (state.step === 'questions') {
@@ -52,12 +51,10 @@ export default function AssessmentPage() {
   }
 
   function handleBack() {
-    if (state.step === 'industry')   { setState((p) => ({ ...p, step: 'country' })); return }
     if (state.step === 'questions')  { setState((p) => ({ ...p, step: 'industry' })); return }
   }
 
   const canContinue =
-    (state.step === 'country'    && state.country !== '') ||
     (state.step === 'industry'   && state.industry !== '') ||
     (state.step === 'questions'  && allQuestionsAnswered)
 
@@ -72,22 +69,6 @@ export default function AssessmentPage() {
 
       <main className="flex-1 flex items-start justify-center px-6 py-12">
         <div className="w-full max-w-2xl">
-
-          {/* Step: País */}
-          {state.step === 'country' && (
-            <div className="animate-fade-in space-y-6">
-              <div>
-                <p className="text-sm text-blue-600 font-semibold mb-2">{STEP_LABELS.country}</p>
-                <h1 className="text-2xl sm:text-3xl font-semibold text-slate-900 mb-2">
-                  ¿En qué país opera tu organización?
-                </h1>
-                <p className="text-slate-500">
-                  Usaremos esta información para contextualizar la recomendación según el ecosistema de tu país.
-                </p>
-              </div>
-              <CountrySelector value={state.country} onChange={(c) => setState((p) => ({ ...p, country: c }))} />
-            </div>
-          )}
 
           {/* Step: Industria */}
           {state.step === 'industry' && (
