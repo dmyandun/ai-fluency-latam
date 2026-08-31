@@ -5,8 +5,6 @@ import { getAgentGraph, type AgentNode } from '@/lib/agent-graph'
 
 interface AgentGraphProps {
   industryId: string
-  loading: boolean
-  streamDone: boolean
   caseIndex: number
   genericFindings: boolean
   onComplete: () => void
@@ -25,7 +23,7 @@ const GENERIC_FINDINGS = [
   'Recomendación personalizada lista',
 ]
 
-export default function AgentGraph({ industryId, loading, streamDone, caseIndex, genericFindings, onComplete }: AgentGraphProps) {
+export default function AgentGraph({ industryId, caseIndex, genericFindings, onComplete }: AgentGraphProps) {
   const config = getAgentGraph(industryId)
   // La cascada arranca en 'loading' desde el primer render: fijarlo aquí en vez de
   // dentro del efecto evita un frame en 'pending' y un render en cascada.
@@ -55,9 +53,9 @@ export default function AgentGraph({ industryId, loading, streamDone, caseIndex,
     onCompleteRef.current()
   }
 
-  // Animación por tiempos fijos. Se programa al montar el grafo y no depende de
-  // loading/streamDone, porque esos estados pueden cambiar antes de que termine
-  // la cascada visual.
+  // Animación por tiempos fijos. Se programa al montar el grafo y es deliberadamente
+  // independiente del estado del stream: si éste termina antes, el grafo conserva su
+  // ritmo visual y completa igual en T3.
   useEffect(() => {
     timersRef.current.forEach(clearTimeout)
     timersRef.current = []
@@ -73,11 +71,6 @@ export default function AgentGraph({ industryId, loading, streamDone, caseIndex,
       timersRef.current = []
     }
   }, [])
-
-  // Si el stream termina antes, el grafo conserva su ritmo visual y completa en T3.
-  useEffect(() => {
-    if (!streamDone) return
-  }, [streamDone])
 
   return (
     <div className="mt-6 rounded-xl border border-slate-200 bg-slate-50 p-6">

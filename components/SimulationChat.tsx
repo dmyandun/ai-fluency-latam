@@ -244,8 +244,6 @@ export default function SimulationChat({
           <AgentGraph
             key={runId}
             industryId={industryId}
-            loading={loading}
-            streamDone={done}
             caseIndex={caseIndex}
             genericFindings={isCustomCase}
             onComplete={() => setAgentsComplete(true)}
