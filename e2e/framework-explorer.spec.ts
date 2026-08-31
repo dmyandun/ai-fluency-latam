@@ -39,3 +39,33 @@ test.describe('explorador del marco', () => {
     await expect(remaining).toHaveCount(1)
   })
 })
+
+/**
+ * El flujograma debe leerse como un árbol: el tronco del segundo nivel nace del
+ * modelo elegido, no del centro. Es la parte que ninguna comprobación funcional
+ * cubre y que se rompería en silencio.
+ */
+test.describe('ramificación del flujograma', () => {
+  for (const model of ['Automatización', 'Agencia', 'Aumentación']) {
+    test(`el tronco de tecnología nace de ${model}`, async ({ page }) => {
+      await page.goto('/#modelos')
+      await page.getByRole('button', { name: model, exact: true }).click()
+
+      const trunk = page.locator('[data-flow-trunk="2 · Tecnología"]')
+      const node = page.getByRole('button', { name: model, exact: true })
+
+      // El tronco se desliza hasta su rama: se sondea hasta que la posición cuaja,
+      // en vez de medir a mitad de la transición.
+      await expect
+        .poll(async () => {
+          const trunkBox = await trunk.boundingBox()
+          const nodeBox = await node.boundingBox()
+          if (!trunkBox || !nodeBox) return Number.POSITIVE_INFINITY
+          const trunkCenter = trunkBox.x + trunkBox.width / 2
+          const nodeCenter = nodeBox.x + nodeBox.width / 2
+          return Math.abs(trunkCenter - nodeCenter)
+        })
+        .toBeLessThan(3)
+    })
+  }
+})
