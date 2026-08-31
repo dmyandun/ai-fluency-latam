@@ -115,6 +115,13 @@ salen de `formatRoadmapAsText()`.
 
 9 entradas indexadas por `${interactionModel}_${implementationType}`.
 Cada entrada tiene: título, resumen, racional, casos de uso, victorias rápidas y riesgos.
+**Esta es la fuente del diagnóstico**, que siempre devuelve un par 1:1.
+
+No la confundas con `lib/framework-matrix.ts`, que sólo alimenta el explorador
+del marco en la landing (`components/landing/FrameworkExplorer.tsx`). Ahí el
+visitante combina un modelo con varias capas a la vez, y el texto se ensambla
+desde 9 fragmentos por par para cubrir las 21 combinaciones sin duplicar
+contenido. Es material divulgativo, no entra en el scoring.
 
 ## Flujo de datos entre páginas
 
