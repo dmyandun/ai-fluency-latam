@@ -17,24 +17,6 @@ const config: Config = {
       fontFamily: {
         sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
       },
-      colors: {
-        brand: {
-          DEFAULT: '#6366F1',
-          light: '#818CF8',
-          dark: '#4F46E5',
-          glow: 'rgba(99, 102, 241, 0.15)',
-        },
-        surface: {
-          DEFAULT: '#111827',
-          secondary: '#1F2937',
-          tertiary: '#374151',
-        },
-        base: '#0A0F1E',
-      },
-      backgroundImage: {
-        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-        'gradient-base': 'linear-gradient(135deg, #0A0F1E 0%, #0F172A 100%)',
-      },
       animation: {
         'slide-in': 'slideIn 0.3s ease-out',
         'fade-in': 'fadeIn 0.4s ease-out',

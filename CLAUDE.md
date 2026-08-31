@@ -3,17 +3,21 @@
 ## Comandos de desarrollo
 
 ```bash
-npm run dev      # Servidor local en http://localhost:3000
-npm run build    # Build de producción (verificar antes de deploy)
-npm run lint     # ESLint
+npm run dev       # Servidor local en http://localhost:3000
+npm run build     # Build de producción (verificar antes de deploy)
+npm run lint      # ESLint (flat config en eslint.config.mjs)
+npm run lint:fix  # ESLint con autofix
 ```
 
 ## Arquitectura
 
-**Next.js 15 App Router** con tres rutas:
-- `/` → landing page (`app/page.tsx` + `components/Hero.tsx`)
+**Next.js 16 App Router** con estas rutas:
+- `/` → landing (`app/page.tsx`, compone las secciones de `components/landing/`)
+- `/explore` → flujo guiado país → industria → simulación → diagnóstico (`components/ExploreFlow.tsx`)
 - `/assessment` → diagnóstico multi-step (`app/assessment/page.tsx`)
 - `/results` → resultados + roadmap (`app/results/page.tsx`)
+- `/privacy` → política de privacidad (`components/PrivacyPolicy.tsx`)
+- `/api/chat` → única ruta dinámica; proxy del chat de simulación
 
 **Sin base de datos.** Todo el estado persiste en `localStorage`:
 - `afl_result` → `AssessmentResult` (resultado del diagnóstico)
@@ -26,6 +30,9 @@ npm run lint     # ESLint
 - No poner lógica de negocio en `page.tsx` — solo composición de componentes
 - TypeScript strict: no usar `any`, no ignorar errores de tipos
 - Comentarios solo cuando el WHY no es obvio
+- `react-hooks/set-state-in-effect` está activa: no derives estado de otro estado
+  en un `useEffect`. Si el `setState` es inevitable (medir el DOM, hidratar desde
+  `localStorage`), suprime la regla con un comentario que explique por qué
 
 ## Lógica de negocio crítica
 
@@ -79,18 +86,32 @@ Cada entrada tiene: título, resumen, racional, casos de uso, victorias rápidas
 
 ## Paleta de colores
 
-```
-Background: #0A0F1E    Surface: #111827 (gray-900)    Surface-2: #1F2937
-Accent: #6366F1 (indigo-500)    Text: #F9FAFB    Muted: #9CA3AF
+La app usa **tema claro** sobre la escala `slate` de Tailwind, con azul como acento.
 
-Por modelo:
+```
+Fondo de página: slate-50 (#F8FAFC)   Superficies: white
+Bordes: slate-200   Texto: slate-900   Texto atenuado: slate-500 / slate-400
+Acento: blue-600 (#2563EB)   Acento hover: blue-700
+Superficies oscuras (solo CTA final): slate-900 → slate-800
+```
+
+Colores semánticos por modelo y tipo de implementación — se usan en badges,
+barras y bordes de tarjeta:
+
+```
+Por modelo de interacción:
   automation:     indigo  (#6366F1)
   agency:         violet  (#8B5CF6)
   augmentation:   cyan    (#06B6D4)
+
+Por tipo de implementación:
   localGenAI:     emerald (#10B981)
   apiGenAI:       amber   (#F59E0B)
   traditionalML:  blue    (#3B82F6)
 ```
+
+Estos colores se escriben como strings en `lib/simulations.ts`, por lo que
+`tailwind.config.ts` los protege del purge con un `safelist`.
 
 ## Extensiones futuras sugeridas
 

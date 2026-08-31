@@ -26,6 +26,8 @@ export default function ResultsPage() {
     if (!raw) { router.replace('/assessment'); return }
     try {
       const parsed: AssessmentResult = JSON.parse(raw)
+      // localStorage no existe en SSR: hidratar al montar es la única vía.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setResult(parsed)
       setRoadmap(loadOrGenerateRoadmap(parsed))
     } catch {

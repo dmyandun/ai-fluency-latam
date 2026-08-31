@@ -177,13 +177,12 @@ function AmlInvestigationGraph() {
     const id = setTimeout(() => {
       setTick((t) => t + 1)
       setAccounts((a) => a + Math.floor(Math.random() * 80) + 20)
+      // El caso extra se suma en el mismo tick que cierra la animación: derivarlo
+      // en otro efecto lo duplicaba bajo StrictMode.
+      if (tick + 1 === 4) setCases((c) => c + 1)
     }, 2400)
     return () => clearTimeout(id)
   }, [started, tick])
-
-  useEffect(() => {
-    if (tick === 4) setCases((c) => c + 1)
-  }, [tick])
 
   const nodeById = (id: string) => NODES.find((n) => n.id === id)!
   const nodeColor = (kind: GraphNode['kind']) => {
