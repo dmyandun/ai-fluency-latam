@@ -38,7 +38,12 @@ npm run lint:fix  # ESLint con autofix
 
 ### Scoring (`lib/scoring.ts`)
 
-Calcula dos recomendaciones independientes a partir de las 13 dimensiones (escala 1-5):
+Calcula dos recomendaciones independientes a partir de 13 dimensiones (escala 1-5).
+
+**Sólo 10 se preguntan al usuario** (`lib/questions.ts`). Las otras tres —
+`taskRepetitiveness`, `humanJudgment` y `autonomousExecution` — se derivan de la
+clasificación de actividades, o caen a un valor neutro de 3 si no hay actividades.
+No las cuentes como preguntas en textos de cara al usuario.
 
 **Modelos de interacción** (shift +8 para evitar negativos, luego normalizar a %):
 ```

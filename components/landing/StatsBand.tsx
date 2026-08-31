@@ -1,6 +1,6 @@
 const STATS = [
   { value: '14', label: 'industrias con simulaciones propias' },
-  { value: '13', label: 'dimensiones evaluadas de tu operación' },
+  { value: '10', label: 'preguntas para evaluar 13 dimensiones' },
   { value: '9', label: 'combinaciones de recomendación posibles' },
   { value: '3', label: 'fases de roadmap a 12 meses' },
 ]

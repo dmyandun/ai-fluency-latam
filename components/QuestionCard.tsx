@@ -42,6 +42,8 @@ export default function QuestionCard({ question, currentValue, onAnswer }: Quest
                 <button
                   key={val}
                   type="button"
+                  aria-label={`${question.text}: ${val} de 5`}
+                  aria-pressed={isSelected}
                   onClick={() => onAnswer(question.dimension, val)}
                   className={`flex-1 flex flex-col items-center gap-1.5 py-3 sm:py-4 rounded-xl border text-sm font-semibold transition-all ${
                     isSelected
