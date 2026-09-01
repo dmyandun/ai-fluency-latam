@@ -13,8 +13,6 @@ import DimensionsPanel from '@/components/DimensionsPanel'
 import RecommendationMatrix from '@/components/RecommendationMatrix'
 import RoadmapFlowBoard from '@/components/RoadmapFlowBoard'
 import AIPolicyGenerator from '@/components/AIPolicyGenerator'
-import SimulationApp from '@/components/SimulationApp'
-import { getSimulation } from '@/lib/simulations'
 import ConsultationModal from '@/components/ConsultationModal'
 import Brandmark from '@/components/Brandmark'
 
@@ -223,26 +221,6 @@ export default function ResultsPage() {
               )}
 
               <DimensionsPanel result={result} />
-
-              {/* Simulación interactiva */}
-              <div>
-                <div className="mb-4">
-                  <h2 className="text-xl font-semibold text-slate-900 mb-1">
-                    Simulación interactiva — así se vería tu producto de IA
-                  </h2>
-                  <p className="text-sm text-slate-500">
-                    Demo de cómo quedaría una aplicación real de IA para tu industria y modelo de interacción recomendado.
-                    Haz clic en el botón de acción para ver la IA en funcionamiento.
-                  </p>
-                </div>
-                <SimulationApp
-                  key={result.industry}
-                  config={getSimulation(result.industry)}
-                  interactionModel={result.interactionModel}
-                  industryId={result.industry}
-                  onSchedule={() => setScheduleOpen(true)}
-                />
-              </div>
 
               {/* CTA */}
               <div className="bg-blue-50 border border-blue-200 rounded-2xl p-8 text-center">
