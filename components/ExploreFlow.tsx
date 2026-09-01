@@ -187,9 +187,6 @@ export default function ExploreFlow() {
           <h1 className="max-w-4xl text-4xl font-semibold leading-tight tracking-tight text-slate-900 sm:text-5xl">
             Explora una simulación con IA y genera tu ruta de adopción en una sola página
           </h1>
-          <p className="mt-5 max-w-3xl text-lg leading-relaxed text-slate-600">
-            Eliges país e industria y pruebas una simulación con agentes de IA. Si prefieres ir directo, puedes saltar al diagnóstico y de ahí al Roadmap 4D, la política de IA y la agenda de consultoría.
-          </p>
         </header>
 
         <SectionShell
