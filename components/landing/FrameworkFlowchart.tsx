@@ -23,14 +23,23 @@ interface BranchProps {
   activeIndexes: number[]
   /** Clase de color para los tramos activos, p. ej. 'bg-violet-500'. */
   activeColor: string
+  /**
+   * Color de texto del mismo tono que `activeColor`: el halo de neón se dibuja
+   * con `currentColor`, así que el tramo activo necesita ambas clases.
+   */
+  activeGlow: string
   /** Desde dónde baja el tronco, en %. El flujo sale del nodo elegido arriba. */
   origin: number
   /** Rótulo del nivel; interrumpe la barra en vez de cruzarla. */
   label: string
 }
 
+/** Tramo encendido: más grueso que los apagados y con halo del mismo color. */
+const ACTIVE_SEGMENT = 'w-[3px] rounded-full shadow-[0_0_8px_currentColor]'
+const IDLE_SEGMENT = 'w-px bg-white/15'
+
 /** Tronco, barra horizontal y bajada a cada rama. */
-function Branch({ count, activeIndexes, activeColor, origin, label }: BranchProps) {
+function Branch({ count, activeIndexes, activeColor, activeGlow, origin, label }: BranchProps) {
   const first = columnCenter(0, count)
   const last = columnCenter(count - 1, count)
 
@@ -39,7 +48,7 @@ function Branch({ count, activeIndexes, activeColor, origin, label }: BranchProp
       {/* Tronco: baja desde el nodo elegido en el nivel anterior */}
       <span
         data-flow-trunk={label}
-        className={`absolute top-0 h-1/2 w-px -translate-x-1/2 transition-all ${activeColor}`}
+        className={`absolute top-0 h-1/2 -translate-x-1/2 transition-all ${ACTIVE_SEGMENT} ${activeColor} ${activeGlow}`}
         style={{ left: `${origin}%` }}
       />
       {/*
@@ -62,8 +71,8 @@ function Branch({ count, activeIndexes, activeColor, origin, label }: BranchProp
         return (
           <span
             key={index}
-            className={`absolute top-1/2 h-1/2 w-px -translate-x-1/2 transition-colors ${
-              isActive ? activeColor : 'bg-white/15'
+            className={`absolute top-1/2 h-1/2 -translate-x-1/2 transition-all ${
+              isActive ? `${ACTIVE_SEGMENT} ${activeColor} ${activeGlow}` : IDLE_SEGMENT
             }`}
             style={{ left: `${columnCenter(index, count)}%` }}
           />
@@ -118,7 +127,8 @@ export default function FrameworkFlowchart({
           <Branch
             count={3}
             activeIndexes={[modelIndex]}
-            activeColor="bg-white/40"
+            activeColor={activeModelInfo.dot}
+            activeGlow={activeModelInfo.accent}
             origin={50}
             label="1 · Interacción"
           />
@@ -166,6 +176,7 @@ export default function FrameworkFlowchart({
             count={3}
             activeIndexes={layerIndexes}
             activeColor={activeModelInfo.dot}
+            activeGlow={activeModelInfo.accent}
             origin={columnCenter(modelIndex, 3)}
             label="2 · Tecnología"
           />
