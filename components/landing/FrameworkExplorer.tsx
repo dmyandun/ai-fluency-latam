@@ -51,46 +51,50 @@ export default function FrameworkExplorer() {
         </div>
 
         {/* Resultado de la combinación */}
-        <div className="p-6 sm:p-8">
+        <div className="flex flex-col p-6 sm:p-8">
           <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
             Tu combinación
           </p>
           {/* La key reinicia la animación en cada cambio de modelo. */}
           <h3
             key={combinationTitle}
-            className="text-xl sm:text-2xl font-semibold text-slate-900 tracking-tight mb-2 animate-fade-up"
+            className="text-xl sm:text-2xl font-semibold text-slate-900 tracking-tight mb-1.5 animate-fade-up"
           >
             {combinationTitle}
           </h3>
-          <p className="text-sm text-slate-600 leading-relaxed mb-6">{activeModel.description}</p>
+          <p className="text-sm text-slate-500 mb-6">{activeModel.tagline}</p>
 
-          <div className="space-y-3">
+          {/*
+            Se reserva el alto de las tres capas: quitar una no debe encoger la
+            sección ni desplazar lo que hay debajo. Los valores salen de medir
+            las tarjetas — envuelven más cuanto más estrecha es la pantalla. Por
+            debajo de 480px no se reserva: ahí el hueco sobrante pesaría más que
+            el salto, y la lista queda apilada bajo el flujograma.
+          */}
+          <div className="space-y-3 min-[480px]:min-h-[282px] sm:min-h-[228px]">
             {activeLayers.map((layer, index) => {
               const note = getCombinationNote(model, layer.id)
               return (
                 <div
                   key={`${model}-${layer.id}`}
-                  className="flex gap-3 rounded-xl border border-slate-200 bg-slate-50/70 p-4 animate-fade-up"
+                  className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50/70 px-4 py-3 animate-fade-up"
                   style={{ animationDelay: `${index * 70}ms` }}
                 >
-                  <span className={`w-1 shrink-0 rounded-full ${layer.bar}`} />
-                  <div>
-                    <p className="flex items-center gap-2 text-sm font-semibold text-slate-800 mb-1">
-                      <FrameworkIcon name={layer.icon} className={`w-4 h-4 ${layer.accent}`} />
-                      {layer.name}
-                    </p>
-                    <p className="text-sm text-slate-600 leading-relaxed">{note.role}</p>
-                    <p className="text-xs text-slate-400 leading-relaxed mt-1.5">{note.example}</p>
+                  <span className={`self-stretch w-1 shrink-0 rounded-full ${layer.bar}`} />
+                  <FrameworkIcon name={layer.icon} className={`w-5 h-5 shrink-0 ${layer.accent}`} />
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-slate-800">{layer.name}</p>
+                    <p className="text-sm text-slate-600">{note.role}</p>
                   </div>
                 </div>
               )
             })}
           </div>
 
-          <p className="mt-6 border-t border-slate-100 pt-4 text-xs text-slate-500 leading-relaxed">
-            El diagnóstico no te obliga a elegir todo de golpe: recomienda{' '}
-            <strong className="font-semibold text-slate-600">un punto de partida</strong> — un
-            modelo y una tecnología — y el roadmap incorpora las demás capas por fases.
+          <p className="mt-6 border-t border-slate-100 pt-4 text-xs text-slate-500">
+            El diagnóstico recomienda{' '}
+            <strong className="font-semibold text-slate-600">un punto de partida</strong>; el
+            roadmap suma las demás capas por fases.
           </p>
         </div>
       </div>
