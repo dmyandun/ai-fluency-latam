@@ -3,7 +3,7 @@ import { INDUSTRIES } from '@/lib/industries'
 
 export default function IndustriesSection() {
   return (
-    <section id="industrias" className="px-6 py-20 lg:py-24 bg-white border-t border-slate-200">
+    <section id="industrias" className="px-6 py-20 lg:py-24 bg-slate-50 border-t border-slate-200">
       <div className="max-w-7xl mx-auto">
         <div className="max-w-2xl mb-12">
           <p className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-3">

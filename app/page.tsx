@@ -1,6 +1,5 @@
 import LandingNav from '@/components/landing/LandingNav'
 import HeroSection from '@/components/landing/HeroSection'
-import HowItWorks from '@/components/landing/HowItWorks'
 import ModelsSection from '@/components/landing/ModelsSection'
 import IndustriesSection from '@/components/landing/IndustriesSection'
 import FaqSection from '@/components/landing/FaqSection'
@@ -14,7 +13,6 @@ export default function HomePage() {
       <main className="flex-1">
         <HeroSection />
         <ModelsSection />
-        <HowItWorks />
         <IndustriesSection />
         <FaqSection />
         <FinalCta />

@@ -13,9 +13,6 @@ export default function LandingFooter() {
         </div>
 
         <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-slate-500">
-          <a href="#como-funciona" className="hover:text-slate-800 transition-colors">
-            Cómo funciona
-          </a>
           <a href="#modelos" className="hover:text-slate-800 transition-colors">
             Modelos
           </a>

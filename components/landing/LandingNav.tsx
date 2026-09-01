@@ -5,7 +5,6 @@ import Brandmark from '@/components/Brandmark'
 import { useEffect, useState } from 'react'
 
 const NAV_LINKS = [
-  { href: '#como-funciona', label: 'Cómo funciona' },
   { href: '#modelos', label: 'Modelos' },
   { href: '#industrias', label: 'Industrias' },
   { href: '#preguntas', label: 'Preguntas' },
