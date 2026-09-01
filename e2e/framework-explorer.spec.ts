@@ -94,8 +94,8 @@ test.describe('alto del explorador', () => {
     'IA Tradicional / ML',
   ]
 
-  for (const width of [1440, 1024, 768]) {
-    test(`no cambia al variar las capas a ${width}px`, async ({ page }) => {
+  for (const width of [1440, 1280, 1024, 768, 640]) {
+    test(`no cambia al variar modelo y capas a ${width}px`, async ({ page }) => {
       await page.setViewportSize({ width, height: 1200 })
       await page.goto('/#modelos')
       const explorer = page.locator('#modelos .rounded-3xl').first()
