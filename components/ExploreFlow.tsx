@@ -35,7 +35,7 @@ function SectionShell({
   children,
 }: {
   title: string
-  description: string
+  description?: string
   action?: ReactNode
   children: ReactNode
 }) {
@@ -44,7 +44,9 @@ function SectionShell({
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h2 className="text-2xl font-semibold text-slate-900">{title}</h2>
-          <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slate-500">{description}</p>
+          {description && (
+            <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slate-500">{description}</p>
+          )}
         </div>
         {action && <div className="shrink-0 sm:pt-1">{action}</div>}
       </div>
@@ -212,7 +214,6 @@ export default function ExploreFlow() {
           <div ref={simulationRef}>
             <SectionShell
               title="Explora simulaciones con IA"
-              description="Esta es la primera experiencia de valor para el usuario que llega desde LinkedIn: ve agentes, visualizaciones y análisis antes de llenar el diagnóstico."
             >
               <SimulationApp
                 key={industry}
@@ -230,7 +231,6 @@ export default function ExploreFlow() {
           <div ref={diagnosisRef}>
             <SectionShell
               title="¿Qué tipo de IA conviene implementar primero en tu organización?"
-              description=""
               action={
                 !diagnosisUnlocked ? (
                   <button
