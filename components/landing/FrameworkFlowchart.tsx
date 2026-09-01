@@ -144,6 +144,13 @@ export default function FrameworkFlowchart({
                 >
                   {option.name}
                 </span>
+                <span
+                  className={`block text-[10px] leading-snug mt-1 ${
+                    isActive ? 'text-slate-400' : 'text-slate-500'
+                  }`}
+                >
+                  {option.signal}
+                </span>
               </button>
             )
           })}
@@ -174,6 +181,8 @@ export default function FrameworkFlowchart({
                 {/* El icono hereda el color del chip: acento si está activo, gris si no */}
                 <FrameworkIcon name={impl.icon} className="w-5 h-5 mx-auto mb-2" />
                 <span className="block text-xs font-semibold leading-tight">{impl.shortName}</span>
+                {/* Hereda el color del chip y se apaga para no competir con el nombre */}
+                <span className="block text-[10px] leading-snug mt-1 opacity-70">{impl.signal}</span>
               </button>
             )
           })}
