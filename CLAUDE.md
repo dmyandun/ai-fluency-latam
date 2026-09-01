@@ -129,6 +129,29 @@ visitante combina un modelo con varias capas a la vez, y el texto se ensambla
 desde 9 fragmentos por par para cubrir las 21 combinaciones sin duplicar
 contenido. Es material divulgativo, no entra en el scoring.
 
+### Benchmark regional (`lib/regional-benchmark.ts`)
+
+Alimenta `components/RegionalBenchmark.tsx`, que sitúa la recomendación frente
+al mercado en la pestaña de diagnóstico de `/results` y en `/explore`.
+
+⚠️ **Aquí sólo entran cifras publicadas y citables.** Cada dato viaja con su
+`BenchmarkSource`: publicador, año, URL y `method` — qué mide y con qué muestra.
+Los tres se enseñan en la UI porque cambian cómo se lee el número. Antes de
+tocar un valor, comprueba que la fuente lo publica: una estimación presentada
+como medición arruina la sección entera y, con ella, la credibilidad del
+diagnóstico.
+
+Ninguna fuente mide la adopción **por modelo de interacción** — automatización,
+agencia y aumentación son el marco de esta app, no una categoría que la
+industria reporte. Por eso ese eje se compara contra el dato global de agentes
+y cada panel lleva un chip `scope` que distingue `region` de `global`. No lo
+quites para “igualar” los dos ejes.
+
+Las cifras están **embebidas como constantes**: se compilan en el bundle y no
+cuestan ninguna llamada en runtime. La contrapartida es que envejecen en
+silencio, así que el `year` de cada fuente se muestra al visitante y conviene
+revisar el archivo cuando salga una edición nueva del ILIA o del State of AI.
+
 ## Flujo de datos entre páginas
 
 **Camino directo** (dos páginas):
@@ -203,6 +226,20 @@ El Space construye con el `Dockerfile` del repo, que usa `output: 'standalone'`
 
 **Convención de ramas:** merges siempre con `--no-ff`, y cada hallazgo nuevo va a
 su propia rama en vez de acumularse en la que está en curso.
+
+## Pestaña de diagnóstico
+
+`/results` y `/explore` comparten los componentes del resultado, así que un
+cambio en cualquiera de ellos llega a los dos caminos:
+
+- `ResultSummary` — fila de KPIs: modelo, tecnología, claridad del diagnóstico
+  (margen del ganador sobre el segundo) y contexto evaluado
+- `ResultCard` × 2 — afinidad de cada eje
+- `RegionalBenchmark` — comparación con la región (ver arriba)
+- `RecommendationMatrix` — el par recomendado en detalle
+- `DimensionsPanel` — separa las **10 dimensiones respondidas** de las 3
+  derivadas de actividades, que sin actividades quedan en el neutro y por eso
+  no se pintan junto a las respuestas reales
 
 ## Extensiones futuras sugeridas
 
