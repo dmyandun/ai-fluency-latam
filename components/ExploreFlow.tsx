@@ -34,22 +34,27 @@ function SectionShell({
   action,
   children,
 }: {
-  title: string
+  title?: string
   description?: string
   action?: ReactNode
   children: ReactNode
 }) {
+  /* Una sección sin encabezado ni botón no debe reservar el hueco de la cabecera. */
+  const hasHeader = Boolean(title || description || action)
+
   return (
     <section className="border-t border-slate-200 py-10 animate-fade-in">
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <h2 className="text-2xl font-semibold text-slate-900">{title}</h2>
-          {description && (
-            <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slate-500">{description}</p>
-          )}
+      {hasHeader && (
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            {title && <h2 className="text-2xl font-semibold text-slate-900">{title}</h2>}
+            {description && (
+              <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slate-500">{description}</p>
+            )}
+          </div>
+          {action && <div className="shrink-0 sm:pt-1">{action}</div>}
         </div>
-        {action && <div className="shrink-0 sm:pt-1">{action}</div>}
-      </div>
+      )}
       {children}
     </section>
   )
@@ -190,8 +195,6 @@ export default function ExploreFlow() {
         </header>
 
         <SectionShell
-          title="Selecciona país e industria"
-          description="Con esto adaptamos la visualización, los casos ficticios y el contexto del diagnóstico a la realidad de tu organización."
           action={
             simulationReady && !diagnosisUnlocked ? (
               <button
