@@ -8,6 +8,7 @@ import {
   getCombinationNote,
 } from '@/lib/framework-matrix'
 import FrameworkFlowchart from './FrameworkFlowchart'
+import FrameworkIcon from './FrameworkIcon'
 
 export default function FrameworkExplorer() {
   const [model, setModel] = useState<InteractionModel>('augmentation')
@@ -39,7 +40,7 @@ export default function FrameworkExplorer() {
     <div className="rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden">
       <div className="grid lg:grid-cols-[1fr_1.15fr]">
         {/* Selectores: el recorrido se elige sobre un flujograma con ramas */}
-        <div className="border-b lg:border-b-0 lg:border-r border-slate-200 bg-slate-50/60">
+        <div>
           <FrameworkFlowchart
             model={model}
             layers={layers}
@@ -74,8 +75,9 @@ export default function FrameworkExplorer() {
                 >
                   <span className={`w-1 shrink-0 rounded-full ${layer.bar}`} />
                   <div>
-                    <p className="text-sm font-semibold text-slate-800 mb-1">
-                      {layer.icon} {layer.name}
+                    <p className="flex items-center gap-2 text-sm font-semibold text-slate-800 mb-1">
+                      <FrameworkIcon name={layer.icon} className={`w-4 h-4 ${layer.accent}`} />
+                      {layer.name}
                     </p>
                     <p className="text-sm text-slate-600 leading-relaxed">{note.role}</p>
                     <p className="text-xs text-slate-400 leading-relaxed mt-1.5">{note.example}</p>
