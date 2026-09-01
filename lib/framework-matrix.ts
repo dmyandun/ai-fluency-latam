@@ -18,8 +18,10 @@ export interface InteractionModelInfo {
   id: InteractionModel
   name: string
   icon: FrameworkIconName
-  tagline: string
-  signals: string[]
+  /** Cuándo encaja. Se lee dentro del nodo, antes de elegirlo. */
+  signal: string
+  /** Qué exige el modelo en seguridad y gobernanza del dato. */
+  governance: string
   dot: string
   /** Anillo del nodo activo, sobre la superficie oscura del flujograma. */
   ring: string
@@ -31,6 +33,8 @@ export interface ImplementationTypeInfo {
   id: ImplementationType
   name: string
   shortName: string
+  /** Cuándo encaja. Se lee dentro del nodo, antes de elegirlo. */
+  signal: string
   icon: FrameworkIconName
   chip: string
   activeChip: string
@@ -44,8 +48,9 @@ export const INTERACTION_MODELS: InteractionModelInfo[] = [
     id: 'automation',
     name: 'Automatización',
     icon: 'automation',
-    tagline: 'La máquina ejecuta, tú supervisas',
-    signals: ['Alto volumen transaccional', 'Reglas estables', 'Decisiones de baja complejidad'],
+    signal: 'Tareas repetitivas',
+    governance:
+      'La máquina ejecuta y tú supervisas: el control está en la trazabilidad. Cada acción debe quedar registrada, ser reversible y escalar a una persona en el umbral que fijes. Gobernar aquí es auditar qué decidió el sistema y con qué datos.',
     dot: 'bg-indigo-500',
     ring: 'border-indigo-400/70 ring-indigo-400/30',
     accent: 'text-indigo-300',
@@ -54,8 +59,9 @@ export const INTERACTION_MODELS: InteractionModelInfo[] = [
     id: 'agency',
     name: 'Agencia',
     icon: 'agency',
-    tagline: 'La IA planifica y actúa con límites',
-    signals: ['Integración con sistemas', 'Procesos multi-paso', 'Ejecución autónoma acotada'],
+    signal: 'Procesos multi-paso',
+    governance:
+      'El agente planifica y actúa sobre tus sistemas: el control pasa del dato al permiso. Qué puede tocar, con qué credenciales y hasta qué límite. Es el modelo que más gobernanza exige, porque un error no informa mal — ejecuta.',
     dot: 'bg-violet-500',
     ring: 'border-violet-400/70 ring-violet-400/30',
     accent: 'text-violet-300',
@@ -64,8 +70,9 @@ export const INTERACTION_MODELS: InteractionModelInfo[] = [
     id: 'augmentation',
     name: 'Aumentación',
     icon: 'augmentation',
-    tagline: 'El experto decide mejor y más rápido',
-    signals: ['Criterio experto alto', 'Trabajo creativo', 'Casos poco estandarizados'],
+    signal: 'Criterio experto alto',
+    governance:
+      'La decisión la firma una persona: el riesgo no está en la acción sino en lo que se expone. Al pedir ayuda, el experto comparte el contexto sensible del caso. Gobernar aquí es definir qué información puede salir y hacia dónde.',
     dot: 'bg-cyan-500',
     ring: 'border-cyan-400/70 ring-cyan-400/30',
     accent: 'text-cyan-300',
@@ -77,6 +84,7 @@ export const IMPLEMENTATION_TYPES: ImplementationTypeInfo[] = [
     id: 'localGenAI',
     name: 'IA Generativa Local',
     shortName: 'Local',
+    signal: 'Datos que no salen',
     icon: 'localGenAI',
     chip: 'border-white/15 bg-white/5 text-slate-300 hover:border-emerald-400/50 hover:bg-white/10',
     activeChip: 'border-emerald-400/70 bg-emerald-500/15 text-emerald-200 ring-2 ring-emerald-400/30',
@@ -87,6 +95,7 @@ export const IMPLEMENTATION_TYPES: ImplementationTypeInfo[] = [
     id: 'apiGenAI',
     name: 'IA Generativa vía API',
     shortName: 'API',
+    signal: 'Arranque en semanas',
     icon: 'apiGenAI',
     chip: 'border-white/15 bg-white/5 text-slate-300 hover:border-amber-400/50 hover:bg-white/10',
     activeChip: 'border-amber-400/70 bg-amber-500/15 text-amber-200 ring-2 ring-amber-400/30',
@@ -97,6 +106,7 @@ export const IMPLEMENTATION_TYPES: ImplementationTypeInfo[] = [
     id: 'traditionalML',
     name: 'IA Tradicional / ML',
     shortName: 'ML',
+    signal: 'Predice con tus datos',
     icon: 'traditionalML',
     chip: 'border-white/15 bg-white/5 text-slate-300 hover:border-blue-400/50 hover:bg-white/10',
     activeChip: 'border-blue-400/70 bg-blue-500/15 text-blue-200 ring-2 ring-blue-400/30',

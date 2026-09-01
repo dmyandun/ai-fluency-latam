@@ -99,90 +99,101 @@ export default function FrameworkFlowchart({
       <div className="absolute -top-24 -left-20 w-64 h-64 rounded-full bg-blue-500/20 blur-3xl" />
       <div className="absolute -bottom-24 -right-20 w-64 h-64 rounded-full bg-indigo-500/20 blur-3xl" />
 
-      {/* El panel derecho es más alto: el flujo se centra en vez de colgar arriba */}
-      <div className="relative flex h-full flex-col justify-center">
-        {/* Nodo raíz */}
-        <div className="flex justify-center">
-          <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-semibold text-slate-200 backdrop-blur-sm">
-            <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
-            Tu organización
-          </span>
-        </div>
+      <div className="relative flex h-full flex-col">
+        {/* Encabeza el panel: se lee antes de tocar nada */}
+        <p className="text-base sm:text-lg font-bold text-white tracking-tight leading-snug">
+          Elige un modelo de interacción y una o varias tecnologías
+        </p>
 
-        <Branch
-          count={3}
-          activeIndexes={[modelIndex]}
-          activeColor="bg-white/40"
-          origin={50}
-          label="1 · Interacción"
-        />
+        {/* El panel derecho es más alto: el árbol se centra en el espacio libre */}
+        <div className="flex flex-1 flex-col justify-center pt-6">
+          {/* Nodo raíz */}
+          <div className="flex justify-center">
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-semibold text-slate-200 backdrop-blur-sm">
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
+              Tu organización
+            </span>
+          </div>
 
-        <div className="grid grid-cols-3 gap-2">
-          {INTERACTION_MODELS.map((option: InteractionModelInfo) => {
-            const isActive = option.id === model
-            return (
-              <button
-                key={option.id}
-                type="button"
-                onClick={() => onSelectModel(option.id)}
-                aria-pressed={isActive}
-                aria-label={option.name}
-                className={`rounded-xl border px-2 py-3 text-center transition-all ${
-                  isActive
-                    ? `bg-white/10 ring-2 ${option.ring}`
-                    : 'border-white/15 bg-white/5 hover:border-white/30 hover:bg-white/10'
-                }`}
-              >
-                <FrameworkIcon
-                  name={option.icon}
-                  className={`w-5 h-5 mx-auto mb-2 ${isActive ? option.accent : 'text-slate-500'}`}
-                />
-                <span
-                  className={`block text-xs font-semibold leading-tight ${
-                    isActive ? 'text-white' : 'text-slate-400'
+          <Branch
+            count={3}
+            activeIndexes={[modelIndex]}
+            activeColor="bg-white/40"
+            origin={50}
+            label="1 · Interacción"
+          />
+
+          <div className="grid grid-cols-3 gap-2">
+            {INTERACTION_MODELS.map((option: InteractionModelInfo) => {
+              const isActive = option.id === model
+              return (
+                <button
+                  key={option.id}
+                  type="button"
+                  onClick={() => onSelectModel(option.id)}
+                  aria-pressed={isActive}
+                  aria-label={option.name}
+                  className={`rounded-xl border px-2 py-3 text-center transition-all ${
+                    isActive
+                      ? `bg-white/10 ring-2 ${option.ring}`
+                      : 'border-white/15 bg-white/5 hover:border-white/30 hover:bg-white/10'
                   }`}
                 >
-                  {option.name}
-                </span>
-              </button>
-            )
-          })}
+                  <FrameworkIcon
+                    name={option.icon}
+                    className={`w-5 h-5 mx-auto mb-2 ${isActive ? option.accent : 'text-slate-500'}`}
+                  />
+                  <span
+                    className={`block text-xs font-semibold leading-tight ${
+                      isActive ? 'text-white' : 'text-slate-400'
+                    }`}
+                  >
+                    {option.name}
+                  </span>
+                  <span
+                    className={`block text-[10px] leading-snug mt-1 ${
+                      isActive ? 'text-slate-400' : 'text-slate-500'
+                    }`}
+                  >
+                    {option.signal}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+
+          <Branch
+            count={3}
+            activeIndexes={layerIndexes}
+            activeColor={activeModelInfo.dot}
+            origin={columnCenter(modelIndex, 3)}
+            label="2 · Tecnología"
+          />
+
+          <div className="grid grid-cols-3 gap-2">
+            {IMPLEMENTATION_TYPES.map((impl: ImplementationTypeInfo) => {
+              const isActive = layers.includes(impl.id)
+              return (
+                <button
+                  key={impl.id}
+                  type="button"
+                  onClick={() => onToggleLayer(impl.id)}
+                  aria-pressed={isActive}
+                  aria-label={impl.name}
+                  className={`rounded-xl border px-2 py-3 text-center transition-all ${
+                    isActive ? impl.activeChip : impl.chip
+                  }`}
+                >
+                  {/* El icono hereda el color del chip: acento si está activo, gris si no */}
+                  <FrameworkIcon name={impl.icon} className="w-5 h-5 mx-auto mb-2" />
+                  <span className="block text-xs font-semibold leading-tight">{impl.shortName}</span>
+                  {/* Hereda el color del chip y se apaga para no competir con el nombre */}
+                  <span className="block text-[10px] leading-snug mt-1 opacity-70">{impl.signal}</span>
+                </button>
+              )
+            })}
+          </div>
         </div>
-
-        <Branch
-          count={3}
-          activeIndexes={layerIndexes}
-          activeColor={activeModelInfo.dot}
-          origin={columnCenter(modelIndex, 3)}
-          label="2 · Tecnología"
-        />
-
-        <div className="grid grid-cols-3 gap-2">
-          {IMPLEMENTATION_TYPES.map((impl: ImplementationTypeInfo) => {
-            const isActive = layers.includes(impl.id)
-            return (
-              <button
-                key={impl.id}
-                type="button"
-                onClick={() => onToggleLayer(impl.id)}
-                aria-pressed={isActive}
-                aria-label={impl.name}
-                className={`rounded-xl border px-2 py-3 text-center transition-all ${
-                  isActive ? impl.activeChip : impl.chip
-                }`}
-              >
-                {/* El icono hereda el color del chip: acento si está activo, gris si no */}
-                <FrameworkIcon name={impl.icon} className="w-5 h-5 mx-auto mb-2" />
-                <span className="block text-xs font-semibold leading-tight">{impl.shortName}</span>
-              </button>
-            )
-          })}
-        </div>
-
-        <p className="mt-4 text-center text-[11px] text-slate-400">
-          Puedes activar varias tecnologías a la vez — la mayoría de organizaciones acaba
-          haciéndolo.
-        </p>
       </div>
     </div>
   )

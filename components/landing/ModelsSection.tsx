@@ -1,5 +1,4 @@
 import FrameworkExplorer from './FrameworkExplorer'
-import { INTERACTION_MODELS } from '@/lib/framework-matrix'
 
 export default function ModelsSection() {
   return (
@@ -20,27 +19,6 @@ export default function ModelsSection() {
         </div>
 
         <FrameworkExplorer />
-
-        {/* Señales que empujan hacia cada modelo: el resumen que el explorador no muestra. */}
-        <div className="mt-8 grid gap-4 sm:grid-cols-3">
-          {INTERACTION_MODELS.map((model) => (
-            <div key={model.id} className="rounded-2xl border border-slate-200 bg-slate-50/60 p-5">
-              <div className="flex items-center gap-2 mb-3">
-                <span className={`w-2 h-2 rounded-full ${model.dot}`} />
-                <span className="text-sm font-semibold text-slate-900">{model.name}</span>
-                <span className="text-xs text-slate-400">se ajusta si…</span>
-              </div>
-              <ul className="space-y-1.5">
-                {model.signals.map((signal) => (
-                  <li key={signal} className="text-xs text-slate-500 flex items-start gap-2">
-                    <span className="text-slate-300 mt-0.5">▸</span>
-                    {signal}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
       </div>
     </section>
   )

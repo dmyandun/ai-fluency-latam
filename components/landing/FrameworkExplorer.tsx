@@ -52,17 +52,23 @@ export default function FrameworkExplorer() {
 
         {/* Resultado de la combinación */}
         <div className="flex flex-col p-6 sm:p-8">
-          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
-            Tu combinación
-          </p>
           {/* La key reinicia la animación en cada cambio de modelo. */}
           <h3
             key={combinationTitle}
-            className="text-xl sm:text-2xl font-semibold text-slate-900 tracking-tight mb-1.5 animate-fade-up"
+            className="text-xl sm:text-2xl font-semibold text-slate-900 tracking-tight mb-3 animate-fade-up"
           >
             {combinationTitle}
           </h3>
-          <p className="text-sm text-slate-500 mb-6">{activeModel.tagline}</p>
+          {/*
+            El grado de gobernanza cambia con el modelo, no con la tecnología:
+            se reserva el alto del texto más largo para no mover las tarjetas.
+          */}
+          <p
+            key={model}
+            className="text-sm text-slate-600 leading-relaxed mb-6 sm:min-h-[91px] animate-fade-up"
+          >
+            {activeModel.governance}
+          </p>
 
           {/*
             Se reserva el alto de las tres capas: quitar una no debe encoger la
