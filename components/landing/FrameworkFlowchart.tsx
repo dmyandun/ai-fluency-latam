@@ -35,7 +35,9 @@ interface BranchProps {
 }
 
 /** Tramo encendido: más grueso que los apagados y con halo del mismo color. */
-const ACTIVE_SEGMENT = 'w-[3px] rounded-full shadow-[0_0_8px_currentColor]'
+const ACTIVE_SEGMENT = 'rounded-full shadow-[0_0_8px_currentColor]'
+const ACTIVE_VERTICAL = `w-[3px] ${ACTIVE_SEGMENT}`
+const ACTIVE_HORIZONTAL = `h-[3px] ${ACTIVE_SEGMENT}`
 const IDLE_SEGMENT = 'w-px bg-white/15'
 
 /** Tronco, barra horizontal y bajada a cada rama. */
@@ -48,31 +50,45 @@ function Branch({ count, activeIndexes, activeColor, activeGlow, origin, label }
       {/* Tronco: baja desde el nodo elegido en el nivel anterior */}
       <span
         data-flow-trunk={label}
-        className={`absolute top-0 h-1/2 -translate-x-1/2 transition-all ${ACTIVE_SEGMENT} ${activeColor} ${activeGlow}`}
+        className={`absolute top-0 h-1/2 -translate-x-1/2 transition-all ${ACTIVE_VERTICAL} ${activeColor} ${activeGlow}`}
         style={{ left: `${origin}%` }}
       />
-      {/*
-        Barra que reparte hacia cada rama. El rótulo se intercala entre dos
-        tramos en lugar de taparla: sobre el degradado del panel ningún color
-        sólido casaría con el fondo.
-      */}
-      <div
-        className="absolute top-1/2 flex -translate-y-1/2 items-center"
+      {/* Barra apagada: une todas las ramas, también las no elegidas. */}
+      <span
+        className="absolute top-1/2 h-px -translate-y-1/2 bg-white/15"
         style={{ left: `${first}%`, right: `${100 - last}%` }}
-      >
-        <span className="h-px flex-1 bg-white/15" />
-        <span className="px-2 text-[10px] font-semibold uppercase tracking-wider text-slate-400 whitespace-nowrap">
-          {label}
-        </span>
-        <span className="h-px flex-1 bg-white/15" />
-      </div>
+      />
+      {/*
+        Tramo horizontal encendido: del tronco a cada rama elegida. Se dibuja
+        sobre la barra apagada, y el rótulo va después para quedar por encima.
+      */}
+      {activeIndexes.map((index) => {
+        const target = columnCenter(index, count)
+        return (
+          <span
+            key={`link-${index}`}
+            className={`absolute top-1/2 -translate-y-1/2 transition-all ${ACTIVE_HORIZONTAL} ${activeColor} ${activeGlow}`}
+            style={{
+              left: `${Math.min(origin, target)}%`,
+              right: `${100 - Math.max(origin, target)}%`,
+            }}
+          />
+        )
+      })}
+      {/*
+        El rótulo se apoya en una píldora translúcida: sin ella el camino
+        encendido le pasaría por debajo y dejaría el texto ilegible.
+      */}
+      <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-slate-900/80 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400 whitespace-nowrap backdrop-blur-sm">
+        {label}
+      </span>
       {Array.from({ length: count }, (_, index) => {
         const isActive = activeIndexes.includes(index)
         return (
           <span
             key={index}
             className={`absolute top-1/2 h-1/2 -translate-x-1/2 transition-all ${
-              isActive ? `${ACTIVE_SEGMENT} ${activeColor} ${activeGlow}` : IDLE_SEGMENT
+              isActive ? `${ACTIVE_VERTICAL} ${activeColor} ${activeGlow}` : IDLE_SEGMENT
             }`}
             style={{ left: `${columnCenter(index, count)}%` }}
           />
