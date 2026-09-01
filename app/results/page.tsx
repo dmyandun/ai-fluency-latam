@@ -7,6 +7,9 @@ import type { AssessmentResult, Roadmap } from '@/types/assessment'
 import { getRecommendation, MODEL_LABELS } from '@/lib/recommendations'
 import { loadOrGenerateRoadmap } from '@/lib/roadmap'
 import ResultCard from '@/components/ResultCard'
+import ResultSummary from '@/components/ResultSummary'
+import RegionalBenchmark from '@/components/RegionalBenchmark'
+import DimensionsPanel from '@/components/DimensionsPanel'
 import RecommendationMatrix from '@/components/RecommendationMatrix'
 import RoadmapFlowBoard from '@/components/RoadmapFlowBoard'
 import AIPolicyGenerator from '@/components/AIPolicyGenerator'
@@ -154,32 +157,16 @@ export default function ResultsPage() {
                 return null
               })()}
 
+              <ResultSummary result={result} />
+
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <ResultCard type="interactionModel"   winner={result.interactionModel}   scores={result.interactionScores} />
                 <ResultCard type="implementationType" winner={result.implementationType} scores={result.implementationScores} />
               </div>
 
-              <RecommendationMatrix result={result} recommendation={recommendation} />
+              <RegionalBenchmark result={result} />
 
-              {/* Simulación interactiva */}
-              <div>
-                <div className="mb-4">
-                  <h2 className="text-xl font-semibold text-slate-900 mb-1">
-                    Simulación interactiva — así se vería tu producto de IA
-                  </h2>
-                  <p className="text-sm text-slate-500">
-                    Demo de cómo quedaría una aplicación real de IA para tu industria y modelo de interacción recomendado.
-                    Haz clic en el botón de acción para ver la IA en funcionamiento.
-                  </p>
-                </div>
-                <SimulationApp
-                  key={result.industry}
-                  config={getSimulation(result.industry)}
-                  interactionModel={result.interactionModel}
-                  industryId={result.industry}
-                  onSchedule={() => setScheduleOpen(true)}
-                />
-              </div>
+              <RecommendationMatrix result={result} recommendation={recommendation} />
 
               {/* Análisis de actividades diarias */}
               {result.activities && result.activities.length > 0 && (
@@ -235,33 +222,26 @@ export default function ResultsPage() {
                 </div>
               )}
 
-              {/* Desglose de dimensiones */}
-              <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-                <h3 className="text-base font-semibold text-slate-900 mb-5">Desglose de tu diagnóstico</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {Object.entries(result.dimensions).map(([key, value]) => {
-                    const labels: Record<string, string> = {
-                      taskRepetitiveness: 'Repetitividad', dataMaturity: 'Madurez de datos',
-                      creativityRequired: 'Creatividad', decisionComplexity: 'Complejidad de decisión',
-                      operationalVolume: 'Volumen operativo', dataPrivacy: 'Privacidad de datos',
-                      systemsIntegration: 'Integración de sistemas', humanJudgment: 'Criterio humano',
-                      autonomousExecution: 'Ejecución autónoma', forecastingNeed: 'Necesidad de predicción',
-                      teamTechMaturity: 'Madurez tecnológica', regulatorySensitivity: 'Sensibilidad regulatoria',
-                      innovationAdvantage: 'Ventaja por innovación',
-                    }
-                    return (
-                      <div key={key} className="flex flex-col gap-1.5">
-                        <div className="flex justify-between items-center">
-                          <span className="text-xs text-slate-500">{labels[key] ?? key}</span>
-                          <span className="text-xs font-semibold text-slate-900 tabular-nums">{value}/5</span>
-                        </div>
-                        <div className="h-1 bg-slate-100 rounded-full overflow-hidden">
-                          <div className="h-full bg-blue-500 rounded-full" style={{ width: `${(value / 5) * 100}%` }} />
-                        </div>
-                      </div>
-                    )
-                  })}
+              <DimensionsPanel result={result} />
+
+              {/* Simulación interactiva */}
+              <div>
+                <div className="mb-4">
+                  <h2 className="text-xl font-semibold text-slate-900 mb-1">
+                    Simulación interactiva — así se vería tu producto de IA
+                  </h2>
+                  <p className="text-sm text-slate-500">
+                    Demo de cómo quedaría una aplicación real de IA para tu industria y modelo de interacción recomendado.
+                    Haz clic en el botón de acción para ver la IA en funcionamiento.
+                  </p>
                 </div>
+                <SimulationApp
+                  key={result.industry}
+                  config={getSimulation(result.industry)}
+                  interactionModel={result.interactionModel}
+                  industryId={result.industry}
+                  onSchedule={() => setScheduleOpen(true)}
+                />
               </div>
 
               {/* CTA */}

@@ -13,6 +13,9 @@ import IndustrySelector from '@/components/IndustrySelector'
 import QuestionsTable from '@/components/QuestionsTable'
 import SimulationApp from '@/components/SimulationApp'
 import ResultCard from '@/components/ResultCard'
+import ResultSummary from '@/components/ResultSummary'
+import RegionalBenchmark from '@/components/RegionalBenchmark'
+import DimensionsPanel from '@/components/DimensionsPanel'
 import RecommendationMatrix from '@/components/RecommendationMatrix'
 import RoadmapFlowBoard from '@/components/RoadmapFlowBoard'
 import AIPolicyGenerator from '@/components/AIPolicyGenerator'
@@ -283,11 +286,14 @@ export default function ExploreFlow() {
                   </p>
                   <p className="mt-1 text-sm leading-relaxed text-emerald-700">{recommendation.summary}</p>
                 </div>
+                <ResultSummary result={result} />
                 <div className="grid gap-6 lg:grid-cols-2">
                   <ResultCard type="interactionModel" winner={result.interactionModel} scores={result.interactionScores} />
                   <ResultCard type="implementationType" winner={result.implementationType} scores={result.implementationScores} />
                 </div>
+                <RegionalBenchmark result={result} />
                 <RecommendationMatrix result={result} recommendation={recommendation} />
+                <DimensionsPanel result={result} />
               </div>
             </SectionShell>
           </div>
