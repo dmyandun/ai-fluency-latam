@@ -9,13 +9,9 @@ export default function IndustriesSection() {
           <p className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-3">
             Industrias
           </p>
-          <h2 className="text-3xl sm:text-4xl font-semibold text-slate-900 tracking-tight mb-4">
+          <h2 className="text-3xl sm:text-4xl font-semibold text-slate-900 tracking-tight">
             Simulaciones ancladas a tu sector
           </h2>
-          <p className="text-slate-600 leading-relaxed">
-            Cada industria trae su propio tablero, sus KPIs y sus casos documentados. Antes de
-            responder el diagnóstico puedes ver la IA operando sobre un escenario reconocible.
-          </p>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-10">
