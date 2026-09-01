@@ -7,6 +7,7 @@ import {
   type ImplementationTypeInfo,
   type InteractionModelInfo,
 } from '@/lib/framework-matrix'
+import FrameworkIcon from './FrameworkIcon'
 
 /**
  * Centro horizontal de la columna `index` en una rejilla de `count` columnas
@@ -132,7 +133,10 @@ export default function FrameworkFlowchart({
                     : 'border-white/15 bg-white/5 hover:border-white/30 hover:bg-white/10'
                 }`}
               >
-                <span className="block text-lg leading-none mb-1.5">{option.icon}</span>
+                <FrameworkIcon
+                  name={option.icon}
+                  className={`w-5 h-5 mx-auto mb-2 ${isActive ? option.accent : 'text-slate-500'}`}
+                />
                 <span
                   className={`block text-xs font-semibold leading-tight ${
                     isActive ? 'text-white' : 'text-slate-400'
@@ -167,7 +171,8 @@ export default function FrameworkFlowchart({
                   isActive ? impl.activeChip : impl.chip
                 }`}
               >
-                <span className="block text-lg leading-none mb-1.5">{impl.icon}</span>
+                {/* El icono hereda el color del chip: acento si está activo, gris si no */}
+                <FrameworkIcon name={impl.icon} className="w-5 h-5 mx-auto mb-2" />
                 <span className="block text-xs font-semibold leading-tight">{impl.shortName}</span>
               </button>
             )
