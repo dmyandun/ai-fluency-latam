@@ -65,7 +65,7 @@ export default function DimensionsPanel({ result }: { result: AssessmentResult }
         ))}
       </div>
 
-      {hasActivities ? (
+      {hasActivities && (
         <div className="mt-6 border-t border-slate-100 pt-5">
           <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4">
             Derivadas de tus actividades
@@ -76,11 +76,6 @@ export default function DimensionsPanel({ result }: { result: AssessmentResult }
             ))}
           </div>
         </div>
-      ) : (
-        <p className="mt-6 border-t border-slate-100 pt-4 text-xs text-slate-400 leading-relaxed">
-          Otras tres dimensiones — repetitividad, criterio humano y ejecución autónoma — se derivan
-          de clasificar tus actividades diarias, un paso que se hace en la sesión de consultoría.
-        </p>
       )}
     </section>
   )
