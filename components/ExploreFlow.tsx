@@ -1,35 +1,33 @@
 'use client'
 
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
-import type { AssessmentResult, DimensionKey, DimensionScore, InteractionModel, Roadmap } from '@/types/assessment'
+import Link from 'next/link'
+import type { DimensionScore, InteractionModel } from '@/types/assessment'
 import { QUESTIONS } from '@/lib/questions'
 import { buildAssessmentResult } from '@/lib/scoring'
-import { getRecommendation, MODEL_LABELS } from '@/lib/recommendations'
-import { generateDefaultRoadmap, saveRoadmap } from '@/lib/roadmap'
 import { getSimulation } from '@/lib/simulations'
 import { DEFAULT_REGION } from '@/lib/countries'
 import IndustrySelector from '@/components/IndustrySelector'
-import QuestionsTable from '@/components/QuestionsTable'
 import SimulationApp from '@/components/SimulationApp'
-import ResultCard from '@/components/ResultCard'
-import ResultSummary from '@/components/ResultSummary'
-import RegionalBenchmark from '@/components/RegionalBenchmark'
-import DimensionsPanel from '@/components/DimensionsPanel'
-import RecommendationMatrix from '@/components/RecommendationMatrix'
-import RoadmapFlowBoard from '@/components/RoadmapFlowBoard'
-import AIPolicyGenerator from '@/components/AIPolicyGenerator'
 import ConsultationModal from '@/components/ConsultationModal'
 import Brandmark from '@/components/Brandmark'
 
 const PREVIEW_VARIANTS: InteractionModel[] = ['automation', 'agency', 'augmentation']
 const CHAT_MODEL: InteractionModel = 'agency'
-const LINKEDIN_URL = 'https://www.linkedin.com/in/dmyandun/'
 
 type ScoreInput = Omit<
   DimensionScore,
   'taskRepetitiveness' | 'humanJudgment' | 'autonomousExecution'
 >
+
+/**
+ * El diagnóstico vive en `/assessment`: esta página sólo enseña la simulación.
+ * La industria elegida viaja en la URL para no volver a preguntarla allí.
+ */
+function assessmentHref(industry: string) {
+  return industry ? `/assessment?industry=${encodeURIComponent(industry)}` : '/assessment'
+}
 
 function SectionShell({
   title,
@@ -65,23 +63,17 @@ function SectionShell({
 
 export default function ExploreFlow() {
   const [industry, setIndustry] = useState('')
-  const [answers, setAnswers] = useState<Partial<DimensionScore>>({})
-  const [result, setResult] = useState<AssessmentResult | null>(null)
-  const [roadmap, setRoadmap] = useState<Roadmap | null>(null)
-  const [policyUnlocked, setPolicyUnlocked] = useState(false)
-  const [diagnosisUnlocked, setDiagnosisUnlocked] = useState(false)
   const [scheduleOpen, setScheduleOpen] = useState(false)
-
   const simulationRef = useRef<HTMLDivElement>(null)
-  const diagnosisRef = useRef<HTMLDivElement>(null)
-  const resultsRef = useRef<HTMLDivElement>(null)
-  const roadmapRef = useRef<HTMLDivElement>(null)
 
   const simulationReady = Boolean(industry)
-  const allQuestionsAnswered = QUESTIONS.every((q) => answers[q.dimension] !== undefined)
-  const recommendation = result ? getRecommendation(result) : null
+
+  /*
+   * El modal de consultoría espera un AssessmentResult. Desde aquí nadie ha
+   * respondido el diagnóstico todavía, así que se arma uno neutro sólo para
+   * darle el contexto de industria.
+   */
   const scheduleResult = useMemo(() => {
-    if (result) return result
     const neutralAnswers = QUESTIONS.reduce<Partial<ScoreInput>>((acc, question) => {
       acc[question.dimension as keyof ScoreInput] = 3
       return acc
@@ -92,97 +84,26 @@ export default function ExploreFlow() {
       industry || 'general',
       []
     )
-  }, [industry, result])
-
-  const progress = useMemo(() => {
-    // El recorrido no termina en el resultado: el roadmap y la política son los
-    // dos pasos finales, así que el 100% se reserva para cuando ambos existen.
-    if (result && roadmap && policyUnlocked) return 100
-    if (result && (roadmap || policyUnlocked)) return 90
-    if (result) return 80
-    if (diagnosisUnlocked && allQuestionsAnswered) return 70
-    if (diagnosisUnlocked) return 60
-    if (simulationReady && allQuestionsAnswered) return 70
-    if (simulationReady) return 50
-    if (industry) return 25
-    return 10
-  }, [
-    allQuestionsAnswered,
-    diagnosisUnlocked,
-    industry,
-    policyUnlocked,
-    result,
-    roadmap,
-    simulationReady,
-  ])
+  }, [industry])
 
   function handleIndustryChange(nextIndustry: string) {
     setIndustry(nextIndustry)
-    setResult(null)
-    setRoadmap(null)
-    setPolicyUnlocked(false)
-    setDiagnosisUnlocked(false)
     window.setTimeout(() => {
       simulationRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }, 120)
   }
-
-  function handleAnswer(dimension: DimensionKey, value: number) {
-    setAnswers((prev) => ({ ...prev, [dimension]: value }))
-    setResult(null)
-    setRoadmap(null)
-    setPolicyUnlocked(false)
-  }
-
-  function handleUnlockDiagnosis() {
-    setDiagnosisUnlocked(true)
-    window.setTimeout(() => {
-      diagnosisRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }, 120)
-  }
-
-  function handleGenerateResult() {
-    if (!industry || !allQuestionsAnswered) return
-
-    const assessmentResult = buildAssessmentResult(answers as ScoreInput, DEFAULT_REGION, industry, [])
-    setResult(assessmentResult)
-    setRoadmap(null)
-    setPolicyUnlocked(false)
-    localStorage.setItem('afl_result', JSON.stringify(assessmentResult))
-    localStorage.removeItem('afl_roadmap')
-
-    window.setTimeout(() => {
-      resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }, 120)
-  }
-
-  function handleGenerateRoadmap() {
-    if (!result) return
-    const nextRoadmap = generateDefaultRoadmap(result)
-    setRoadmap(nextRoadmap)
-    saveRoadmap(nextRoadmap)
-
-    window.setTimeout(() => {
-      roadmapRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }, 120)
-  }
-
-  const handleUpdateRoadmap = useCallback((updated: Roadmap) => {
-    setRoadmap(updated)
-    saveRoadmap(updated)
-  }, [])
 
   return (
     <div className="min-h-screen bg-slate-50">
       <nav className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 px-6 py-4 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
           <Brandmark />
-          <div className="hidden min-w-[220px] items-center gap-3 sm:flex">
-            <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-100">
-              <div className="h-full rounded-full bg-blue-600 transition-all" style={{ width: `${progress}%` }} />
-            </div>
-            <span className="text-xs font-semibold text-slate-500">{progress}%</span>
-          </div>
+          <Link
+            href={assessmentHref(industry)}
+            className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-600 shadow-sm transition-all hover:border-blue-400 hover:text-blue-700"
+          >
+            Ir al diagnóstico
+          </Link>
         </div>
       </nav>
 
@@ -193,20 +114,19 @@ export default function ExploreFlow() {
             Experiencia interactiva para descubrir oportunidades reales de IA
           </div>
           <h1 className="max-w-4xl text-4xl font-semibold leading-tight tracking-tight text-slate-900 sm:text-5xl">
-            Explora una simulación con IA y genera tu ruta de adopción en una sola página
+            Prueba una simulación con IA aplicada a tu industria
           </h1>
         </header>
 
         <SectionShell
           action={
-            simulationReady && !diagnosisUnlocked ? (
-              <button
-                type="button"
-                onClick={handleUnlockDiagnosis}
-                className="rounded-xl border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-600 shadow-sm transition-all hover:border-blue-400 hover:text-blue-700"
+            simulationReady ? (
+              <Link
+                href={assessmentHref(industry)}
+                className="inline-block rounded-xl border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-600 shadow-sm transition-all hover:border-blue-400 hover:text-blue-700"
               >
                 Saltar al diagnóstico →
-              </button>
+              </Link>
             ) : null
           }
         >
@@ -215,9 +135,7 @@ export default function ExploreFlow() {
 
         {simulationReady && (
           <div ref={simulationRef}>
-            <SectionShell
-              title="Explora simulaciones con IA"
-            >
+            <SectionShell title="Explora simulaciones con IA">
               <SimulationApp
                 key={industry}
                 config={getSimulation(industry)}
@@ -230,156 +148,39 @@ export default function ExploreFlow() {
           </div>
         )}
 
-        {simulationReady && (
-          <div ref={diagnosisRef}>
-            <SectionShell
-              title="¿Qué tipo de IA conviene implementar primero en tu organización?"
-              action={
-                !diagnosisUnlocked ? (
-                  <button
-                    type="button"
-                    onClick={handleUnlockDiagnosis}
-                    className="rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:bg-blue-700"
-                  >
-                    Diagnóstico →
-                  </button>
-                ) : null
-              }
-            >
-              {!diagnosisUnlocked ? (
-                <div className="h-1" />
-              ) : (
-                <div className="space-y-6">
-                  <QuestionsTable questions={QUESTIONS} answers={answers} onAnswer={handleAnswer} />
-                  <div className="flex flex-col items-start justify-between gap-3 bg-blue-50 px-5 py-4 sm:flex-row sm:items-center">
-                    <div>
-                      <p className="text-sm font-semibold text-slate-900">Genera tus resultados del diagnóstico</p>
-                      <p className="text-xs text-slate-500">
-                        Al terminar podrás generar tu Roadmap 4D y un borrador de política de IA.
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleGenerateResult}
-                      disabled={!allQuestionsAnswered}
-                      className="rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:bg-blue-700 disabled:bg-slate-200 disabled:text-slate-400"
-                    >
-                      Ver resultados →
-                    </button>
-                  </div>
-                </div>
-              )}
-            </SectionShell>
+        <SectionShell>
+          <div className="rounded-2xl border border-blue-200 bg-blue-50 p-8 text-center">
+            <h2 className="mb-2 text-xl font-semibold text-slate-900">
+              ¿Qué tipo de IA conviene implementar primero en tu organización?
+            </h2>
+            <p className="mx-auto mb-6 max-w-xl text-slate-500">
+              El diagnóstico son 10 preguntas. Al terminarlas obtienes la recomendación, tu Roadmap
+              4D de 12 meses y el borrador de política de IA.
+            </p>
+            <div className="flex flex-col justify-center gap-3 sm:flex-row">
+              <Link
+                href={assessmentHref(industry)}
+                className="rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-md transition-all hover:bg-blue-700"
+              >
+                Hacer el diagnóstico →
+              </Link>
+              <button
+                type="button"
+                onClick={() => setScheduleOpen(true)}
+                className="rounded-xl border border-slate-300 bg-white px-6 py-3 text-sm font-medium text-slate-700 shadow-sm transition-all hover:border-blue-400 hover:text-blue-700"
+              >
+                Contactar consultoría
+              </button>
+            </div>
           </div>
-        )}
-
-        {result && recommendation && (
-          <div ref={resultsRef}>
-            <SectionShell
-              title="Resultados y recomendación"
-              description="El diagnóstico resume qué tipo de IA conviene implementar y por qué, con una lectura práctica para pasar de la curiosidad a un primer piloto."
-            >
-              <div className="space-y-6">
-                <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4">
-                  <p className="text-sm font-semibold text-emerald-800">
-                    Recomendación: {MODEL_LABELS[result.interactionModel]} + {MODEL_LABELS[result.implementationType]}
-                  </p>
-                  <p className="mt-1 text-sm leading-relaxed text-emerald-700">{recommendation.summary}</p>
-                </div>
-                <ResultSummary result={result} />
-                <div className="grid gap-6 lg:grid-cols-2">
-                  <ResultCard type="interactionModel" winner={result.interactionModel} scores={result.interactionScores} />
-                  <ResultCard type="implementationType" winner={result.implementationType} scores={result.implementationScores} />
-                </div>
-                <RegionalBenchmark result={result} />
-                <RecommendationMatrix result={result} recommendation={recommendation} />
-                <DimensionsPanel result={result} />
-              </div>
-            </SectionShell>
-          </div>
-        )}
-
-        {result && (
-          <div ref={roadmapRef}>
-            <SectionShell
-              title="¿Cómo se vería tu plan de adopción de IA para los próximos 12 meses?"
-              description="Un Roadmap 4D basado en Delegation, Description, Discernment y Diligence, que convierte el diagnóstico en una ruta accionable por fases. Puedes editar, agregar o eliminar iniciativas."
-              action={
-                !roadmap ? (
-                  <button
-                    type="button"
-                    onClick={handleGenerateRoadmap}
-                    className="rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:bg-blue-700"
-                  >
-                    Generar Roadmap 4D →
-                  </button>
-                ) : null
-              }
-            >
-              {roadmap ? (
-                <RoadmapFlowBoard roadmap={roadmap} onUpdateRoadmap={handleUpdateRoadmap} />
-              ) : (
-                <p className="text-sm text-slate-500">
-                  El roadmap se arma a partir de tu resultado y queda guardado en este navegador.
-                </p>
-              )}
-            </SectionShell>
-          </div>
-        )}
-
-        {result && (
-          <SectionShell
-            title="¿Qué reglas debería seguir tu equipo antes de usar IA con datos reales?"
-            description="Un borrador de política interna alineado al diagnóstico y al framework 4D. Solo necesitas escribir el nombre de la empresa."
-            action={
-              !policyUnlocked ? (
-                <button
-                  type="button"
-                  onClick={() => setPolicyUnlocked(true)}
-                  className="rounded-xl bg-slate-900 px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:bg-slate-800"
-                >
-                  Preparar generador de política →
-                </button>
-              ) : null
-            }
-          >
-            {policyUnlocked ? (
-              <AIPolicyGenerator result={result} />
-            ) : (
-              <p className="text-sm text-slate-500">
-                Se genera a partir de tu recomendación, sin enviar datos a ningún servidor.
-              </p>
-            )}
-          </SectionShell>
-        )}
-
-        <section className="border-t border-blue-200 py-10 text-center animate-fade-in">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-blue-600">Contacto</p>
-          <h2 className="mt-2 text-2xl font-semibold text-slate-900">¿Quieres aterrizar esto a un caso real de tu empresa?</h2>
-          <p className="mx-auto mt-2 max-w-2xl text-sm leading-relaxed text-slate-500">
-            Puedes agendar una consultoría o escribirme por LinkedIn en cualquier momento del recorrido.
-          </p>
-          <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
-            <button
-              type="button"
-              onClick={() => setScheduleOpen(true)}
-              className="rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:bg-blue-700"
-            >
-              Contactar consultoría
-            </button>
-            <a
-              href={LINKEDIN_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="rounded-xl bg-white px-6 py-3 text-sm font-semibold text-blue-700 shadow-sm ring-1 ring-slate-300 transition-all hover:ring-blue-400"
-            >
-              Charlemos de IA
-            </a>
-          </div>
-        </section>
+        </SectionShell>
       </main>
 
-      <ConsultationModal result={scheduleResult} open={scheduleOpen} onClose={() => setScheduleOpen(false)} />
+      <ConsultationModal
+        result={scheduleResult}
+        open={scheduleOpen}
+        onClose={() => setScheduleOpen(false)}
+      />
     </div>
   )
 }

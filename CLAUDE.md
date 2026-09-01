@@ -18,17 +18,24 @@ soporta `output: 'standalone'`; sirve la app igual y el aviso es esperado.
 
 **Next.js 16 App Router** con estas rutas:
 - `/` → landing (`app/page.tsx`, compone las secciones de `components/landing/`)
-- `/explore` → recorrido completo en una sola página (`components/ExploreFlow.tsx`):
-  industria → simulación → diagnóstico → resultados → Roadmap 4D → política de IA
-- `/assessment` → el mismo diagnóstico sin simulación, en 2 pasos (`app/assessment/page.tsx`)
-- `/results` → resultados + roadmap; sólo alcanzable desde `/assessment`
+- `/explore` → escaparate de simulaciones (`components/ExploreFlow.tsx`):
+  industria → simulación → salida al diagnóstico. **No contiene el diagnóstico.**
+- `/assessment` → el diagnóstico, en 2 pasos (`components/AssessmentFlow.tsx`;
+  `page.tsx` sólo lo envuelve en `<Suspense>`, que `useSearchParams` exige)
+- `/results` → resultados + roadmap + política; sólo alcanzable desde `/assessment`
 - `/privacy` → política de privacidad (`components/PrivacyPolicy.tsx`)
 - `/api/chat` → única ruta dinámica; proxy del chat de simulación
 
-**Hay dos caminos al roadmap y la landing ofrece ambos.** `/explore` usa las
-simulaciones como gancho, pero son saltables ("Saltar al diagnóstico").
-`/assessment` es la vía directa. Al tocar uno, comprueba que el otro sigue
-coherente — la suite E2E cubre los dos.
+**Hay dos entradas y la landing ofrece ambas**, pero el diagnóstico está en un
+solo sitio. `/explore` usa las simulaciones como gancho y de ahí sale a
+`/assessment`; `/assessment` es también la vía directa. El diagnóstico nunca se
+renderiza junto a una simulación: fue una decisión explícita, no la revierta
+nadie por comodidad. Al tocar una entrada, comprueba que la otra sigue coherente
+— la suite E2E cubre las dos.
+
+`/explore` pasa la industria elegida en la query (`/assessment?industry=banking`)
+para no volver a preguntarla; `AssessmentFlow` la valida contra `INDUSTRIES` y,
+si es válida, arranca directamente en las preguntas.
 
 **Sin base de datos.** Todo el estado persiste en `localStorage`:
 - `afl_result` → `AssessmentResult` (resultado del diagnóstico)
@@ -110,8 +117,7 @@ Cinco fases (`ROADMAP_PHASES`), que son el framework 4D más la consolidación:
 `12m` AI Fluency. Todo roadmap trae 25 items: 18 universales + 4 del modelo de
 interacción ganador + 3 del tipo de implementación ganador.
 
-El tablero que se renderiza es **`RoadmapFlowBoard`**, tanto en `/results` como
-en `/explore`.
+El tablero que se renderiza es **`RoadmapFlowBoard`**, en `/results`.
 
 El roadmap ya se puede sacar de la app sin backend: `downloadRoadmap()` lo baja
 como texto plano y `buildMailtoLink()` arma un `mailto:` con el contenido; ambos
@@ -132,7 +138,7 @@ contenido. Es material divulgativo, no entra en el scoring.
 ### Benchmark regional (`lib/regional-benchmark.ts`)
 
 Alimenta `components/RegionalBenchmark.tsx`, que sitúa la recomendación frente
-al mercado en la pestaña de diagnóstico de `/results` y en `/explore`.
+al mercado en la pestaña de diagnóstico de `/results`.
 
 ⚠️ **Aquí sólo entran cifras publicadas y citables.** Cada dato viaja con su
 `BenchmarkSource`: publicador, año, URL y `method` — qué mide y con qué muestra.
@@ -169,18 +175,16 @@ revisar el archivo cuando salga una edición nueva del ILIA o del State of AI.
   → RoadmapFlowBoard.onUpdateRoadmap → saveRoadmap() actualiza 'afl_roadmap'
 ```
 
-**Camino guiado** (una sola página, sin navegación):
+**Camino guiado** (entra por la simulación y desemboca en el mismo diagnóstico):
 
 ```
-/explore  (ExploreFlow mantiene todo en estado local)
-  industria → simulación (saltable) → 10 preguntas
-  → buildAssessmentResult() → setResult() + guarda 'afl_result'
-  → "Generar Roadmap 4D" → generateDefaultRoadmap() → saveRoadmap()
-  → "Preparar generador de política" → AIPolicyGenerator
+/explore  (ExploreFlow sólo mantiene la industria en estado local)
+  industria → simulación → "Hacer el diagnóstico"
+  → <Link href="/assessment?industry=<id>">
+  → desde aquí continúa el camino directo de arriba
 ```
 
-`/explore` no navega a `/results`: renderiza sus propios resultados, roadmap y
-política en la misma página.
+`/explore` no guarda nada en `localStorage` ni calcula ningún resultado.
 
 ## Paleta de colores
 
@@ -229,8 +233,7 @@ su propia rama en vez de acumularse en la que está en curso.
 
 ## Pestaña de diagnóstico
 
-`/results` y `/explore` comparten los componentes del resultado, así que un
-cambio en cualquiera de ellos llega a los dos caminos:
+El resultado se renderiza sólo en `/results`, con estos componentes:
 
 - `ResultSummary` — fila de KPIs: modelo, tecnología, claridad del diagnóstico
   (margen del ganador sobre el segundo) y contexto evaluado
