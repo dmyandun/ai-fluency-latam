@@ -108,6 +108,10 @@ export default function FrameworkFlowchart({
             Tu organización
           </span>
         </div>
+        {/* La invitación va antes del árbol: se lee cuando aún hay que elegir */}
+        <p className="mt-3 text-center text-[11px] text-slate-400">
+          Elige un modelo de interacción y una o varias tecnologías
+        </p>
 
         <Branch
           count={3}
@@ -187,11 +191,6 @@ export default function FrameworkFlowchart({
             )
           })}
         </div>
-
-        <p className="mt-4 text-center text-[11px] text-slate-400">
-          Puedes activar varias tecnologías a la vez — la mayoría de organizaciones acaba
-          haciéndolo.
-        </p>
       </div>
     </div>
   )
