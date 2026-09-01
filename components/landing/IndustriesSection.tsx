@@ -14,7 +14,7 @@ export default function IndustriesSection() {
           </h2>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-10">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
           {INDUSTRIES.map((industry) => (
             <Link
               key={industry.id}
@@ -28,14 +28,6 @@ export default function IndustriesSection() {
             </Link>
           ))}
         </div>
-
-        <p className="text-sm text-slate-500">
-          ¿Tu sector no está en la lista?{' '}
-          <Link href="/assessment" className="text-blue-600 hover:text-blue-700 underline underline-offset-2">
-            El diagnóstico funciona igual
-          </Link>{' '}
-          — las dimensiones que evalúa son transversales a cualquier operación.
-        </p>
       </div>
     </section>
   )
