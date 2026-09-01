@@ -41,22 +41,28 @@ function Branch({ count, activeIndexes, activeColor, origin, label }: BranchProp
         className={`absolute top-0 h-1/2 w-px -translate-x-1/2 transition-all ${activeColor}`}
         style={{ left: `${origin}%` }}
       />
-      {/* Barra que reparte hacia cada rama */}
-      <span
-        className="absolute top-1/2 h-px bg-slate-200"
+      {/*
+        Barra que reparte hacia cada rama. El rótulo se intercala entre dos
+        tramos en lugar de taparla: sobre el degradado del panel ningún color
+        sólido casaría con el fondo.
+      */}
+      <div
+        className="absolute top-1/2 flex -translate-y-1/2 items-center"
         style={{ left: `${first}%`, right: `${100 - last}%` }}
-      />
-      {/* El rótulo tapa el centro de la barra con el fondo del panel */}
-      <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-slate-50 px-2 text-[10px] font-semibold uppercase tracking-wider text-slate-400 whitespace-nowrap">
-        {label}
-      </span>
+      >
+        <span className="h-px flex-1 bg-white/15" />
+        <span className="px-2 text-[10px] font-semibold uppercase tracking-wider text-slate-400 whitespace-nowrap">
+          {label}
+        </span>
+        <span className="h-px flex-1 bg-white/15" />
+      </div>
       {Array.from({ length: count }, (_, index) => {
         const isActive = activeIndexes.includes(index)
         return (
           <span
             key={index}
             className={`absolute top-1/2 h-1/2 w-px -translate-x-1/2 transition-colors ${
-              isActive ? activeColor : 'bg-slate-200'
+              isActive ? activeColor : 'bg-white/15'
             }`}
             style={{ left: `${columnCenter(index, count)}%` }}
           />
@@ -88,84 +94,91 @@ export default function FrameworkFlowchart({
   }, [])
 
   return (
-    <div className="p-6 sm:p-8">
-      {/* Nodo raíz */}
-      <div className="flex justify-center">
-        <span className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-600 shadow-sm">
-          <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
-          Tu organización
-        </span>
-      </div>
+    <div className="relative h-full overflow-hidden bg-gradient-to-br from-slate-900 to-slate-800 p-6 sm:p-8">
+      <div className="absolute -top-24 -left-20 w-64 h-64 rounded-full bg-blue-500/20 blur-3xl" />
+      <div className="absolute -bottom-24 -right-20 w-64 h-64 rounded-full bg-indigo-500/20 blur-3xl" />
 
-      <Branch
-        count={3}
-        activeIndexes={[modelIndex]}
-        activeColor="bg-slate-300"
-        origin={50}
-        label="1 · Interacción"
-      />
+      {/* El panel derecho es más alto: el flujo se centra en vez de colgar arriba */}
+      <div className="relative flex h-full flex-col justify-center">
+        {/* Nodo raíz */}
+        <div className="flex justify-center">
+          <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-semibold text-slate-200 backdrop-blur-sm">
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
+            Tu organización
+          </span>
+        </div>
 
-      <div className="grid grid-cols-3 gap-2">
-        {INTERACTION_MODELS.map((option: InteractionModelInfo) => {
-          const isActive = option.id === model
-          return (
-            <button
-              key={option.id}
-              type="button"
-              onClick={() => onSelectModel(option.id)}
-              aria-pressed={isActive}
-              aria-label={option.name}
-              className={`rounded-xl border px-2 py-3 text-center transition-all ${
-                isActive
-                  ? `bg-white shadow-sm ring-2 ${option.ring}`
-                  : 'border-slate-200 bg-white/60 hover:border-slate-300 hover:bg-white'
-              }`}
-            >
-              <span className="block text-lg leading-none mb-1.5">{option.icon}</span>
-              <span
-                className={`block text-xs font-semibold leading-tight ${
-                  isActive ? 'text-slate-900' : 'text-slate-500'
+        <Branch
+          count={3}
+          activeIndexes={[modelIndex]}
+          activeColor="bg-white/40"
+          origin={50}
+          label="1 · Interacción"
+        />
+
+        <div className="grid grid-cols-3 gap-2">
+          {INTERACTION_MODELS.map((option: InteractionModelInfo) => {
+            const isActive = option.id === model
+            return (
+              <button
+                key={option.id}
+                type="button"
+                onClick={() => onSelectModel(option.id)}
+                aria-pressed={isActive}
+                aria-label={option.name}
+                className={`rounded-xl border px-2 py-3 text-center transition-all ${
+                  isActive
+                    ? `bg-white/10 ring-2 ${option.ring}`
+                    : 'border-white/15 bg-white/5 hover:border-white/30 hover:bg-white/10'
                 }`}
               >
-                {option.name}
-              </span>
-            </button>
-          )
-        })}
+                <span className="block text-lg leading-none mb-1.5">{option.icon}</span>
+                <span
+                  className={`block text-xs font-semibold leading-tight ${
+                    isActive ? 'text-white' : 'text-slate-400'
+                  }`}
+                >
+                  {option.name}
+                </span>
+              </button>
+            )
+          })}
+        </div>
+
+        <Branch
+          count={3}
+          activeIndexes={layerIndexes}
+          activeColor={activeModelInfo.dot}
+          origin={columnCenter(modelIndex, 3)}
+          label="2 · Tecnología"
+        />
+
+        <div className="grid grid-cols-3 gap-2">
+          {IMPLEMENTATION_TYPES.map((impl: ImplementationTypeInfo) => {
+            const isActive = layers.includes(impl.id)
+            return (
+              <button
+                key={impl.id}
+                type="button"
+                onClick={() => onToggleLayer(impl.id)}
+                aria-pressed={isActive}
+                aria-label={impl.name}
+                className={`rounded-xl border px-2 py-3 text-center transition-all ${
+                  isActive ? impl.activeChip : impl.chip
+                }`}
+              >
+                <span className="block text-lg leading-none mb-1.5">{impl.icon}</span>
+                <span className="block text-xs font-semibold leading-tight">{impl.shortName}</span>
+              </button>
+            )
+          })}
+        </div>
+
+        <p className="mt-4 text-center text-[11px] text-slate-400">
+          Puedes activar varias tecnologías a la vez — la mayoría de organizaciones acaba
+          haciéndolo.
+        </p>
       </div>
-
-      <Branch
-        count={3}
-        activeIndexes={layerIndexes}
-        activeColor={activeModelInfo.dot}
-        origin={columnCenter(modelIndex, 3)}
-        label="2 · Tecnología"
-      />
-
-      <div className="grid grid-cols-3 gap-2">
-        {IMPLEMENTATION_TYPES.map((impl: ImplementationTypeInfo) => {
-          const isActive = layers.includes(impl.id)
-          return (
-            <button
-              key={impl.id}
-              type="button"
-              onClick={() => onToggleLayer(impl.id)}
-              aria-pressed={isActive}
-              aria-label={impl.name}
-              className={`rounded-xl border px-2 py-3 text-center transition-all ${
-                isActive ? impl.activeChip : impl.chip
-              }`}
-            >
-              <span className="block text-lg leading-none mb-1.5">{impl.icon}</span>
-              <span className="block text-xs font-semibold leading-tight">{impl.shortName}</span>
-            </button>
-          )
-        })}
-      </div>
-
-      <p className="mt-4 text-center text-[11px] text-slate-400">
-        Puedes activar varias tecnologías a la vez — la mayoría de organizaciones acaba haciéndolo.
-      </p>
     </div>
   )
 }

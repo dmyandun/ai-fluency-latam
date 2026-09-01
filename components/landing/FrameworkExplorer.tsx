@@ -39,7 +39,7 @@ export default function FrameworkExplorer() {
     <div className="rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden">
       <div className="grid lg:grid-cols-[1fr_1.15fr]">
         {/* Selectores: el recorrido se elige sobre un flujograma con ramas */}
-        <div className="border-b lg:border-b-0 lg:border-r border-slate-200 bg-slate-50/60">
+        <div>
           <FrameworkFlowchart
             model={model}
             layers={layers}
