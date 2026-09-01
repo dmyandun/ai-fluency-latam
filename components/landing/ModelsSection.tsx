@@ -8,14 +8,9 @@ export default function ModelsSection() {
           <p className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-3">
             El marco
           </p>
-          <h2 className="text-3xl sm:text-4xl font-semibold text-slate-900 tracking-tight mb-4">
+          <h2 className="text-3xl sm:text-4xl font-semibold text-slate-900 tracking-tight">
             Tres formas de trabajar con IA, tres tecnologías para sostenerlas
           </h2>
-          <p className="text-slate-600 leading-relaxed">
-            No toda la IA es igual, y no hay que elegir una sola tecnología. Combina un modelo de
-            interacción con las capas que tengan sentido para tu contexto y mira qué aporta cada
-            una.
-          </p>
         </div>
 
         <FrameworkExplorer />
