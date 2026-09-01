@@ -19,7 +19,6 @@ export interface InteractionModelInfo {
   name: string
   icon: FrameworkIconName
   tagline: string
-  signals: string[]
   dot: string
   /** Anillo del nodo activo, sobre la superficie oscura del flujograma. */
   ring: string
@@ -45,7 +44,6 @@ export const INTERACTION_MODELS: InteractionModelInfo[] = [
     name: 'Automatización',
     icon: 'automation',
     tagline: 'La máquina ejecuta, tú supervisas',
-    signals: ['Alto volumen transaccional', 'Reglas estables', 'Decisiones de baja complejidad'],
     dot: 'bg-indigo-500',
     ring: 'border-indigo-400/70 ring-indigo-400/30',
     accent: 'text-indigo-300',
@@ -55,7 +53,6 @@ export const INTERACTION_MODELS: InteractionModelInfo[] = [
     name: 'Agencia',
     icon: 'agency',
     tagline: 'La IA planifica y actúa con límites',
-    signals: ['Integración con sistemas', 'Procesos multi-paso', 'Ejecución autónoma acotada'],
     dot: 'bg-violet-500',
     ring: 'border-violet-400/70 ring-violet-400/30',
     accent: 'text-violet-300',
@@ -65,7 +62,6 @@ export const INTERACTION_MODELS: InteractionModelInfo[] = [
     name: 'Aumentación',
     icon: 'augmentation',
     tagline: 'El experto decide mejor y más rápido',
-    signals: ['Criterio experto alto', 'Trabajo creativo', 'Casos poco estandarizados'],
     dot: 'bg-cyan-500',
     ring: 'border-cyan-400/70 ring-cyan-400/30',
     accent: 'text-cyan-300',
