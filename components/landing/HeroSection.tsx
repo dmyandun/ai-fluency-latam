@@ -43,21 +43,11 @@ export default function HeroSection() {
           </h1>
 
           <p
-            className="text-lg text-slate-600 max-w-xl mx-auto lg:mx-0 leading-relaxed mb-3 lg:text-justify animate-fade-up"
+            className="text-lg text-slate-600 max-w-xl mx-auto lg:mx-0 leading-relaxed mb-8 lg:text-justify animate-fade-up"
             style={{ animationDelay: '120ms' }}
           >
-            Responde 10 preguntas sobre tu operación y obtén una recomendación personalizada: el
-            modelo de interacción más adecuado, la tecnología a utilizar y un roadmap concreto para
-            los próximos 12 meses.
-          </p>
-
-          {/* El reparto de márgenes deja los botones a la misma altura que con un solo párrafo. */}
-          <p
-            className="text-base text-slate-500 max-w-xl mx-auto lg:mx-0 leading-relaxed mb-8 lg:text-justify animate-fade-up"
-            style={{ animationDelay: '150ms' }}
-          >
-            ¿Quieres verlo en acción antes de empezar? Explora una simulación de IA aplicada a tu
-            industria.
+            Responde 10 preguntas y obtén tu modelo de interacción, la tecnología adecuada y un
+            roadmap a 12 meses.
           </p>
 
           <div
@@ -75,7 +65,7 @@ export default function HeroSection() {
               href="/explore"
               className="bg-white border border-slate-300 hover:border-blue-300 text-slate-700 hover:text-blue-700 font-medium px-7 py-3.5 rounded-xl text-base transition-all shadow-sm"
             >
-              Ver simulaciones primero
+              Explora simulaciones
             </Link>
           </div>
 

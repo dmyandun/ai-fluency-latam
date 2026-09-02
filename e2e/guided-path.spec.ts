@@ -52,5 +52,5 @@ test('la landing ofrece las dos entradas al producto', async ({ page }) => {
   await page.goto('/')
 
   await expect(page.getByRole('link', { name: /^Iniciar diagnóstico/ }).first()).toHaveAttribute('href', '/assessment')
-  await expect(page.getByRole('link', { name: /Ver simulaciones primero/ }).first()).toHaveAttribute('href', '/explore')
+  await expect(page.getByRole('link', { name: /Explora simulaciones/ }).first()).toHaveAttribute('href', '/explore')
 })

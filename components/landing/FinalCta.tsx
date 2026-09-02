@@ -26,7 +26,7 @@ export default function FinalCta() {
               href="/explore"
               className="border border-white/25 hover:border-white/50 text-white font-medium px-8 py-4 rounded-xl text-base transition-colors"
             >
-              Ver simulaciones primero
+              Explora simulaciones
             </Link>
           </div>
           <p className="text-xs text-slate-400 mt-6">
