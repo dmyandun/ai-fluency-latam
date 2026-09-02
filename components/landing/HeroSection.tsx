@@ -26,31 +26,38 @@ export default function HeroSection() {
         <div className="text-center lg:text-left">
           <div className="inline-flex items-center gap-2 bg-white border border-slate-200 text-slate-600 text-xs font-medium px-3 py-1.5 rounded-full mb-6 shadow-sm animate-fade-up">
             <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-            Diagnóstico gratuito para organizaciones de Latinoamérica
+            Diagnóstico gratuito
           </div>
 
           <h1
             className="text-4xl sm:text-5xl lg:text-[3.4rem] font-semibold text-slate-900 leading-[1.08] tracking-tight mb-6 animate-fade-up"
             style={{ animationDelay: '60ms' }}
           >
-            Deja de preguntarte{' '}
             <span className="relative inline-block">
               <span className="relative z-10 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                dónde empezar
+                Cómo empezar
               </span>
               <span className="absolute inset-x-0 bottom-1 h-3 bg-blue-100 -z-0 rounded" />
             </span>{' '}
-            con IA
+            con IA en tu organización
           </h1>
 
           <p
-            className="text-lg text-slate-600 max-w-xl mx-auto lg:mx-0 leading-relaxed mb-8 animate-fade-up"
+            className="text-lg text-slate-600 max-w-xl mx-auto lg:mx-0 leading-relaxed mb-3 animate-fade-up"
             style={{ animationDelay: '120ms' }}
           >
-            Responde 10 preguntas sobre tu operación y obtén el modelo de interacción y el tipo de
-            implementación que mejor encajan con tu contexto, más un roadmap concreto para los
-            próximos 12 meses. ¿Prefieres verlo antes de responder? Hay una simulación de IA lista
-            para tu industria.
+            Responde 10 preguntas sobre tu operación y obtén una recomendación personalizada: el
+            modelo de interacción más adecuado, la tecnología a utilizar y un roadmap concreto para
+            los próximos 12 meses.
+          </p>
+
+          {/* El reparto de márgenes deja los botones a la misma altura que con un solo párrafo. */}
+          <p
+            className="text-base text-slate-500 max-w-xl mx-auto lg:mx-0 leading-relaxed mb-8 animate-fade-up"
+            style={{ animationDelay: '150ms' }}
+          >
+            ¿Quieres verlo en acción antes de empezar? Explora una simulación de IA aplicada a tu
+            industria.
           </p>
 
           <div
