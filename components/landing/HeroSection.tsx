@@ -15,7 +15,7 @@ const PREVIEW_SCORES = [
 
 export default function HeroSection() {
   return (
-    <section className="relative overflow-hidden">
+    <section id="inicio" className="relative overflow-hidden">
       {/* Fondo decorativo */}
       <div className="absolute inset-0 -z-10 bg-grid-slate [mask-image:radial-gradient(ellipse_70%_60%_at_50%_0%,black,transparent)]" />
       <div className="absolute -z-10 top-[-12rem] left-1/2 -translate-x-1/2 w-[46rem] h-[46rem] rounded-full bg-blue-200/35 blur-3xl" />
