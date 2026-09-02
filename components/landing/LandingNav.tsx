@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import Brandmark from '@/components/Brandmark'
+import HomeBrandmark from '@/components/landing/HomeBrandmark'
 import { useEffect, useState } from 'react'
 
 const NAV_LINKS = [
@@ -34,7 +34,7 @@ export default function LandingNav() {
       }`}
     >
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-        <Brandmark />
+        <HomeBrandmark />
 
         <div className="hidden md:flex items-center gap-1">
           {NAV_LINKS.map((link) => (

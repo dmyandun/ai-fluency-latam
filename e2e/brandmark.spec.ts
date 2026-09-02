@@ -50,3 +50,20 @@ test('los títulos de la política de privacidad son legibles', async ({ page })
     expect(r + g + b).toBeLessThan(450)
   }
 })
+
+/**
+ * Dentro de la landing la marca sube al principio. Se comprueba dos veces
+ * seguidas a propósito: con sólo el ancla, el segundo clic repite el mismo hash
+ * y el navegador ya no desplaza nada.
+ */
+test('la marca de la landing sube al inicio, también al repetir el clic', async ({ page }) => {
+  await page.goto('/')
+
+  for (const container of ['nav', 'footer']) {
+    await page.evaluate(() => window.scrollTo(0, 2500))
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(500)
+
+    await page.locator(container).first().getByRole('link', { name: /Fluency LATAM/ }).first().click()
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0)
+  }
+})
