@@ -38,9 +38,9 @@ export function generateAIPolicy(
       'El alcance de acción de cada agente debe estar documentado y limitado al mínimo necesario para su función.',
     ],
     augmentation: [
-      'La IA actúa como copiloto del experto humano — las decisiones finales siempre las toma el humano.',
+      'La IA actúa como copiloto del experto humano: las decisiones finales siempre las toma el humano.',
       'El uso de IA para tareas de alta complejidad o alto impacto requiere que el profesional valide explícitamente el output antes de usarlo.',
-      'La IA no reemplaza el criterio experto — lo amplifica. La responsabilidad profesional permanece en el humano.',
+      'La IA no reemplaza el criterio experto, lo amplifica. La responsabilidad profesional permanece en el humano.',
     ],
   }[result.interactionModel] ?? []
 
@@ -78,13 +78,13 @@ export function generateAIPolicy(
         'Efectividad: el uso de IA debe producir resultados de mayor calidad o eficiencia que los procesos anteriores.',
         'Responsabilidad: todo output generado por IA que se use en el trabajo es responsabilidad del colaborador que lo incorporó.',
         'Transparencia: cuando un entregable fue producido con asistencia significativa de IA, debe declararse al cliente, usuario o receptor cuando sea relevante.',
-        'Supervisión humana: la IA asiste y amplifica — no reemplaza el juicio humano en decisiones de alto impacto.',
+        'Supervisión humana: la IA asiste y amplifica, no reemplaza el juicio humano en decisiones de alto impacto.',
         'Mejora continua: el equipo debe documentar errores y aprendizajes del sistema para mejorar su uso colectivo.',
       ],
     },
     {
       id: 'delegation',
-      title: '3. Delegación — qué tareas se pueden delegar a la IA',
+      title: '3. Delegación: qué tareas se pueden delegar a la IA',
       content: [
         ...delegationRules,
         'Cada equipo debe mantener un catálogo actualizado de tareas aprobadas para delegación a IA, clasificadas por nivel de autonomía: Solo IA / Humano + IA / Solo humano.',
@@ -92,20 +92,20 @@ export function generateAIPolicy(
     },
     {
       id: 'description',
-      title: '4. Descripción — cómo comunicarse con la IA',
+      title: '4. Descripción: cómo comunicarse con la IA',
       content: [
         'Los colaboradores deben proveer contexto suficiente en sus prompts: quién eres, qué necesitas, para qué audiencia, en qué formato y con qué restricciones.',
-        'No se debe asumir que la IA conoce el contexto de la empresa — el contexto relevante debe incluirse explícitamente en cada interacción.',
+        'No se debe asumir que la IA conoce el contexto de la empresa: el contexto relevante debe incluirse explícitamente en cada interacción.',
         'Los prompts que producen resultados de alta calidad deben documentarse en la biblioteca compartida del equipo para reutilización.',
         'Está prohibido incluir datos confidenciales, contraseñas, claves de API o información de acceso en prompts de IA.',
       ],
     },
     {
       id: 'discernment',
-      title: '5. Discernimiento — cómo evaluar los outputs',
+      title: '5. Discernimiento: cómo evaluar los outputs',
       content: [
         'Todo output de IA debe ser revisado por un humano antes de ser usado en contextos de impacto: comunicaciones externas, decisiones de negocio, documentos legales o entregables de cliente.',
-        'Los colaboradores deben verificar hechos, cifras y referencias que la IA incluya en sus respuestas — la IA puede generar información incorrecta con apariencia de veracidad.',
+        'Los colaboradores deben verificar hechos, cifras y referencias que la IA incluya en sus respuestas: la IA puede generar información incorrecta con apariencia de veracidad.',
         'Cuando un output de IA sea rechazado por baja calidad, el colaborador debe documentar el caso para mejorar los prompts del equipo.',
         'Criterios mínimos de evaluación para outputs de IA: precisión factual, tono apropiado, completitud, ausencia de sesgos evidentes y adecuación al contexto.',
       ],
@@ -122,7 +122,7 @@ export function generateAIPolicy(
     },
     {
       id: 'diligence',
-      title: '8. Diligencia — uso ético y responsable',
+      title: '8. Diligencia: uso ético y responsable',
       content: [
         'Los colaboradores no deben usar IA para generar contenido engañoso, difamatorio, discriminatorio o que viole derechos de terceros.',
         'El uso de IA para crear contenido que se presente como producido enteramente por humanos cuando el destinatario tiene expectativa de autoría humana (ej: trabajos académicos, certifcaciones) está prohibido.',
@@ -167,7 +167,7 @@ export function formatPolicyAsText(policy: AIPolicy): string {
     '╚══════════════════════════════════════════════════════════════╝',
     '',
     `Fecha de emisión: ${policy.date}`,
-    `Basada en: AI Fluency Framework — Anthropic (Feller & Dakan)`,
+    `Basada en: AI Fluency Framework de Anthropic (Feller & Dakan)`,
     '',
     '═'.repeat(64),
     '',
@@ -184,7 +184,7 @@ export function formatPolicyAsText(policy: AIPolicy): string {
 
   lines.push('═'.repeat(64))
   lines.push(`Generado por AI Fluency LATAM · aifluencylatam.com`)
-  lines.push(`Documento de referencia — debe ser revisado por el área legal antes de su implementación formal.`)
+  lines.push(`Documento de referencia: debe ser revisado por el área legal antes de su implementación formal.`)
 
   return lines.join('\n')
 }

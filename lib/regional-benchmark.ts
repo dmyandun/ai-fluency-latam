@@ -104,7 +104,7 @@ export const IMPLEMENTATION_BENCHMARK: Record<
     stat: {
       value: '22%',
       label:
-        'del consumo regional llega a capas avanzadas — modelos y APIs, plataformas de desarrollo y código abierto — frente al 26% global',
+        'del consumo regional llega a capas avanzadas (modelos y APIs, plataformas de desarrollo y código abierto), frente al 26% global',
       sourceId: 'cepalUse',
       scope: 'region',
     },

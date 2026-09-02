@@ -78,7 +78,7 @@ export default function QuestionsTable({ questions, answers, onAnswer }: Questio
       {/* Indicador de completado */}
       {answeredCount === questions.length && (
         <p className="text-center text-sm text-blue-600 font-medium">
-          ✓ Todas las preguntas respondidas — puedes ver tus resultados
+          ✓ Todas las preguntas respondidas: puedes ver tus resultados
         </p>
       )}
     </div>

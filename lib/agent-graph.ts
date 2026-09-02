@@ -20,9 +20,9 @@ const AGENT_GRAPHS: Record<string, AgentGraphConfig> = {
         icon: '📊',
         tool: 'demanda_analyzer',
         findings: [
-          '80 SKUs: varianza 200 vs 3 u/mes — alta dispersión',
-          '1,200 u/día con 4.2% defectos — sobre meta 1.5%',
-          'OEE 58/71/64% — planta 1 crítica',
+          '80 SKUs: varianza 200 vs 3 u/mes, alta dispersión',
+          '1,200 u/día con 4.2% defectos, sobre meta 1.5%',
+          'OEE 58/71/64%, planta 1 crítica',
         ],
       },
       {
@@ -30,9 +30,9 @@ const AGENT_GRAPHS: Record<string, AgentGraphConfig> = {
         icon: '🤝',
         tool: 'proveedor_evaluador',
         findings: [
-          '4 proveedores, lead time 7-21 días — variable',
+          '4 proveedores, lead time 7-21 días, variable',
           'Defectos en turno nocturno + 2 de 8 estaciones',
-          'Mantenimiento reactivo — paros no planificados',
+          'Mantenimiento reactivo, paros no planificados',
         ],
       },
       {
@@ -41,7 +41,7 @@ const AGENT_GRAPHS: Record<string, AgentGraphConfig> = {
         tool: 'stock_optimizer',
         findings: [
           'Stock seguridad diferenciado por rotación de SKU',
-          'Reproceso $18K/mes — foco en estación nocturna',
+          'Reproceso $18K/mes, foco en estación nocturna',
           'Mantenimiento predictivo en planta de OEE 58%',
         ],
       },
@@ -55,9 +55,9 @@ const AGENT_GRAPHS: Record<string, AgentGraphConfig> = {
         icon: '📊',
         tool: 'calificador_riesgo',
         findings: [
-          'Leverage total 45.6% ($205K/$450K) — moderado',
-          '47 operaciones en 3h — velocidad atípica',
-          '28% dormidos, 42% ocasionales — cartera fría',
+          'Leverage total 45.6% ($205K/$450K), moderado',
+          '47 operaciones en 3h, velocidad atípica',
+          '28% dormidos, 42% ocasionales, cartera fría',
         ],
       },
       {
@@ -66,8 +66,8 @@ const AGENT_GRAPHS: Record<string, AgentGraphConfig> = {
         tool: 'analizador_historial',
         findings: [
           '2 atrasos regularizados hace 8 meses',
-          '15 destinos nuevos en Asia — sin precedente',
-          'ROI actual 4.2% — bajo vs benchmark',
+          '15 destinos nuevos en Asia, sin precedente',
+          'ROI actual 4.2%, bajo vs benchmark',
         ],
       },
       {
@@ -75,8 +75,8 @@ const AGENT_GRAPHS: Record<string, AgentGraphConfig> = {
         icon: '💰',
         tool: 'flujo_evaluador',
         findings: [
-          'Cuota $2.5K vs cash flow $3-8K — ajustado',
-          'Patrón de layering detectado — alta sospecha',
+          'Cuota $2.5K vs cash flow $3-8K, ajustado',
+          'Patrón de layering detectado, alta sospecha',
           'Potencial +$1.2M con segmentación dirigida',
         ],
       },
@@ -100,9 +100,9 @@ const AGENT_GRAPHS: Record<string, AgentGraphConfig> = {
         icon: '💵',
         tool: 'margen_analyzer',
         findings: [
-          'Costo $40 vs lista $95 — margen para liquidar',
+          'Costo $40 vs lista $95, margen para liquidar',
           'Capital inmovilizado $620K en baja rotación',
-          'Ticket promedio $52 — abandono 68% en envío',
+          'Ticket promedio $52, abandono 68% en envío',
         ],
       },
       {
@@ -111,7 +111,7 @@ const AGENT_GRAPHS: Record<string, AgentGraphConfig> = {
         tool: 'precio_optimizer',
         findings: [
           'Descuento escalonado liberando espacio verano',
-          'Rebalanceo entre tiendas — descontinuar 380 SKUs',
+          'Rebalanceo entre tiendas, descontinuar 380 SKUs',
           'Personalización en checkout para subir conversión',
         ],
       },
@@ -125,8 +125,8 @@ const AGENT_GRAPHS: Record<string, AgentGraphConfig> = {
         icon: '🩺',
         tool: 'sintoma_clasificador',
         findings: [
-          'Cefalea súbita 9/10 + PA 185/115 — banderas rojas',
-          'No-shows 30% — concentrados en la tarde',
+          'Cefalea súbita 9/10 + PA 185/115, banderas rojas',
+          'No-shows 30%, concentrados en la tarde',
           '850 diabéticos, 35% HbA1c fuera de meta',
         ],
       },
@@ -135,7 +135,7 @@ const AGENT_GRAPHS: Record<string, AgentGraphConfig> = {
         icon: '📋',
         tool: 'protocolo_buscador',
         findings: [
-          'Disartria + 40min — ventana de ictus activa',
+          'Disartria + 40min, ventana de ictus activa',
           'Patrón: crónicos de seguimiento faltan más',
           '120 pacientes sin control hace 6+ meses',
         ],
@@ -145,7 +145,7 @@ const AGENT_GRAPHS: Record<string, AgentGraphConfig> = {
         icon: '🚨',
         tool: 'prioridad_calificador',
         findings: [
-          'Prioridad máxima — protocolo de ictus inmediato',
+          'Prioridad máxima, protocolo de ictus inmediato',
           'Recordatorios dirigidos reducirían $80K/año',
           'Estratificar riesgo: priorizar los 120 sin control',
         ],
@@ -160,8 +160,8 @@ const AGENT_GRAPHS: Record<string, AgentGraphConfig> = {
         icon: '🗺️',
         tool: 'ruta_optimizer',
         findings: [
-          '2 rutas cruzadas en zona norte — reasignable',
-          '22% de km en vacío — rutas no optimizadas',
+          '2 rutas cruzadas en zona norte, reasignable',
+          '22% de km en vacío, rutas no optimizadas',
           '2 pasillos concentran 40% del picking',
         ],
       },
@@ -170,7 +170,7 @@ const AGENT_GRAPHS: Record<string, AgentGraphConfig> = {
         icon: '🚗',
         tool: 'flota_gestor',
         findings: [
-          'Conductor libre 90min — capacidad disponible',
+          'Conductor libre 90min, capacidad disponible',
           'Flota 25 unidades, ventanas cumplidas 81%',
           '3,500 pedidos/día, picking 14min c/u',
         ],
@@ -195,7 +195,7 @@ const AGENT_GRAPHS: Record<string, AgentGraphConfig> = {
         icon: '📄',
         tool: 'clausula_extractor',
         findings: [
-          'Penalidad 15%/semana, sin tope — identificada',
+          'Penalidad 15%/semana, sin tope, identificada',
           '120 contratos: cambio de control y renovación',
           'Jurisdicción duplicada: local vs arbitraje',
         ],
@@ -207,7 +207,7 @@ const AGENT_GRAPHS: Record<string, AgentGraphConfig> = {
         findings: [
           'Riesgo exponencial: 45-60% del contrato en 3 sem',
           'Penalidades de terminación anticipada en 18 contratos',
-          'Conflicto de leyes entre dos países — $200K en juego',
+          'Conflicto de leyes entre dos países, $200K en juego',
         ],
       },
       {
@@ -230,9 +230,9 @@ const AGENT_GRAPHS: Record<string, AgentGraphConfig> = {
         icon: '✅',
         tool: 'doc_validador',
         findings: [
-          '7/9 documentos válidos — faltan 2',
+          '7/9 documentos válidos, faltan 2',
           '600 trámites/día, 40% se atasca por docs',
-          '2,300 solicitudes — 80 con domicilio repetido',
+          '2,300 solicitudes, 80 con domicilio repetido',
         ],
       },
       {
@@ -240,7 +240,7 @@ const AGENT_GRAPHS: Record<string, AgentGraphConfig> = {
         icon: '🔍',
         tool: 'cumplimiento_verificador',
         findings: [
-          'Faltan fumigación y planos — críticos',
+          'Faltan fumigación y planos, críticos',
           'Resolución 12 días vs meta de 5',
           'Ingresos declarados no cuadran en varios casos',
         ],
@@ -250,7 +250,7 @@ const AGENT_GRAPHS: Record<string, AgentGraphConfig> = {
         icon: '📌',
         tool: 'tramite_enrutador',
         findings: [
-          'Notificar faltantes ahora — resolver en plazo',
+          'Notificar faltantes ahora, resolver en plazo',
           'Validación temprana de docs reduce reprocesos',
           'Detección de anomalías prioriza los sospechosos',
         ],
@@ -266,7 +266,7 @@ const AGENT_GRAPHS: Record<string, AgentGraphConfig> = {
         tool: 'rendimiento_analyzer',
         findings: [
           'Reprobación 30% en 3 de 8 cursos',
-          'Finalización 34% — abandono en semana 3',
+          'Finalización 34%, abandono en semana 3',
           '850 de 6,000 en riesgo de deserción',
         ],
       },
@@ -300,7 +300,7 @@ const AGENT_GRAPHS: Record<string, AgentGraphConfig> = {
         icon: '🌾',
         tool: 'suelo_analyzer',
         findings: [
-          'Soja en llenado de grano — etapa crítica',
+          'Soja en llenado de grano, etapa crítica',
           'Hato 400 vacas, 22 L/día vs potencial 28',
           'Maíz: zonas de 12 vs 6 ton/ha en el mismo lote',
         ],
@@ -311,7 +311,7 @@ const AGENT_GRAPHS: Record<string, AgentGraphConfig> = {
         tool: 'clima_correlador',
         findings: [
           'Déficit hídrico + 4°C sobre promedio',
-          '15% con mastitis subclínica — alimento +20%',
+          '15% con mastitis subclínica, alimento +20%',
           'Fertilización uniforme ignora la heterogeneidad',
         ],
       },
@@ -335,7 +335,7 @@ const AGENT_GRAPHS: Record<string, AgentGraphConfig> = {
         icon: '📡',
         tool: 'red_diagnostico',
         findings: [
-          'Nodo zona norte al 85% en pico — congestión',
+          'Nodo zona norte al 85% en pico, congestión',
           'Churn 2.8%/mes = $1.2M en ingresos perdidos',
           '12K tickets/semana, 55% repetitivos',
         ],
@@ -345,9 +345,9 @@ const AGENT_GRAPHS: Record<string, AgentGraphConfig> = {
         icon: '👥',
         tool: 'churn_predictor',
         findings: [
-          'Churn 6% en la zona — clientes en fuga',
+          'Churn 6% en la zona, clientes en fuga',
           'Riesgo alto: 2+ tickets y consumo decreciente',
-          'Satisfacción 6.2/10 — resolución lenta (48h)',
+          'Satisfacción 6.2/10, resolución lenta (48h)',
         ],
       },
       {
@@ -370,7 +370,7 @@ const AGENT_GRAPHS: Record<string, AgentGraphConfig> = {
         icon: '📋',
         tool: 'riesgo_perfilador',
         findings: [
-          'Conductor 24a + deportivo — riesgo alto',
+          'Conductor 24a + deportivo, riesgo alto',
           'Reclamo $48K con póliza de solo 4 meses',
           '25K pólizas, cancelación 9% anual',
         ],
@@ -380,7 +380,7 @@ const AGENT_GRAPHS: Record<string, AgentGraphConfig> = {
         icon: '🚨',
         tool: 'fraude_detector',
         findings: [
-          'Sin historial de reclamos — primera póliza',
+          'Sin historial de reclamos, primera póliza',
           'Inconsistencias en fechas de los daños',
           'Cancelan pólizas de 2-3 años sin uso',
         ],
@@ -391,7 +391,7 @@ const AGENT_GRAPHS: Record<string, AgentGraphConfig> = {
         tool: 'prima_calculador',
         findings: [
           'Prima elevada + deducible alto para mitigar',
-          'Investigar antes de pagar — peritaje recomendado',
+          'Investigar antes de pagar, peritaje recomendado',
           'Scoring predictivo para retención dirigida',
         ],
       },
@@ -415,7 +415,7 @@ const AGENT_GRAPHS: Record<string, AgentGraphConfig> = {
         icon: '👥',
         tool: 'audiencia_segmentador',
         findings: [
-          'Rebote 78% — titular largo poco atractivo',
+          'Rebote 78%, titular largo poco atractivo',
           '2.3 artículos/sesión, abandono en paywall',
           'Rendimiento muy variable entre videos',
         ],
@@ -450,7 +450,7 @@ const AGENT_GRAPHS: Record<string, AgentGraphConfig> = {
         icon: '📅',
         tool: 'cronograma_analyzer',
         findings: [
-          '3 subcontratistas con retraso — riesgo de overrun',
+          '3 subcontratistas con retraso, riesgo de overrun',
           'Riesgo en altura + 2 cuadrillas específicas',
           'Concreto y acero: pedidos por estimación manual',
         ],
@@ -460,7 +460,7 @@ const AGENT_GRAPHS: Record<string, AgentGraphConfig> = {
         icon: '⚠️',
         tool: 'riesgo_evaluador',
         findings: [
-          'Proyección de sobrecosto — acción correctiva ya',
+          'Proyección de sobrecosto, acción correctiva ya',
           'Plan de seguridad focalizado en trabajo en altura',
           'Planificación IA de materiales reduce desperdicio',
         ],

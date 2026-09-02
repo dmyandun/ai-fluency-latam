@@ -169,7 +169,7 @@ export default function RoadmapFlowBoard({ roadmap, onUpdateRoadmap }: RoadmapFl
       <div className="flex flex-wrap items-start justify-between gap-4 mb-4">
         <div>
           <h2 className="text-xl font-semibold text-slate-900">
-            4D Framework for AI Fluency — Roadmap
+            Roadmap 4D Framework for AI Fluency
           </h2>
           <p className="text-sm text-slate-500 mt-0.5">
             Tu plan de 12 meses organizado en las 4 competencias de fluidez en IA de Anthropic.

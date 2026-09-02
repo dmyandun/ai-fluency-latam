@@ -9,7 +9,7 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: 'AI Fluency LATAM — Diagnóstico de Adopción de IA',
+  title: 'AI Fluency LATAM · Diagnóstico de Adopción de IA',
   description:
     'Descubre qué tipo de IA necesita tu organización. Diagnóstico B2B para empresas latinoamericanas: Automatización, Agencia o Aumentación.',
   keywords: [

@@ -33,7 +33,7 @@ export default function AIPolicyGenerator({ result }: AIPolicyGeneratorProps) {
 
   function handleSendEmail() {
     if (!policy || !emailInput.trim()) return
-    const subject = encodeURIComponent(`Política de Uso de IA — ${policy.companyName}`)
+    const subject = encodeURIComponent(`Política de Uso de IA de ${policy.companyName}`)
     const body    = encodeURIComponent(formatPolicyAsText(policy))
     window.open(`mailto:${emailInput.trim()}?subject=${subject}&body=${body}`, '_blank')
     setShowEmailModal(false)

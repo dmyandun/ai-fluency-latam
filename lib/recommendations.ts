@@ -47,7 +47,7 @@ const RECOMMENDATIONS: Record<string, Recommendation> = {
     risks: [
       'Costos variables según volumen de uso',
       'Dependencia de disponibilidad del proveedor de API',
-      'Datos enviados a terceros — revisar políticas de privacidad',
+      'Datos enviados a terceros: revisar políticas de privacidad',
     ],
     quickWins: [
       'Bot de respuesta automática a preguntas frecuentes',

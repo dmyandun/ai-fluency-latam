@@ -11,7 +11,7 @@ const INDUSTRY_CASES: Record<string, string[]> = {
   ],
   retail: [
     'Tengo 300 unidades de chaquetas de invierno en bodega, terminó la temporada y la demanda cayó 70%. El costo unitario fue $40, precio de lista $95, y son $12K de capital inmovilizado que necesito para la próxima colección. El almacenamiento cuesta $2/unidad/mes y se acerca la temporada de verano que necesita ese espacio. ¿Qué escalera de descuentos aplicarías semana a semana para maximizar la recuperación?',
-    'Manejo 1,400 SKUs en 6 tiendas. El 20% de productos genera el 75% de las ventas, pero tengo quiebres de stock del 12% en los más vendidos y sobrestock en 380 productos de baja rotación. El capital inmovilizado es $620K. Leí que las grandes cadenas reducen quiebres 15-25% con forecasting de IA — ¿qué tan alcanzable es a mi escala y cómo rebalanceo el inventario entre tiendas?',
+    'Manejo 1,400 SKUs en 6 tiendas. El 20% de productos genera el 75% de las ventas, pero tengo quiebres de stock del 12% en los más vendidos y sobrestock en 380 productos de baja rotación. El capital inmovilizado es $620K. Leí que las grandes cadenas reducen quiebres 15-25% con forecasting de IA. ¿Qué tan alcanzable es a mi escala y cómo rebalanceo el inventario entre tiendas?',
     'Mi e-commerce tiene 45K visitas/mes con tasa de conversión del 1.8% (industria: 2.5%). El abandono de carrito es 68%, concentrado en el paso de envío. Ticket promedio $52. ¿Qué analizarías para subir la conversión y tendría sentido un asistente de compra conversacional por WhatsApp como el de los grandes marketplaces?',
   ],
   health: [
@@ -45,7 +45,7 @@ const INDUSTRY_CASES: Record<string, string[]> = {
     'Tenemos 200 hectáreas de maíz con rendimiento heterogéneo: zonas de 12 ton/ha y otras de 6 ton/ha en el mismo lote. El uso de fertilizante es uniforme ($90K/temporada). ¿Cómo aplicarías agricultura de precisión para optimizar insumos por zona?',
   ],
   telecom: [
-    'Una zona residencial con 200 clientes activos muestra 40% de tickets de soporte por velocidad baja en las últimas 2 semanas. El nodo de la zona opera al 85% de capacidad en horas pico, pero mantiene todas las celdas encendidas de madrugada con tráfico mínimo — y la energía ya pesa ~30% del OPEX de red. El churn en esa zona subió a 6%. ¿Cómo diagnosticas la causa raíz y qué priorizas?',
+    'Una zona residencial con 200 clientes activos muestra 40% de tickets de soporte por velocidad baja en las últimas 2 semanas. El nodo de la zona opera al 85% de capacidad en horas pico, pero mantiene todas las celdas encendidas de madrugada con tráfico mínimo, y la energía ya pesa ~30% del OPEX de red. El churn en esa zona subió a 6%. ¿Cómo diagnosticas la causa raíz y qué priorizas?',
     'Tenemos 180,000 clientes con un churn mensual del 2.8% ($1.2M en ingresos perdidos/mes), en línea con el benchmark regional prepago de 2-3%. Los que se van suelen tener 2+ tickets sin resolver y consumo decreciente en los 3 meses previos. ¿Cómo identificarías clientes en riesgo y qué acciones de retención automatizarías?',
     'Nuestro call center recibe 12,000 tickets/semana con un tiempo medio de atención de 9 minutos y primera resolución de apenas 15%. El 55% son consultas repetitivas (facturación, configuración). La satisfacción es 6.2/10. ¿Cómo subirías la primera resolución y dónde entraría un copiloto IA para los agentes?',
   ],

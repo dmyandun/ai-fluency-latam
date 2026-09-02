@@ -39,7 +39,7 @@ function BibliographyParagraph({ variants, casesByModel }: {
   return (
     <div className="border-t border-slate-100 bg-slate-50/40 px-6 py-4">
       <p className="text-[11px] leading-relaxed text-slate-400">
-        <span className="font-semibold text-slate-500">Bibliografía — </span>
+        <span className="font-semibold text-slate-500">Bibliografía: </span>
         casos reales que inspiraron las simulaciones. {parts}.
       </p>
     </div>
@@ -148,7 +148,7 @@ export default function SimulationApp({ config, interactionModel, industryId, on
           <span className="w-3 h-3 rounded-full bg-emerald-400" />
         </div>
         <span className="text-slate-400 text-xs font-mono flex-1 text-center">
-          app.{config.appName.toLowerCase().replace(/\s/g, '')}.ai — simulación interactiva
+          app.{config.appName.toLowerCase().replace(/\s/g, '')}.ai · simulación interactiva
         </span>
         {!isMulti && <span className="text-slate-500 text-xs">↺ Reiniciar por sección</span>}
       </div>
