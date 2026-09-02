@@ -43,7 +43,7 @@ export default function HeroSection() {
           </h1>
 
           <p
-            className="text-lg text-slate-600 max-w-xl mx-auto lg:mx-0 leading-relaxed mb-3 animate-fade-up"
+            className="text-lg text-slate-600 max-w-xl mx-auto lg:mx-0 leading-relaxed mb-3 lg:text-justify animate-fade-up"
             style={{ animationDelay: '120ms' }}
           >
             Responde 10 preguntas sobre tu operación y obtén una recomendación personalizada: el
@@ -53,7 +53,7 @@ export default function HeroSection() {
 
           {/* El reparto de márgenes deja los botones a la misma altura que con un solo párrafo. */}
           <p
-            className="text-base text-slate-500 max-w-xl mx-auto lg:mx-0 leading-relaxed mb-8 animate-fade-up"
+            className="text-base text-slate-500 max-w-xl mx-auto lg:mx-0 leading-relaxed mb-8 lg:text-justify animate-fade-up"
             style={{ animationDelay: '150ms' }}
           >
             ¿Quieres verlo en acción antes de empezar? Explora una simulación de IA aplicada a tu
