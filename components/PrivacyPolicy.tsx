@@ -294,7 +294,7 @@ export default function PrivacyPolicy() {
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-slate-400">
           <span className="flex flex-wrap items-center justify-center gap-x-2">
             <Brandmark size="sm" />
-            <span>— Diagnóstico de adopción de IA</span>
+            <span>Diagnóstico de adopción de IA</span>
           </span>
           <Link href="/" className="hover:text-slate-700 transition-colors">
             Volver al inicio

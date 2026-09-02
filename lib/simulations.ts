@@ -73,7 +73,7 @@ const SIMULATIONS: Record<string, SimulationConfig> = {
       { label: 'Rotación promedio', value: '18.4 días', change: '-3.2 días', positive: true },
       { label: 'Órdenes pendientes', value: '147', change: '+8 hoy', positive: false },
     ],
-    tableTitle: 'Estado del inventario — Top productos',
+    tableTitle: 'tableTitle: estado del inventario',
     tableHeaders: ['Producto', 'Stock actual', 'Mínimo', 'Proveedor', 'Estado'],
     tableRows: [
       { cells: ['Tornillo M8 x 30mm', '8,420 u', '5,000 u', 'Aceros del Sur', 'OK'], status: 'ok' },
@@ -93,7 +93,7 @@ const SIMULATIONS: Record<string, SimulationConfig> = {
           { type: 'alert', icon: '🔴', title: 'Quiebre crítico detectado', description: 'Filtro FA-220 en 0 unidades. Línea de producción 3 se detiene en 6 horas si no se repone.' },
           { type: 'automation', icon: '🤖', title: 'Orden generada automáticamente', description: 'O.C. #4821 enviada a FilterTech: 120 unidades a $18.50/u. Entrega estimada: 2 días hábiles.' },
           { type: 'prediction', icon: '📊', title: 'Predicción próximos 14 días', description: 'Rodamiento 6205 alcanzará nivel crítico en 9 días. Aceite hidráulico en 5 días. Órdenes preventivas programadas.' },
-          { type: 'recommendation', icon: '💡', title: 'Inspección visual 100% conectada', description: 'La visión IA inspecciona el 100% de las unidades (vs muestreo 1 de 20) y re-rutea defectos a retrabajo — patrón BMW AIQX, escalado a 30+ plantas. Los repuestos de retrabajo se descuentan del stock en tiempo real.' },
+          { type: 'recommendation', icon: '💡', title: 'Inspección visual 100% conectada', description: 'La visión IA inspecciona el 100% de las unidades (vs muestreo 1 de 20) y re-rutea defectos a retrabajo. Patrón BMW AIQX, escalado a 30+ plantas. Los repuestos de retrabajo se descuentan del stock en tiempo real.' },
         ],
         impacts: [
           { label: 'Horas de paro por falta de insumos', before: '14.2 h/mes', after: '0.8 h/mes', unit: '' },
@@ -107,10 +107,10 @@ const SIMULATIONS: Record<string, SimulationConfig> = {
         panelTitle: 'Agente de Compras',
         panelIntro: 'El agente de IA consulta múltiples proveedores, compara precios, negocia condiciones y ejecuta las compras dentro de los parámetros autorizados.',
         insights: [
-          { type: 'automation', icon: '🤖', title: 'Agente activo — 3 acciones ejecutadas', description: 'Consultó stock de 3 proveedores para Filtro FA-220. Mejor oferta: FilterTech a $17.20/u (urgencia 24h).' },
+          { type: 'automation', icon: '🤖', title: 'Agente activo, 3 acciones ejecutadas', description: 'Consultó stock de 3 proveedores para Filtro FA-220. Mejor oferta: FilterTech a $17.20/u (urgencia 24h).' },
           { type: 'recommendation', icon: '📋', title: 'Órdenes listas para aprobar', description: '2 órdenes generadas por $6,240 en total. Dentro del límite de aprobación automática ($10,000). ¿Confirmar?' },
           { type: 'prediction', icon: '📈', title: 'Oportunidad de ahorro detectada', description: 'El agente detectó que comprando 6 meses de aceite hidráulico se obtiene 12% de descuento. Ahorro proyectado: $1,870.' },
-          { type: 'alert', icon: '⚠️', title: 'Replanificación ante retraso de proveedor', description: 'El proveedor del rodamiento avisó +5 días de lead time. El agente replanificó órdenes y producción en cadena — patrón Unilever, cuya planificación autónoma reduce 1-2% el costo total de supply chain. En LATAM, Ternium aplica IA operacional para anticipar paros (sin cifra pública).' },
+          { type: 'alert', icon: '⚠️', title: 'Replanificación ante retraso de proveedor', description: 'El proveedor del rodamiento avisó +5 días de lead time. El agente replanificó órdenes y producción en cadena. Patrón Unilever, cuya planificación autónoma reduce 1-2% el costo total de supply chain. En LATAM, Ternium aplica IA operacional para anticipar paros (sin cifra pública).' },
         ],
         impacts: [
           { label: 'Tiempo del comprador en cotizaciones', before: '6 h/semana', after: '30 min/semana', unit: '' },
@@ -122,12 +122,12 @@ const SIMULATIONS: Record<string, SimulationConfig> = {
         actionLabel: '🧠 Analizar y sugerir estrategia',
         processingMessage: 'La IA está analizando patrones de consumo, estacionalidad y proyecciones para asistir al planificador...',
         panelTitle: 'Copiloto de Planificación',
-        panelIntro: 'La IA amplifica el criterio del planificador con análisis predictivo, escenarios y recomendaciones — las decisiones siguen siendo humanas. Patrón Siemens Industrial Copilot (~30% menos tiempo de diagnóstico) y Embraer en LATAM.',
+        panelIntro: 'La IA amplifica el criterio del planificador con análisis predictivo, escenarios y recomendaciones, las decisiones siguen siendo humanas. Patrón Siemens Industrial Copilot (~30% menos tiempo de diagnóstico) y Embraer en LATAM.',
         insights: [
           { type: 'prediction', icon: '📊', title: 'Análisis de estacionalidad', description: 'Histórico muestra un aumento del 34% en consumo de rodamientos en Q4. Sugiero incrementar stock de seguridad para octubre.' },
           { type: 'recommendation', icon: '💡', title: '3 estrategias de optimización', description: 'A) Consolidar pedidos de 5 proveedores en 2 (+15% descuento). B) Adoptar VMI con SKF. C) Implementar kanban para consumibles.' },
           { type: 'insight', icon: '🔍', title: 'Patrón de consumo atípico', description: 'El aceite hidráulico tiene un consumo 40% mayor al histórico en los últimos 30 días. Posible fuga en línea 2. Revisar antes de reabastecer.' },
-          { type: 'recommendation', icon: '🎯', title: 'Clasificación ABC actualizada', description: 'El filtro FA-220 debería reclasificarse a categoría A — afecta tiempo de paro crítico. Recomiendo mayor stock de seguridad.' },
+          { type: 'recommendation', icon: '🎯', title: 'Clasificación ABC actualizada', description: 'El filtro FA-220 debería reclasificarse a categoría A, afecta tiempo de paro crítico. Recomiendo mayor stock de seguridad.' },
         ],
         impacts: [
           { label: 'Precisión en planificación de demanda', before: '67%', after: '91%', unit: '' },
@@ -141,7 +141,7 @@ const SIMULATIONS: Record<string, SimulationConfig> = {
   banking: {
     appName: 'BankCore AI',
     appIcon: '🏦',
-    tagline: 'Operaciones bancarias con IA — fraude, onboarding y atención',
+    tagline: 'tagline: operaciones bancarias con IA',
     navItems: ['Dashboard', 'Fraude', 'KYC', 'Clientes', 'IA'],
     colorAccent: 'bg-blue-700', colorLight: 'bg-blue-50',
     colorText: 'text-blue-700', colorBorder: 'border-blue-200',
@@ -164,7 +164,7 @@ const SIMULATIONS: Record<string, SimulationConfig> = {
         panelIntro: 'Inspirado en HSBC AML AI (-60% falsos positivos, +50% sospechosas interceptadas) y JPMorgan. La IA detecta automáticamente patrones de lavado, expande la red de cuentas vinculadas y genera el reporte UAF.',
         visualWidget: { kind: 'amlInvestigationGraph' },
         insights: [
-          { type: 'alert',      icon: '🔴', title: 'TX-9823 bloqueada — $14,200 a Hong Kong',  description: 'Dispositivo nuevo + geolocalización atípica + monto fuera del rango histórico. Probabilidad de fraude 96%.' },
+          { type: 'alert',      icon: '🔴', title: 'TX-9823 bloqueada, $14,200 a Hong Kong',  description: 'Dispositivo nuevo + geolocalización atípica + monto fuera del rango histórico. Probabilidad de fraude 96%.' },
           { type: 'automation', icon: '🤖', title: '2.4M transacciones analizadas hoy',         description: 'Decisión en <10ms cada una. 312 bloqueadas automáticamente, 18 escaladas a investigador, $1.84M en pérdidas evitadas.' },
           { type: 'prediction', icon: '📊', title: 'Nuevo patrón de smurfing detectado',         description: 'Cluster de 47 cuentas relacionadas operando justo bajo el umbral de reporte. Modelo lo aprendió en 6 días y reportó a UAF.' },
           { type: 'recommendation', icon: '💡', title: 'Optimización: reducir umbral zona X',  description: 'Backtest 90 días sugiere bajar falsos positivos 12% sin perder detecciones reales. Ahorro: 340 horas/mes de analistas.' },
@@ -182,7 +182,7 @@ const SIMULATIONS: Record<string, SimulationConfig> = {
         panelIntro: 'Dos escenarios reales: (1) orquestación multi-agente para underwriting de créditos comerciales (patrón JPMorgan COiN + Nubank nuFormer), y (2) agente de cobranza autónoma vía WhatsApp que negocia planes de pago (patrón Nubank + Mercado Pago).',
         visualWidget: { kind: 'agencyShowcase' },
         insights: [
-          { type: 'automation', icon: '🤖', title: 'Expediente CR-4821 resuelto en 90 segundos',     description: 'Los 4 agentes consolidaron 11 fuentes de datos, simularon estrés a +400 bps, cruzaron AML/OFAC y produjeron condiciones óptimas — sin intervención humana.' },
+          { type: 'automation', icon: '🤖', title: 'Expediente CR-4821 resuelto en 90 segundos',     description: 'Los 4 agentes consolidaron 11 fuentes de datos, simularon estrés a +400 bps, cruzaron AML/OFAC y produjeron condiciones óptimas, sin intervención humana.' },
           { type: 'alert',      icon: '⚠️', title: 'Compliance escaló alerta a Decisión',            description: 'Agente Compliance detectó deuda vencida de un director en otra institución. Agente Decisión incorporó la señal en su scoring final (-12 pts).' },
           { type: 'prediction', icon: '📈', title: 'Score compuesto: 762 / Riesgo BAJO',              description: 'Datos 78/100 · Riesgo 71/100 · Comportamental 85/100. Recomendación final: aprobar a 9.8% con garantía hipotecaria.' },
           { type: 'recommendation', icon: '💡', title: 'Auditoría completa generada automáticamente', description: 'Cada agente dejó trazabilidad en la bitácora de orquestación. La decisión es defendible ante el comité de crédito y los reguladores (SBS/CNBV/Superfinanciera).' },
@@ -200,7 +200,7 @@ const SIMULATIONS: Record<string, SimulationConfig> = {
         panelIntro: 'Patrón Bradesco BIA (87% de contención), Wells Fargo Fargo (245M interacciones) y DBS nudges (clientes ahorran 2x, invierten 5x). La IA prepara contexto y sugerencias; el asesor decide y ejecuta.',
         visualWidget: { kind: 'clientCopilotSplit' },
         insights: [
-          { type: 'insight',        icon: '🔍', title: 'M. Salazar — perfil sintetizado en 2.1s', description: '8 años cliente premium, AUM $48.2K (+18% YoY), NPS 9/10, sin productos de inversión. Listo para llamada de las 11:30.' },
+          { type: 'insight',        icon: '🔍', title: 'M. Salazar, perfil sintetizado en 2.1s', description: '8 años cliente premium, AUM $48.2K (+18% YoY), NPS 9/10, sin productos de inversión. Listo para llamada de las 11:30.' },
           { type: 'alert',          icon: '⚠️', title: 'Riesgo de churn 73% próximos 60 días',   description: '3 transferencias salientes a banco rival en últimos 30 días + consulta de hipoteca por WhatsApp. Llamada proactiva HOY.' },
           { type: 'recommendation', icon: '💡', title: 'Next-best-product: Fondo conservador',   description: 'Match perfil 94%. Sin productos de inversión activos en 8 años. Producto cumple su tolerancia al riesgo declarada.' },
           { type: 'prediction',     icon: '📊', title: 'Comparable con cohorte similar',          description: 'De 213 clientes con perfil idéntico, los que recibieron nudge proactivo: ahorran 2.1x, invierten 5x y suben NPS +6 puntos.' },
@@ -227,7 +227,7 @@ const SIMULATIONS: Record<string, SimulationConfig> = {
       { label: 'Precisión de forecast', value: '87.3%', change: '+12 pp con IA', positive: true },
       { label: 'Margen bruto', value: '42.1%', change: '+1.8 pp', positive: true },
     ],
-    tableTitle: 'Productos — Predicción de demanda próximas 2 semanas',
+    tableTitle: 'tableTitle: productos',
     tableHeaders: ['Producto', 'Stock', 'Forecast 14d', 'Días hasta agotamiento', 'Tendencia'],
     tableRows: [
       { cells: ['Zapatilla Running X200', '245 u', '312 u', '11 días', '📈 +24%'], status: 'warning', highlight: true },
@@ -245,7 +245,7 @@ const SIMULATIONS: Record<string, SimulationConfig> = {
         insights: [
           { type: 'alert', icon: '🔴', title: 'Orden urgente: Short Deportivo L', description: '12 unidades en stock vs 89 proyectadas en 14 días. O.C. automática por 200 u enviada a proveedor. Llegada: 3 días.' },
           { type: 'automation', icon: '🤖', title: '8 órdenes de reposición generadas', description: 'Total: $47,820 en mercancía. 6 dentro del límite automático, 2 requieren aprobación del comprador (>$10,000).' },
-          { type: 'prediction', icon: '📊', title: 'Pico de demanda detectado', description: 'El modelo detecta un aumento del 34% en zapatillas running en los próximos 10 días — correlación con maratón local del 15/6. Forecasting hiperlocal con clima y eventos, patrón Zara.' },
+          { type: 'prediction', icon: '📊', title: 'Pico de demanda detectado', description: 'El modelo detecta un aumento del 34% en zapatillas running en los próximos 10 días, correlación con maratón local del 15/6. Forecasting hiperlocal con clima y eventos, patrón Zara.' },
           { type: 'recommendation', icon: '💡', title: 'Oportunidad: liquidar Medias Deportivas', description: 'Stock de 3,200 u con tendencia negativa (-8%). Recomiendo escalera de descuentos 15% → 25% → 40% por quincena para liberar capital antes de fin de temporada.' },
         ],
         impacts: [
@@ -258,9 +258,9 @@ const SIMULATIONS: Record<string, SimulationConfig> = {
         actionLabel: '🤖 Activar agente de ventas omnicanal',
         processingMessage: 'El agente está analizando comportamiento de clientes, stock disponible y personalizando ofertas...',
         panelTitle: 'Agente de Ventas',
-        panelIntro: 'El agente gestiona la experiencia del cliente en todos los canales: responde consultas, recomienda productos, procesa devoluciones y activa promociones — patrón Magalu "Lu" (Brasil) y Amazon Rufus.',
+        panelIntro: 'El agente gestiona la experiencia del cliente en todos los canales: responde consultas, recomienda productos, procesa devoluciones y activa promociones. Patrón Magalu "Lu" (Brasil) y Amazon Rufus.',
         insights: [
-          { type: 'automation', icon: '🤖', title: 'Agente atendió 1,247 interacciones hoy', description: 'WhatsApp: 698, Web chat: 412, Instagram DM: 137. Resolución autónoma: 91%. La venta asistida por WhatsApp convierte ~3x más que la app — patrón Magalu Lu en LATAM.' },
+          { type: 'automation', icon: '🤖', title: 'Agente atendió 1,247 interacciones hoy', description: 'WhatsApp: 698, Web chat: 412, Instagram DM: 137. Resolución autónoma: 91%. La venta asistida por WhatsApp convierte ~3x más que la app. Patrón Magalu Lu en LATAM.' },
           { type: 'prediction', icon: '📈', title: 'Segmento de alto valor identificado', description: '340 clientes con 3+ compras en 90 días sin compra en los últimos 30. El agente activó campaña de re-engagement personalizada.' },
           { type: 'recommendation', icon: '💡', title: 'Upsell detectado en tiempo real', description: 'Cliente consultando zapatillas Running X200: el agente recomienda también Medias Deportivas + ahorra $18 en bundle. Conversión 62%.' },
           { type: 'alert', icon: '⚠️', title: '34 devoluciones en proceso', description: 'El agente procesó 28 automáticamente (política estándar). 6 requieren criterio humano (daño reportado, cliente VIP, monto >$200).' },
@@ -275,7 +275,7 @@ const SIMULATIONS: Record<string, SimulationConfig> = {
         actionLabel: '🧠 Asistir al equipo de merchandising',
         processingMessage: 'La IA está analizando tendencias de mercado, comportamiento de compra y performance de categorías...',
         panelTitle: 'Copiloto de Merchandising',
-        panelIntro: 'La IA amplifica el criterio del equipo de merchandising con análisis de tendencias, comparación competitiva y simulaciones de escenarios — patrón de los copilotos de category manager y store manager (Carrefour "Hopla", M&S).',
+        panelIntro: 'La IA amplifica el criterio del equipo de merchandising con análisis de tendencias, comparación competitiva y simulaciones de escenarios. Patrón de los copilotos de category manager y store manager (Carrefour "Hopla", M&S).',
         insights: [
           { type: 'insight', icon: '🔍', title: 'Análisis de tendencias del mercado', description: 'Trail running creció 41% en la categoría en los últimos 6 meses. Sugiero ampliar el surtido de mochilas trail antes de la temporada de senderismo.' },
           { type: 'prediction', icon: '📊', title: 'Simulación: 3 escenarios de surtido', description: 'A) Expandir zapatillas (+$18K/mes), B) Agregar accesorios trail (+$22K/mes), C) Ambos (+$34K/mes). Inversión y riesgo por escenario disponibles.' },
@@ -304,14 +304,14 @@ const SIMULATIONS: Record<string, SimulationConfig> = {
       { label: 'Camas disponibles', value: '23 / 180', change: 'Capacidad al 87%', positive: false },
       { label: 'Readmisiones 30d', value: '4.1%', change: '-1.8 pp', positive: true },
     ],
-    tableTitle: 'Flujo de pacientes — Ocupación y espera por área',
+    tableTitle: 'tableTitle: flujo de pacientes',
     tableHeaders: ['Área', 'Ocupación', 'Espera prom.', 'Altas previstas hoy', 'Estado'],
     tableRows: [
-      { cells: ['Urgencias', '112% (sobre capacidad)', '2h 40m', '—', '🔴 Congestión'], status: 'critical', highlight: true },
-      { cells: ['UCI', '92%', '—', '2 altas', '⚠ Al límite'], status: 'warning', highlight: true },
+      { cells: ['Urgencias', '112% (sobre capacidad)', '2h 40m', 'n/d', '🔴 Congestión'], status: 'critical', highlight: true },
+      { cells: ['UCI', '92%', 'n/d', '2 altas', '⚠ Al límite'], status: 'warning', highlight: true },
       { cells: ['Hospitalización', '87%', '4h para asignar cama', '14 altas', '⚠ Altas en bloque AM'], status: 'warning' },
-      { cells: ['Consulta externa', '71%', '3 semanas (lista)', '—', '⚠ 30% no-shows'], status: 'warning', highlight: true },
-      { cells: ['Quirófanos', '64%', '—', '—', 'OK'], status: 'ok' },
+      { cells: ['Consulta externa', '71%', '3 semanas (lista)', 'n/d', '⚠ 30% no-shows'], status: 'warning', highlight: true },
+      { cells: ['Quirófanos', '64%', 'n/d', 'n/d', 'OK'], status: 'ok' },
     ],
     variants: {
       automation: {
@@ -323,7 +323,7 @@ const SIMULATIONS: Record<string, SimulationConfig> = {
           { type: 'alert', icon: '🔴', title: 'Pico de demanda proyectado 18:00-22:00', description: 'El modelo proyecta 45 llegadas adicionales a urgencias esta tarde (patrón lunes). Refuerzo de turno y camillas programado automáticamente a las 17:30.' },
           { type: 'automation', icon: '🤖', title: '38 altas codificadas automáticamente hoy', description: 'Codificación ICD-10 en tiempo real desde la nota clínica, con concordancia κ≈0.87 validada en hospital real (JMIR 2024). 6 casos ambiguos derivados al codificador senior.' },
           { type: 'prediction', icon: '📊', title: 'Ocupación de camas proyectada a 48h', description: 'Con las 14 altas previstas y la demanda estimada, hospitalización llegará al 94% mañana. Traslados internos y limpieza de camas pre-programados.' },
-          { type: 'recommendation', icon: '💡', title: 'Documentación incompleta detectada temprano', description: '12 expedientes con campos administrativos faltantes marcados antes de facturación — cada error de codificación cuesta ~$3,200 en promedio (AHIMA).' },
+          { type: 'recommendation', icon: '💡', title: 'Documentación incompleta detectada temprano', description: '12 expedientes con campos administrativos faltantes marcados antes de facturación, cada error de codificación cuesta ~$3,200 en promedio (AHIMA).' },
         ],
         impacts: [
           { label: 'Tiempo de codificación por alta', before: '10-15 min', after: 'Tiempo real (κ≈0.87)', unit: '' },
@@ -335,7 +335,7 @@ const SIMULATIONS: Record<string, SimulationConfig> = {
         actionLabel: '🤖 Activar agente de coordinación',
         processingMessage: 'El agente está coordinando camas, agenda, recordatorios y comunicaciones con pacientes...',
         panelTitle: 'Agente de Coordinación de Pacientes',
-        panelIntro: 'El agente coordina camas, agenda, recordatorios y seguimiento post-alta de forma autónoma — patrón de sistemas multi-agente en salud (Nature Biomedical Engineering 2025). Las decisiones clínicas siguen siendo del equipo médico.',
+        panelIntro: 'El agente coordina camas, agenda, recordatorios y seguimiento post-alta de forma autónoma. Patrón de sistemas multi-agente en salud (Nature Biomedical Engineering 2025). Las decisiones clínicas siguen siendo del equipo médico.',
         insights: [
           { type: 'automation', icon: '🤖', title: 'Agenda de mañana optimizada automáticamente', description: 'El agente reprogramó 8 consultas para distribuir carga uniforme. Envió confirmaciones a pacientes por WhatsApp. Cancelaciones gestionadas.' },
           { type: 'recommendation', icon: '📋', title: 'Asignación de camas optimizada', description: 'El agente identifica que la cama 114 se libera en 2 horas (alta ya indicada por el médico) y la pre-asigna al siguiente ingreso según el orden de espera de urgencias.' },
@@ -352,9 +352,9 @@ const SIMULATIONS: Record<string, SimulationConfig> = {
         actionLabel: '🧠 Activar copiloto de documentación',
         processingMessage: 'La IA está transcribiendo la consulta y generando el borrador de nota para revisión del médico...',
         panelTitle: 'Copiloto de Documentación Ambiental',
-        panelIntro: 'La IA escucha la consulta y genera el borrador de la nota en la historia clínica; el médico revisa, edita y firma. La decisión clínica es siempre humana — patrón DAX/Nabla evaluado en RCT independiente (NEJM AI 2025).',
+        panelIntro: 'La IA escucha la consulta y genera el borrador de la nota en la historia clínica; el médico revisa, edita y firma. La decisión clínica es siempre humana. Patrón DAX/Nabla evaluado en RCT independiente (NEJM AI 2025).',
         insights: [
-          { type: 'insight', icon: '🔍', title: 'Nota de consulta generada en 40 segundos', description: 'Borrador estructurado (motivo, evolución, plan administrativo) listo tras la consulta. El médico editó 2 campos y firmó — sin "pajama time" para esta cita.' },
+          { type: 'insight', icon: '🔍', title: 'Nota de consulta generada en 40 segundos', description: 'Borrador estructurado (motivo, evolución, plan administrativo) listo tras la consulta. El médico editó 2 campos y firmó, sin "pajama time" para esta cita.' },
           { type: 'prediction', icon: '📊', title: 'Evidencia real: verificado vs auto-reportado', description: 'Los vendors reportaban -50% de tiempo de documentación; el ensayo aleatorizado independiente midió -9.5% (NEJM AI 2025). Este panel muestra impacto verificado, no marketing.' },
           { type: 'recommendation', icon: '💡', title: 'Códigos sugeridos junto a la firma', description: 'La IA propone los códigos ICD-10 de la consulta con nivel de confianza; el médico confirma antes de enviar a facturación. Menos reproceso con el equipo de codificación.' },
           { type: 'alert', icon: '⚠️', title: 'Validar métricas localmente antes de escalar', description: 'Lección Epic Sepsis: un modelo desplegado a escala mostró desempeño mucho menor al declarado al validarse de forma independiente (JAMA IM 2021). Mide en tu propio piloto.' },
@@ -381,7 +381,7 @@ const SIMULATIONS: Record<string, SimulationConfig> = {
       { label: 'Costo combustible', value: '$4,210', change: '-18% vs sin IA', positive: true },
       { label: 'Incidentes reportados', value: '3', change: '-67% vs promedio', positive: true },
     ],
-    tableTitle: 'Rutas activas — Estado en tiempo real',
+    tableTitle: 'tableTitle: rutas activas',
     tableHeaders: ['Ruta', 'Conductor', 'Entregas', 'Estado', 'ETA'],
     tableRows: [
       { cells: ['Ruta Sur-01', 'Carlos Mendez', '24/28', 'En curso', 'A tiempo'], status: 'ok' },
@@ -398,7 +398,7 @@ const SIMULATIONS: Record<string, SimulationConfig> = {
         panelIntro: 'La IA recalcula automáticamente las rutas cuando hay retrasos, cambios de tráfico o nuevas solicitudes de entrega.',
         insights: [
           { type: 'alert', icon: '🔴', title: 'Ruta Norte-03: desvío automático activado', description: 'Accidente detectado en Av. Principal. IA redirigió a Carlos Torres por ruta alternativa. Retraso reducido de 45 min a 12 min.' },
-          { type: 'automation', icon: '🤖', title: '4 rutas de mañana ya optimizadas', description: 'IA procesó 142 pedidos nuevos y generó las rutas óptimas para mañana. Ahorro proyectado vs manual: 340 km (-19%), $186 en combustible — a escala, UPS ORION ahorra 6-8 millas por conductor/día y ~10% de combustible en 55,000 rutas.' },
+          { type: 'automation', icon: '🤖', title: '4 rutas de mañana ya optimizadas', description: 'IA procesó 142 pedidos nuevos y generó las rutas óptimas para mañana. Ahorro proyectado vs manual: 340 km (-19%), $186 en combustible, a escala, UPS ORION ahorra 6-8 millas por conductor/día y ~10% de combustible en 55,000 rutas.' },
           { type: 'prediction', icon: '📊', title: 'Predicción de congestión', description: 'El modelo predice tráfico pesado en zona industrial mañana 7-9am (patrón histórico + evento local). Rutas ya redirigidas preventivamente.' },
           { type: 'recommendation', icon: '💡', title: 'Oportunidad: consolidar 3 rutas', description: 'Los pedidos de las zonas Sur-03, Sur-04 y Sur-07 pueden consolidarse en una sola ruta. Ahorro: 1 camión, $320/día.' },
         ],
@@ -412,11 +412,11 @@ const SIMULATIONS: Record<string, SimulationConfig> = {
         actionLabel: '🤖 Activar agente de coordinación de flota',
         processingMessage: 'El agente está evaluando estado de la flota, contactando conductores y coordinando recursos...',
         panelTitle: 'Agente de Operaciones',
-        panelIntro: 'El agente coordina la flota en tiempo real: comunica a conductores, gestiona incidentes y coordina con clientes ante retrasos — el patrón de orquestación last-mile que Rappi opera con ML en 9 países de LATAM.',
+        panelIntro: 'El agente coordina la flota en tiempo real: comunica a conductores, gestiona incidentes y coordina con clientes ante retrasos. El patrón de orquestación last-mile que Rappi opera con ML en 9 países de LATAM.',
         insights: [
           { type: 'automation', icon: '🤖', title: 'Agente notificó a 8 clientes sobre retraso', description: 'Martha López en pausa por falla mecánica. El agente notificó a los 7 clientes afectados, ofreció reprogramación y asignó vehículo de reemplazo.' },
           { type: 'recommendation', icon: '📋', title: 'Redistribución de carga aprobada', description: 'El agente redistribuyó 10 entregas de Ruta Oriente-02 a conductores con capacidad disponible. Sin impacto en SLA de clientes.' },
-          { type: 'prediction', icon: '📈', title: 'Tarifa spot negociada por el agente', description: 'Para cubrir la falla mecánica, el agente cotizó con 3 transportistas externos y cerró a $145 el viaje (-8% vs referencia) — patrón Maersk + Pactum de negociación autónoma con carriers.' },
+          { type: 'prediction', icon: '📈', title: 'Tarifa spot negociada por el agente', description: 'Para cubrir la falla mecánica, el agente cotizó con 3 transportistas externos y cerró a $145 el viaje (-8% vs referencia). Patrón Maersk + Pactum de negociación autónoma con carriers.' },
           { type: 'alert', icon: '⚠️', title: 'Zona de alto riesgo detectada', description: 'Reportes de inseguridad en zona norte para esta noche. El agente reprogramó 3 entregas para mañana y notificó a los clientes.' },
         ],
         impacts: [
@@ -429,7 +429,7 @@ const SIMULATIONS: Record<string, SimulationConfig> = {
         actionLabel: '🧠 Asistir al jefe de operaciones',
         processingMessage: 'La IA está preparando el análisis de operaciones y recomendaciones estratégicas...',
         panelTitle: 'Copiloto de Operaciones',
-        panelIntro: 'La IA amplifica el criterio del jefe de operaciones con análisis de eficiencia, detección de patrones y simulación de escenarios — patrón Flexport: el copiloto propone y redacta, el humano aprueba.',
+        panelIntro: 'La IA amplifica el criterio del jefe de operaciones con análisis de eficiencia, detección de patrones y simulación de escenarios. Patrón Flexport: el copiloto propone y redacta, el humano aprueba.',
         insights: [
           { type: 'insight', icon: '🔍', title: 'Patrón de retrasos identificado', description: 'El 78% de los retrasos ocurren en la zona norte los días lunes. Causa probable: tráfico por mercado semanal. El jefe puede ajustar la planificación.' },
           { type: 'prediction', icon: '📊', title: 'Simulación: 3 escenarios de flota', description: 'A) Flota actual (-$0, riesgo alto en temporada alta), B) +2 camiones (+$8,400/mes, cubre demanda), C) Flota externa en pico (flexible, +$3,200/mes).' },
@@ -458,7 +458,7 @@ const SIMULATIONS: Record<string, SimulationConfig> = {
       { label: 'Cláusulas de riesgo', value: '38 detectadas', change: 'En 12 contratos', positive: false },
       { label: 'Contratos aprobados', value: '89', change: '60.5% del total', positive: true },
     ],
-    tableTitle: 'Contratos en proceso — Análisis IA',
+    tableTitle: 'tableTitle: contratos en proceso',
     tableHeaders: ['Contrato', 'Tipo', 'Páginas', 'Riesgo IA', 'Estado'],
     tableRows: [
       { cells: ['Contrato Suministro-2847', 'B2B Servicios', '48 pág', '🔴 Alto', 'Revisar'], status: 'critical', highlight: true },
@@ -506,9 +506,9 @@ const SIMULATIONS: Record<string, SimulationConfig> = {
         actionLabel: '🧠 Asistir al abogado senior',
         processingMessage: 'La IA está preparando el análisis jurídico y los precedentes relevantes para el abogado...',
         panelTitle: 'Copiloto Jurídico',
-        panelIntro: 'La IA amplifica el criterio del abogado con análisis de precedentes, comparación de cláusulas y redacción de alternativas — el abogado siempre decide.',
+        panelIntro: 'La IA amplifica el criterio del abogado con análisis de precedentes, comparación de cláusulas y redacción de alternativas, el abogado siempre decide.',
         insights: [
-          { type: 'insight', icon: '🔍', title: 'Análisis de precedentes — Suministro-2847', description: 'En 3 litigios similares de 2021-2023, la cláusula de penalidad asimétrica fue declarada abusiva en 2 casos. El abogado puede citar jurisprudencia.' },
+          { type: 'insight', icon: '🔍', title: 'Análisis de precedentes: Suministro-2847', description: 'En 3 litigios similares de 2021-2023, la cláusula de penalidad asimétrica fue declarada abusiva en 2 casos. El abogado puede citar jurisprudencia.' },
           { type: 'prediction', icon: '📊', title: 'Evaluación de riesgo litigioso', description: 'Bajo las condiciones actuales del contrato, el riesgo de litigio se estima en 23% en los próximos 24 meses. Con las modificaciones sugeridas: 4%.' },
           { type: 'recommendation', icon: '💡', title: 'Cláusulas de protección sugeridas', description: 'Para el Acuerdo Distribución MX, la IA sugiere agregar: cláusula de cambio material, limitación de responsabilidad y mecanismo de resolución escalonada.' },
           { type: 'insight', icon: '🎯', title: 'Inconsistencia detectada', description: 'El plazo de entrega en la cláusula 4.2 (30 días) contradice el definido en el Anexo B (45 días). Requiere corrección antes de la firma.' },
@@ -535,7 +535,7 @@ const SIMULATIONS: Record<string, SimulationConfig> = {
       { label: 'Documentos procesados', value: '12,847/mes', change: '+340% capacidad', positive: true },
       { label: 'Satisfacción ciudadana', value: '7.8/10', change: '+2.1 pts', positive: true },
     ],
-    tableTitle: 'Trámites en revisión — Clasificación IA',
+    tableTitle: 'tableTitle: trámites en revisión',
     tableHeaders: ['ID', 'Tipo de trámite', 'Ciudadano', 'Documentos', 'Estado IA'],
     tableRows: [
       { cells: ['T-48291', 'Licencia comercial', 'J. Martínez', '7/7 ✓', '🟢 Listo para aprobar'], status: 'ok' },
@@ -583,12 +583,12 @@ const SIMULATIONS: Record<string, SimulationConfig> = {
         actionLabel: '🧠 Asistir al funcionario revisor',
         processingMessage: 'La IA está preparando el expediente completo y los criterios de evaluación para el funcionario...',
         panelTitle: 'Copiloto del Funcionario',
-        panelIntro: 'La IA amplifica el criterio del funcionario con contexto del expediente, precedentes similares y checklist de verificación — la decisión siempre es del funcionario.',
+        panelIntro: 'La IA amplifica el criterio del funcionario con contexto del expediente, precedentes similares y checklist de verificación, la decisión siempre es del funcionario.',
         insights: [
           { type: 'insight', icon: '🔍', title: 'Expediente T-48295 analizado', description: 'Restaurante ABC: sin antecedentes negativos en el registro, 3 años operando, sede anterior aprobada sin observaciones. Contexto favorable para la inspección.' },
           { type: 'recommendation', icon: '💡', title: 'Puntos críticos para la inspección', description: 'Basado en inspecciones anteriores del mismo tipo de local: verificar área de manipulación de alimentos (63% de observaciones en esa zona), ventilación y manejo de residuos.' },
           { type: 'prediction', icon: '📊', title: 'Comparación con trámites similares', description: 'De 47 habilitaciones sanitarias similares en los últimos 6 meses, 89% fueron aprobadas. El perfil de este solicitante es mejor que el promedio del segmento.' },
-          { type: 'alert', icon: '⚠️', title: 'Inconsistencia en documentación', description: 'El certificado de fumigación (anexo 6) fue emitido hace 14 meses — la normativa requiere que no supere 12 meses. El funcionario debe decidir si solicitar actualización.' },
+          { type: 'alert', icon: '⚠️', title: 'Inconsistencia en documentación', description: 'El certificado de fumigación (anexo 6) fue emitido hace 14 meses, la normativa requiere que no supere 12 meses. El funcionario debe decidir si solicitar actualización.' },
         ],
         impacts: [
           { label: 'Tiempo de revisión por expediente', before: '2.5 horas', after: '28 minutos', unit: '' },
@@ -612,7 +612,7 @@ const SIMULATIONS: Record<string, SimulationConfig> = {
       { label: 'Déficit hídrico', value: '+4°C', change: 'sobre promedio histórico', positive: false },
       { label: 'Ahorro de insumos', value: '$90K', change: 'con dosis variable', positive: true },
     ],
-    tableTitle: 'Lotes y hato — estado con IA',
+    tableTitle: 'tableTitle: lotes y hato',
     tableHeaders: ['Lote / Grupo', 'Tipo', 'Rinde / Producción', 'IA activa', 'Estado'],
     tableRows: [
       { cells: ['Lote L-1 Maíz', 'Cultivo', '12 t/ha', '✓ Dosis variable', 'Óptimo'], status: 'ok' },
@@ -660,7 +660,7 @@ const SIMULATIONS: Record<string, SimulationConfig> = {
         actionLabel: '🧠 Asistir al ingeniero agrónomo',
         processingMessage: 'La IA está preparando el análisis agronómico y los escenarios de manejo para el ingeniero...',
         panelTitle: 'Copiloto Agronómico',
-        panelIntro: 'La IA amplifica el criterio del ingeniero con análisis de suelo, clima y escenarios de manejo — la decisión agronómica sigue siendo humana.',
+        panelIntro: 'La IA amplifica el criterio del ingeniero con análisis de suelo, clima y escenarios de manejo, la decisión agronómica sigue siendo humana.',
         insights: [
           { type: 'insight', icon: '🔍', title: 'Heterogeneidad del lote detectada', description: 'El mapa de rinde muestra zonas de 12 vs 6 t/ha en el mismo lote de maíz. Probable causa: diferencia de materia orgánica y compactación en la zona baja.' },
           { type: 'prediction', icon: '📊', title: 'Simulación: 3 estrategias de riego', description: 'A) Riego uniforme ($120/ha, +6% rinde). B) Riego dirigido a zonas críticas (+11% rinde, -30% agua). C) Diferir y arriesgar lluvia. Costo y riesgo por escenario.' },
@@ -689,7 +689,7 @@ const SIMULATIONS: Record<string, SimulationConfig> = {
       { label: 'Nodo norte (pico)', value: '85%', change: 'congestión en hora pico', positive: false },
       { label: 'CSAT', value: '6.2/10', change: 'resolución 48h promedio', positive: false },
     ],
-    tableTitle: 'Red y soporte — estado con IA',
+    tableTitle: 'tableTitle: red y soporte',
     tableHeaders: ['Celda / Zona', 'Carga pico', 'Churn zona', 'IA activa', 'Estado'],
     tableRows: [
       { cells: ['N-01 Norte', '85%', '6.0%', '⚠ Ampliar capacidad', 'Congestión'], status: 'critical', highlight: true },
@@ -707,8 +707,8 @@ const SIMULATIONS: Record<string, SimulationConfig> = {
         insights: [
           { type: 'alert', icon: '🔴', title: 'Congestión en nodo Norte (N-01)', description: 'Carga al 85% en hora pico con 40% de tickets por velocidad baja en la zona. La IA balanceó tráfico hacia E-02 y programó ampliación de capacidad prioritaria.' },
           { type: 'automation', icon: '🤖', title: '6,600 tickets repetitivos resueltos por IA', description: 'De 12K tickets/semana, el 55% son consultas de facturación y configuración. La IA conversacional los resolvió sin agente. Respuesta: 38 seg vs 48h.' },
-          { type: 'prediction', icon: '📊', title: 'Modo sueño nocturno en 38 celdas', description: 'Entre 1:00 y 5:00 la IA apaga portadoras con tráfico mínimo y las despierta al subir la demanda — patrón Vodafone/Ericsson: 25-33% menos energía de RAN, con la energía pesando 20-40% del OPEX de red.' },
-          { type: 'recommendation', icon: '💡', title: 'Bloqueo automático de spam y fraude', description: '4,120 llamadas y SMS fraudulentos bloqueados hoy en la red sin intervención humana — el patrón Airtel redujo 68.7% las pérdidas financieras por fraude.' },
+          { type: 'prediction', icon: '📊', title: 'Modo sueño nocturno en 38 celdas', description: 'Entre 1:00 y 5:00 la IA apaga portadoras con tráfico mínimo y las despierta al subir la demanda. Patrón Vodafone/Ericsson: 25-33% menos energía de RAN, con la energía pesando 20-40% del OPEX de red.' },
+          { type: 'recommendation', icon: '💡', title: 'Bloqueo automático de spam y fraude', description: '4,120 llamadas y SMS fraudulentos bloqueados hoy en la red sin intervención humana. El patrón Airtel redujo 68.7% las pérdidas financieras por fraude.' },
         ],
         impacts: [
           { label: 'Tickets que requieren agente humano', before: '12K/semana', after: '5.4K/semana', unit: '' },
@@ -720,9 +720,9 @@ const SIMULATIONS: Record<string, SimulationConfig> = {
         actionLabel: '🤖 Activar agente de experiencia del cliente',
         processingMessage: 'El agente está revisando tickets abiertos, estado de la red y perfiles de clientes en riesgo...',
         panelTitle: 'Agente de Experiencia del Cliente',
-        panelIntro: 'El agente gestiona soporte, retención y coordinación con el área técnica de forma autónoma, 24/7 — camino al nivel 4 de autonomía del TM Forum, validado por primera vez por DNB + Ericsson (2025).',
+        panelIntro: 'El agente gestiona soporte, retención y coordinación con el área técnica de forma autónoma, 24/7. Camino al nivel 4 de autonomía del TM Forum, validado por primera vez por DNB + Ericsson (2025).',
         insights: [
-          { type: 'automation', icon: '🤖', title: 'Agente atendió 8,420 interacciones hoy', description: 'WhatsApp, app y web. Resolución sin derivar: 88% — en línea con lo que Amdocs reporta para billing (>90%, cifra del vendor sin auditoría independiente). Abrió 3 órdenes de trabajo al área técnica automáticamente.' },
+          { type: 'automation', icon: '🤖', title: 'Agente atendió 8,420 interacciones hoy', description: 'WhatsApp, app y web. Resolución sin derivar: 88%. En línea con lo que Amdocs reporta para billing (>90%, cifra del vendor sin auditoría independiente). Abrió 3 órdenes de trabajo al área técnica automáticamente.' },
           { type: 'recommendation', icon: '📋', title: 'Plan de retención para 1,240 clientes', description: 'El agente segmentó a los clientes en fuga (2+ tickets, consumo a la baja) y preparó ofertas personalizadas. Retención proactiva antes del 3er ticket.' },
           { type: 'prediction', icon: '📈', title: 'Órdenes técnicas coordinadas', description: 'El agente priorizó la ampliación de N-01 y agendó la cuadrilla de campo para mañana 7am (menor tráfico). Clientes afectados notificados.' },
           { type: 'alert', icon: '⚠️', title: 'Cliente corporativo en riesgo', description: 'Una cuenta de $45K/año reportó 4 caídas en 2 semanas. El agente escaló a un ejecutivo senior con el historial completo y una propuesta de compensación.' },
@@ -737,11 +737,11 @@ const SIMULATIONS: Record<string, SimulationConfig> = {
         actionLabel: '🧠 Asistir a los agentes de soporte',
         processingMessage: 'La IA está preparando el contexto del cliente y las sugerencias de respuesta para el agente en llamada...',
         panelTitle: 'Copiloto del Agente de Soporte',
-        panelIntro: 'La IA sugiere respuestas, diagnósticos y próximos pasos al agente durante la llamada — patrón Vivo I.Ajuda (Telefônica Brasil, 23,000 agentes); el agente humano decide qué aplicar.',
+        panelIntro: 'La IA sugiere respuestas, diagnósticos y próximos pasos al agente durante la llamada. Patrón Vivo I.Ajuda (Telefônica Brasil, 23,000 agentes); el agente humano decide qué aplicar.',
         insights: [
           { type: 'insight', icon: '🔍', title: 'Contexto del cliente en pantalla en 2 segundos', description: 'Historial de tickets, estado del nodo de su zona (N-01 congestionado) y facturación consolidados antes de que el agente conteste la llamada.' },
           { type: 'prediction', icon: '📊', title: 'Sugerencia con nivel de confianza', description: 'Para el reclamo de velocidad, el copiloto sugiere: informar la ampliación de N-01 + descuento temporal (confianza 87%). El agente acepta, edita o descarta.' },
-          { type: 'recommendation', icon: '💡', title: 'Primera resolución en aumento', description: 'Con las sugerencias del copiloto, la primera resolución del piloto pasó de 15% a 41% en 2 meses — Vodafone SuperTOBi la llevó de 15% a 60%.' },
+          { type: 'recommendation', icon: '💡', title: 'Primera resolución en aumento', description: 'Con las sugerencias del copiloto, la primera resolución del piloto pasó de 15% a 41% en 2 meses. Vodafone SuperTOBi la llevó de 15% a 60%.' },
           { type: 'alert', icon: '⚠️', title: 'Casos técnicos: derivar con criterio', description: 'Los LLM genéricos fallan 30-40% en preguntas técnicas de red (benchmark NetEval); el copiloto responde desde la base de conocimiento interna y marca cuándo derivar al NOC.' },
         ],
         impacts: [
@@ -766,14 +766,14 @@ const SIMULATIONS: Record<string, SimulationConfig> = {
       { label: 'Accidentes', value: '3.2', change: 'por 200K hrs (meta 1.5)', positive: false },
       { label: 'Desperdicio', value: '14%', change: '$180K en sobrecostos', positive: false },
     ],
-    tableTitle: 'Obras — avance vs presupuesto',
+    tableTitle: 'tableTitle: obras',
     tableHeaders: ['Obra', 'Ubicación', 'Avance físico', 'Presupuesto', 'Estado'],
     tableRows: [
       { cells: ['OBR-01 Torre Norte', 'Zona financiera', '45%', '62%', '🔴 Atrasado'], status: 'critical', highlight: true },
       { cells: ['OBR-02 C. Comercial Sur', 'Periferia', '70%', '68%', '🟢 En obra'], status: 'ok' },
       { cells: ['OBR-03 Hospital Regional', 'Centro', '28%', '25%', '🟢 En obra'], status: 'ok' },
       { cells: ['OBR-04 Condominio Las Lomas', 'Las Lomas', '100%', '97%', '✓ Entregado'], status: 'ok' },
-      { cells: ['Seguridad — 5 obras', '120 trabajadores', '3.2 índice', 'meta 1.5', '⚠ Sobre meta'], status: 'warning', highlight: true },
+      { cells: ['Seguridad, 5 obras', '120 trabajadores', '3.2 índice', 'meta 1.5', '⚠ Sobre meta'], status: 'warning', highlight: true },
     ],
     variants: {
       automation: {
@@ -814,7 +814,7 @@ const SIMULATIONS: Record<string, SimulationConfig> = {
         actionLabel: '🧠 Asistir al director de obra',
         processingMessage: 'La IA está preparando el análisis de portafolio de obras y los escenarios de acción...',
         panelTitle: 'Copiloto del Director de Obra',
-        panelIntro: 'La IA amplifica el criterio del director con análisis de costos, cronograma y riesgo por obra — las decisiones siguen siendo humanas.',
+        panelIntro: 'La IA amplifica el criterio del director con análisis de costos, cronograma y riesgo por obra, las decisiones siguen siendo humanas.',
         insights: [
           { type: 'insight', icon: '🔍', title: 'Análisis de portafolio', description: '4 obras, $47.1M de inversión. OBR-01 (Torre Norte) es la única con desvío crítico de costo; las otras 3 están en plazo. El foco debe estar en la estructura de OBR-01.' },
           { type: 'prediction', icon: '📊', title: 'Simulación: 3 escenarios para OBR-01', description: 'A) Acelerar (+$86K, -4 sem). B) Renegociar subcontrato (riesgo legal, -2 sem). C) Mantener (sobrecosto $1.4M). Costo y riesgo por escenario.' },
@@ -843,7 +843,7 @@ const SIMULATIONS: Record<string, SimulationConfig> = {
       { label: 'Loss ratio', value: '62%', change: '-3 pp con IA', positive: true },
       { label: 'Tiempo de liquidación', value: '2.4 días', change: '-71% con IA', positive: true },
     ],
-    tableTitle: 'Siniestros y pólizas — análisis IA',
+    tableTitle: 'tableTitle: siniestros y pólizas',
     tableHeaders: ['ID', 'Tipo', 'Monto', 'Riesgo / Fraude IA', 'Estado'],
     tableRows: [
       { cells: ['SIN-2041', 'Auto · colisión', '$8,400', '🟡 Revisión', 'En peritaje'], status: 'warning', highlight: true },
@@ -891,9 +891,9 @@ const SIMULATIONS: Record<string, SimulationConfig> = {
         actionLabel: '🧠 Asistir al suscriptor senior',
         processingMessage: 'La IA está preparando el perfil de riesgo y los comparables de mercado para el suscriptor...',
         panelTitle: 'Copiloto de Suscripción',
-        panelIntro: 'La IA amplifica el criterio del suscriptor con perfiles de riesgo, comparables y detección de fraude — la decisión es siempre humana.',
+        panelIntro: 'La IA amplifica el criterio del suscriptor con perfiles de riesgo, comparables y detección de fraude, la decisión es siempre humana.',
         insights: [
-          { type: 'insight', icon: '🔍', title: 'Perfil de riesgo — POL-7720', description: 'Conductor 24a, vehículo deportivo 2022, zona urbana de alta siniestralidad, sin historial (primera póliza). Sin antecedentes negativos, pero perfil estadísticamente más riesgoso.' },
+          { type: 'insight', icon: '🔍', title: 'Perfil de riesgo: POL-7720', description: 'Conductor 24a, vehículo deportivo 2022, zona urbana de alta siniestralidad, sin historial (primera póliza). Sin antecedentes negativos, pero perfil estadísticamente más riesgoso.' },
           { type: 'prediction', icon: '📊', title: 'Comparación con cartera similar', description: 'De 320 pólizas de perfil similar, la siniestralidad fue 2.1x el promedio en el primer año. El suscriptor puede ajustar prima y deducible con base en esto.' },
           { type: 'recommendation', icon: '💡', title: '3 estructuras de póliza sugeridas', description: 'A) Prima alta + deducible estándar. B) Prima media + deducible alto + telemetría. C) Cobertura limitada el primer año. Trade-offs por opción.' },
           { type: 'alert', icon: '⚠️', title: 'Señal de fraude para revisión', description: 'En SIN-2033, las fechas de los daños en los metadatos de las fotos no coinciden con la fecha declarada del siniestro. El suscriptor decide si investigar antes de pagar.' },
@@ -920,7 +920,7 @@ const SIMULATIONS: Record<string, SimulationConfig> = {
       { label: 'Parque solar', value: '20 MW', change: '-8% eficiencia', positive: false },
       { label: 'Ahorro proyectado', value: '$26K/mes', change: 'con IA de demanda', positive: true },
     ],
-    tableTitle: 'Cargas y activos — estado con IA',
+    tableTitle: 'tableTitle: cargas y activos',
     tableHeaders: ['Carga / Activo', 'Tipo', 'Consumo / Estado', 'IA activa', 'Estado'],
     tableRows: [
       { cells: ['Proceso martes 14-16h', 'Demanda', '+15% sobre contrato', '⚠ Desplazar carga', 'Penalización'], status: 'critical', highlight: true },
@@ -968,7 +968,7 @@ const SIMULATIONS: Record<string, SimulationConfig> = {
         actionLabel: '🧠 Asistir al jefe de energía',
         processingMessage: 'La IA está preparando el análisis energético y los escenarios de inversión para el equipo...',
         panelTitle: 'Copiloto de Energía',
-        panelIntro: 'La IA amplifica el criterio del jefe de energía con análisis de consumo, simulaciones y detección de ineficiencias — la decisión es humana.',
+        panelIntro: 'La IA amplifica el criterio del jefe de energía con análisis de consumo, simulaciones y detección de ineficiencias, la decisión es humana.',
         insights: [
           { type: 'insight', icon: '🔍', title: 'Mapa de consumo del edificio', description: 'La climatización representa el 40% del consumo y opera a full incluso en zonas desocupadas y fuera de horario. La mayor oportunidad de ahorro inmediato.' },
           { type: 'prediction', icon: '📊', title: 'Simulación: 3 medidas de eficiencia', description: 'A) Sensores de ocupación ($40K, -$60K/año). B) Gestión de demanda (software, -$144K/año en penalizaciones). C) Ambas. Payback por opción.' },
@@ -997,7 +997,7 @@ const SIMULATIONS: Record<string, SimulationConfig> = {
       { label: 'Finalización de cursos', value: '34%', change: 'abandono en semana 3', positive: false },
       { label: 'Retención proyectada', value: '+22 pp', change: 'con intervención IA', positive: true },
     ],
-    tableTitle: 'Cursos y cohortes — riesgo IA',
+    tableTitle: 'tableTitle: cursos y cohortes',
     tableHeaders: ['Curso / Cohorte', 'Estudiantes', 'Reprobación / Riesgo', 'IA activa', 'Estado'],
     tableRows: [
       { cells: ['Matemáticas II', '420', '38% reprobación', '⚠ Tutoría', 'Crítico'], status: 'critical', highlight: true },
@@ -1045,7 +1045,7 @@ const SIMULATIONS: Record<string, SimulationConfig> = {
         actionLabel: '🧠 Asistir al equipo docente',
         processingMessage: 'La IA está preparando el análisis pedagógico y las intervenciones sugeridas para los docentes...',
         panelTitle: 'Copiloto Docente',
-        panelIntro: 'La IA amplifica el criterio del docente con análisis de rendimiento, patrones de aprendizaje e intervenciones sugeridas — la pedagogía la decide el docente.',
+        panelIntro: 'La IA amplifica el criterio del docente con análisis de rendimiento, patrones de aprendizaje e intervenciones sugeridas, la pedagogía la decide el docente.',
         insights: [
           { type: 'insight', icon: '🔍', title: 'Patrón de reprobación detectado', description: 'La reprobación en Matemáticas II sube tras el primer parcial y se concentra en temas sin práctica aplicada. Correlaciona con un ausentismo del 18%.' },
           { type: 'prediction', icon: '📊', title: 'Simulación: 3 intervenciones pedagógicas', description: 'A) Práctica interactiva en módulos densos (+18 pp finalización). B) Tutoría entre pares. C) Evaluación formativa continua. Impacto estimado por opción.' },
@@ -1074,7 +1074,7 @@ const SIMULATIONS: Record<string, SimulationConfig> = {
       { label: 'CTR de titulares', value: '4.1%', change: 'rebote 78%', positive: false },
       { label: 'Conversión proyectada', value: '+2.4 pp', change: 'con IA de contenido', positive: true },
     ],
-    tableTitle: 'Contenidos — engagement IA',
+    tableTitle: 'tableTitle: contenidos',
     tableHeaders: ['Contenido', 'Canal', 'Engagement', 'IA activa', 'Estado'],
     tableRows: [
       { cells: ['Artículo "Reforma..."', 'Web', '1.2% lectura · 78% rebote', '⚠ Reescribir titular', 'Bajo'], status: 'critical', highlight: true },
@@ -1122,7 +1122,7 @@ const SIMULATIONS: Record<string, SimulationConfig> = {
         actionLabel: '🧠 Asistir al equipo editorial',
         processingMessage: 'La IA está preparando el análisis de audiencia y las recomendaciones de contenido para la redacción...',
         panelTitle: 'Copiloto Editorial',
-        panelIntro: 'La IA amplifica el criterio del equipo editorial con análisis de audiencia, tendencias y rendimiento — las decisiones editoriales son humanas.',
+        panelIntro: 'La IA amplifica el criterio del equipo editorial con análisis de audiencia, tendencias y rendimiento, las decisiones editoriales son humanas.',
         insights: [
           { type: 'insight', icon: '🔍', title: 'Diagnóstico de bajo engagement', description: 'El artículo destacado tiene 78% de rebote por un titular largo y primeros párrafos densos. Otros similares con titular directo retienen 8%.' },
           { type: 'prediction', icon: '📊', title: 'Simulación: 3 estrategias de suscripción', description: 'A) Paywall medido (más volumen). B) Premium diferenciado (más ARPU). C) Freemium con newsletter. Conversión y riesgo por opción.' },
@@ -1153,7 +1153,7 @@ const FALLBACK_SIMULATION: SimulationConfig = {
     { label: 'Errores detectados', value: '12', change: '-81%', positive: true },
     { label: 'Productividad equipo', value: '+47%', change: 'vs línea base', positive: true },
   ],
-  tableTitle: 'Actividades del equipo — Estado con IA',
+  tableTitle: 'tableTitle: actividades del equipo',
   tableHeaders: ['Actividad', 'Responsable', 'Volumen', 'IA activa', 'Estado'],
   tableRows: [
     { cells: ['Revisión de documentos', 'Equipo A', '145/día', '✓ Activa', 'Optimizado'], status: 'ok' },
@@ -1170,7 +1170,7 @@ const FALLBACK_SIMULATION: SimulationConfig = {
       panelIntro: 'La IA automatiza las tareas repetitivas del equipo, liberando tiempo para trabajo de mayor valor.',
       insights: [
         { type: 'automation', icon: '🤖', title: '847 tareas procesadas automáticamente', description: 'La IA resolvió el 68% del volumen de trabajo del día sin intervención humana.' },
-        { type: 'prediction', icon: '📊', title: 'Predicción de carga para mañana', description: 'El modelo estima 1,340 tareas para mañana — 12% más que el promedio. Recursos ajustados.' },
+        { type: 'prediction', icon: '📊', title: 'Predicción de carga para mañana', description: 'El modelo estima 1,340 tareas para mañana, 12% más que el promedio. Recursos ajustados.' },
         { type: 'recommendation', icon: '💡', title: '2 procesos listos para automatización total', description: 'Clasificación de solicitudes y generación de reportes tienen suficientes datos para automatizarse al 95%.' },
         { type: 'alert', icon: '⚠️', title: 'Anomalía detectada en proceso', description: 'Tasa de error inusualmente alta en análisis de datos (4.8% vs 0.9% promedio). Se recomienda revisar la fuente de datos de entrada.' },
       ],

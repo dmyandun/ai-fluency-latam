@@ -31,7 +31,7 @@ const FAQS = [
   {
     question: '¿Sirve si mi organización ya usa IA?',
     answer:
-      'Sí. Si ya tienes iniciativas en marcha, el diagnóstico ayuda a validar si el enfoque elegido corresponde a tu contexto real o si estás resolviendo con agentes algo que era automatización simple — un error caro y frecuente.',
+      'Sí. Si ya tienes iniciativas en marcha, el diagnóstico ayuda a validar si el enfoque elegido corresponde a tu contexto real o si estás resolviendo con agentes algo que era automatización simple, un error caro y frecuente.',
   },
   {
     question: '¿Está pensado para Latinoamérica?',

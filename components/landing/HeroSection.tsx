@@ -48,8 +48,9 @@ export default function HeroSection() {
             style={{ animationDelay: '120ms' }}
           >
             Responde 10 preguntas sobre tu operación y obtén el modelo de interacción y el tipo de
-            implementación que mejor encajan con tu contexto — más un roadmap concreto para los
-            próximos 12 meses.
+            implementación que mejor encajan con tu contexto, más un roadmap concreto para los
+            próximos 12 meses. ¿Prefieres verlo antes de responder? Hay una simulación de IA lista
+            para tu industria.
           </p>
 
           <div

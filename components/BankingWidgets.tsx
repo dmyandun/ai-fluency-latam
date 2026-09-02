@@ -38,31 +38,31 @@ function useStartOnVisible<T extends Element>(): [React.RefObject<T | null>, boo
 export const BANKING_CASES_BY_MODEL: Record<InteractionModel, { cases: string[] }> = {
   automation: {
     cases: [
-      'HSBC — Dynamic Risk Assessment AML (con Google Cloud)',
-      'JPMorgan Chase — fraud & AML detection',
-      'Commonwealth Bank of Australia — scam prevention',
-      'FinCEN — graph analytics patterns',
+      'HSBC. Dynamic Risk Assessment AML (con Google Cloud)',
+      'JPMorgan Chase, fraud & AML detection',
+      'Commonwealth Bank of Australia, scam prevention',
+      'FinCEN, graph analytics patterns',
     ],
   },
   agency: {
     cases: [
-      'JPMorgan Chase — COiN (revisión de contratos)',
-      'Nubank — nuFormer (foundation model crediticio)',
-      'Goldman Sachs — GS AI Assistant',
-      'McKinsey — agentic underwriting patterns 2025',
-      'Nubank — cobranza autónoma vía WhatsApp',
-      'Mercado Pago — recuperación de cartera',
-      'BBVA — chatbot de cobranza',
-      'Klarna — agentic recovery 2025',
+      'JPMorgan Chase. COiN (revisión de contratos)',
+      'Nubank, nuFormer (foundation model crediticio)',
+      'Goldman Sachs. GS AI Assistant',
+      'McKinsey, agentic underwriting patterns 2025',
+      'Nubank, cobranza autónoma vía WhatsApp',
+      'Mercado Pago, recuperación de cartera',
+      'BBVA, chatbot de cobranza',
+      'Klarna, agentic recovery 2025',
     ],
   },
   augmentation: {
     cases: [
-      'Bradesco — BIA con GenAI',
-      'Wells Fargo — Fargo AI Assistant',
-      'DBS Bank — nudges personalizados',
-      'NatWest — Cora+',
-      'Capital One — Eno',
+      'Bradesco. BIA con GenAI',
+      'Wells Fargo. Fargo AI Assistant',
+      'DBS Bank, nudges personalizados',
+      'NatWest. Cora+',
+      'Capital One. Eno',
     ],
   },
 }
@@ -160,9 +160,9 @@ const EDGES: GraphEdge[] = [
 
 const FINDINGS = [
   { tick: 1, text: 'Cuenta-001: 4 transferencias de $9.8K en 12 minutos',     tone: 'amber' },
-  { tick: 1, text: 'Patrón structuring — montos justo bajo el umbral $10K',  tone: 'red'   },
+  { tick: 1, text: 'Patrón structuring, montos justo bajo el umbral $10K',  tone: 'red'   },
   { tick: 2, text: 'Expansión 2do grado: 4 cuentas receptoras descubiertas', tone: 'amber' },
-  { tick: 2, text: 'Cluster identificado — 9 cuentas vinculadas',             tone: 'red'   },
+  { tick: 2, text: 'Cluster identificado, 9 cuentas vinculadas',             tone: 'red'   },
   { tick: 3, text: 'Reporte UAF generado · caso #AML-8829 abierto',           tone: 'green' },
 ]
 
@@ -215,7 +215,7 @@ function AmlInvestigationGraph() {
             <div className="flex gap-1.5">
               <HoverExplainer
                 title="Cuenta sospechosa central"
-                body="Aquí empieza la investigación. La IA detectó múltiples transferencias de $9.8K en pocos minutos — justo bajo el umbral de reporte de $10K. Es el patrón clásico de structuring (fraccionamiento) para evadir detección."
+                body="Aquí empieza la investigación. La IA detectó múltiples transferencias de $9.8K en pocos minutos, justo bajo el umbral de reporte de $10K. Es el patrón clásico de structuring (fraccionamiento) para evadir detección."
                 position="bottom"
               >
                 <span className="inline-flex items-center gap-1 bg-red-100 text-red-700 px-2 py-0.5 rounded-full text-[10px] font-semibold border border-red-200 cursor-help">
@@ -224,7 +224,7 @@ function AmlInvestigationGraph() {
               </HoverExplainer>
               <HoverExplainer
                 title="Primer grado de conexión"
-                body="Cuentas que reciben directamente de la sospechosa. La IA expande automáticamente la red sin intervención humana — antes esto tomaba semanas de investigación manual cruzando datos de varios sistemas."
+                body="Cuentas que reciben directamente de la sospechosa. La IA expande automáticamente la red sin intervención humana, antes esto tomaba semanas de investigación manual cruzando datos de varios sistemas."
                 position="bottom"
               >
                 <span className="inline-flex items-center gap-1 bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full text-[10px] font-semibold border border-orange-200 cursor-help">
@@ -243,7 +243,7 @@ function AmlInvestigationGraph() {
             </div>
           </div>
           <svg viewBox="0 0 100 100" className="w-full h-[320px]" preserveAspectRatio="xMidYMid meet">
-            {/* Edges — se "dibujan" desde el origen al destino cuando aparecen */}
+            {/* Edges, se "dibujan" desde el origen al destino cuando aparecen */}
             {EDGES.map((e, i) => {
               if (e.revealAt > tick) return null
               const from = nodeById(e.from)
@@ -378,13 +378,13 @@ function AgencyShowcase() {
     <div className="space-y-6">
       <section>
         <h4 className="text-xs font-bold uppercase tracking-wide text-violet-700 mb-2 flex items-center gap-2">
-          <span className="text-base">🕸️</span> Escenario 1 — Underwriting multi-agente
+          <span className="text-base">🕸️</span> Escenario 1: Underwriting multi-agente
         </h4>
         <MultiAgentUnderwriting />
       </section>
       <section>
         <h4 className="text-xs font-bold uppercase tracking-wide text-emerald-700 mb-2 flex items-center gap-2">
-          <span className="text-base">💬</span> Escenario 2 — Cobranza autónoma
+          <span className="text-base">💬</span> Escenario 2: Cobranza autónoma
         </h4>
         <AutonomousCollectionChat />
       </section>
@@ -404,13 +404,13 @@ interface SubAgent {
 
 const SUB_AGENTS: Array<SubAgent & { explain: string }> = [
   { id: 'data',       icon: '📊', name: 'Datos',      job: 'Buró + estados financieros',      color: 'blue',    explain: 'Este agente reemplaza al analista junior que pasaba 2 horas recopilando datos de buró, estados financieros y consultas externas. La IA cruza 11 fuentes en 8 segundos y entrega un dataset limpio al siguiente agente.' },
-  { id: 'risk',       icon: '⚖️', name: 'Riesgo',     job: 'Ratios + simulación de estrés',  color: 'amber',   explain: 'Calcula ratios financieros (DSCR, deuda/EBITDA) y simula escenarios de estrés (subidas de tasa, recesión). Antes lo hacía un analista senior con Excel — ahora se hace en segundos con backtesting sobre miles de empresas similares.' },
-  { id: 'compliance', icon: '🛡️', name: 'Compliance', job: 'AML + SBS + sanciones',           color: 'emerald', explain: 'Verifica listas PEP, OFAC y normativas locales (SBS, CNBV, Superfinanciera). La IA detecta riesgos ocultos como deudas vencidas de directores en otras instituciones — algo que un humano tardaría días en cruzar.' },
+  { id: 'risk',       icon: '⚖️', name: 'Riesgo',     job: 'Ratios + simulación de estrés',  color: 'amber',   explain: 'Calcula ratios financieros (DSCR, deuda/EBITDA) y simula escenarios de estrés (subidas de tasa, recesión). Antes lo hacía un analista senior con Excel, ahora se hace en segundos con backtesting sobre miles de empresas similares.' },
+  { id: 'compliance', icon: '🛡️', name: 'Compliance', job: 'AML + SBS + sanciones',           color: 'emerald', explain: 'Verifica listas PEP, OFAC y normativas locales (SBS, CNBV, Superfinanciera). La IA detecta riesgos ocultos como deudas vencidas de directores en otras instituciones, algo que un humano tardaría días en cruzar.' },
   { id: 'decision',   icon: '🎯', name: 'Decisión',   job: 'Tasa + plazo + garantía',         color: 'violet',  explain: 'Agrega las señales de los 3 agentes anteriores y propone condiciones óptimas (tasa, plazo, garantía). Optimiza el riesgo-retorno contra la política del banco. La decisión final puede aprobarse automáticamente o escalarse al comité.' },
 ]
 
 const AGENT_LOG = [
-  { from: 'Datos',      text: 'Buró consultado — score 720, sin atrasos' },
+  { from: 'Datos',      text: 'Buró consultado, score 720, sin atrasos' },
   { from: 'Datos',      text: 'EBITDA +18% YoY · 11 fuentes consolidadas' },
   { from: 'Datos',      text: '→ handoff a Riesgo' },
   { from: 'Riesgo',     text: 'DSCR 1.42 · deuda/EBITDA 2.1x dentro de política' },
@@ -473,7 +473,7 @@ function MultiAgentUnderwriting() {
             return (
               <div key={agent.id} className="flex-1 flex items-center">
                 <HoverExplainer
-                  title={`Agente ${agent.name} — ¿qué resuelve?`}
+                  title={`Agente ${agent.name}, ¿qué resuelve?`}
                   body={agent.explain}
                   position="bottom"
                   className="flex-1"
@@ -491,7 +491,7 @@ function MultiAgentUnderwriting() {
                     <div className="flex items-center justify-center gap-1 mt-1">
                       {status === 'done'    && <span className="text-[9px] font-bold text-emerald-600">✓</span>}
                       {status === 'working' && <span className={`w-1.5 h-1.5 rounded-full ${c.dot} animate-pulse`} />}
-                      {status === 'idle'    && <span className="text-[9px] text-slate-300">—</span>}
+                      {status === 'idle'    && <span className="text-[9px] text-slate-300">·</span>}
                     </div>
                   </div>
                 </HoverExplainer>
@@ -514,7 +514,7 @@ function MultiAgentUnderwriting() {
         </div>
       </div>
 
-      {/* Bitácora — altura amplia para mostrar las 11 líneas sin scroll */}
+      {/* Bitácora, altura amplia para mostrar las 11 líneas sin scroll */}
       <div className="bg-slate-900 rounded-xl p-4 font-mono text-[11px] min-h-[320px]">
         <p className="text-[9px] uppercase tracking-wide text-slate-400 mb-3">Bitácora de orquestación</p>
         <div className="space-y-1.5">
@@ -692,7 +692,7 @@ const AI_CARDS = [
     body: 'Match perfil cliente: 94%. Cliente sin productos de inversión en 8 años de relación.',
     cta: 'Proponer en llamada',
     ctaColor: 'bg-blue-600',
-    explain: 'La IA analizó 200+ atributos del cliente y los cruzó con cohortes similares. El modelo aprende qué producto convierte más para qué perfil — antes el asesor adivinaba o usaba reglas estáticas. Ahora el copiloto sugiere el producto correcto y el asesor decide cuándo y cómo proponerlo.',
+    explain: 'La IA analizó 200+ atributos del cliente y los cruzó con cohortes similares. El modelo aprende qué producto convierte más para qué perfil, antes el asesor adivinaba o usaba reglas estáticas. Ahora el copiloto sugiere el producto correcto y el asesor decide cuándo y cómo proponerlo.',
   },
   {
     badge: '⚠️ RIESGO DE CHURN 73%',
@@ -701,7 +701,7 @@ const AI_CARDS = [
     body: '3 transferencias en últimos 30 días por $8,400 a Banco rival. Sugerencia: llamada proactiva HOY.',
     cta: 'Llamada proactiva HOY',
     ctaColor: 'bg-red-600',
-    explain: 'El modelo de churn analiza patrones en tiempo real: transferencias salientes, baja en frecuencia de uso, consultas externas. Detecta clientes a punto de irse 60 días antes que el ojo humano. El banco actúa proactivamente con ofertas o llamadas — recuperar al cliente cuesta 5x menos que adquirir uno nuevo.',
+    explain: 'El modelo de churn analiza patrones en tiempo real: transferencias salientes, baja en frecuencia de uso, consultas externas. Detecta clientes a punto de irse 60 días antes que el ojo humano. El banco actúa proactivamente con ofertas o llamadas, recuperar al cliente cuesta 5x menos que adquirir uno nuevo.',
   },
   {
     badge: '💬 RESUMEN PRE-LLAMADA',

@@ -61,7 +61,7 @@ export const INTERACTION_MODELS: InteractionModelInfo[] = [
     icon: 'agency',
     signal: 'Procesos multi-paso',
     governance:
-      'El agente planifica y actúa sobre tus sistemas: el control pasa del dato al permiso. Qué puede tocar, con qué credenciales y hasta qué límite. Es el modelo que más gobernanza exige, porque un error no informa mal — ejecuta.',
+      'El agente planifica y actúa sobre tus sistemas: el control pasa del dato al permiso. Qué puede tocar, con qué credenciales y hasta qué límite. Es el modelo que más gobernanza exige, porque un error no informa mal: ejecuta.',
     dot: 'bg-violet-500',
     ring: 'border-violet-400/70 ring-violet-400/30',
     accent: 'text-violet-300',

@@ -11,11 +11,11 @@ import { MODEL_LABELS } from '@/lib/recommendations'
 // 4D Framework de AI Fluency — Anthropic (Feller & Dakan)
 // Delegation → Description → Discernment → Diligence
 export const ROADMAP_PHASES: RoadmapPhaseConfig[] = [
-  { id: '30d', label: 'D1 · Delegation',   description: 'Decidir qué delegar a la IA — 30 días',          durationDays: 30  },
-  { id: '60d', label: 'D2 · Description',  description: 'Comunicarse efectivamente con la IA — 60 días',  durationDays: 60  },
-  { id: '90d', label: 'D3 · Discernment',  description: 'Evaluar y refinar los outputs — 90 días',        durationDays: 90  },
-  { id: '6m',  label: 'D4 · Diligence',    description: 'Uso responsable y ético — 6 meses',              durationDays: 180 },
-  { id: '12m', label: 'AI Fluency',        description: 'Fluencia consolidada y escalamiento — 12 meses', durationDays: 365 },
+  { id: '30d', label: 'D1 · Delegation',   description: 'Decidir qué delegar a la IA · 30 días',          durationDays: 30  },
+  { id: '60d', label: 'D2 · Description',  description: 'Comunicarse efectivamente con la IA · 60 días',  durationDays: 60  },
+  { id: '90d', label: 'D3 · Discernment',  description: 'Evaluar y refinar los outputs · 90 días',        durationDays: 90  },
+  { id: '6m',  label: 'D4 · Diligence',    description: 'Uso responsable y ético · 6 meses',              durationDays: 180 },
+  { id: '12m', label: 'AI Fluency',        description: 'Fluencia consolidada y escalamiento · 12 meses', durationDays: 365 },
 ]
 
 function makeItem(
@@ -90,7 +90,7 @@ const DISCERNMENT_ITEMS: RoadmapItem[] = [
     'high', 5, 2),
   makeItem('sys-d3-3', '90d',
     'Discernment · Lanzar el piloto con revisión humana de todos los outputs',
-    'En las primeras semanas, un humano revisa cada output antes de usarlo. Esto no es ineficiencia — es aprendizaje activo. Después de 30 días sabrás exactamente cuánto confiar en el sistema.',
+    'En las primeras semanas, un humano revisa cada output antes de usarlo. Esto no es ineficiencia, sino aprendizaje activo. Después de 30 días sabrás exactamente cuánto confiar en el sistema.',
     'high', 5, 4),
   makeItem('sys-d3-4', '90d',
     'Discernment · Calibrar niveles de supervisión basados en evidencia',
@@ -115,7 +115,7 @@ const DILIGENCE_ITEMS: RoadmapItem[] = [
     'high', 5, 2),
   makeItem('sys-d4-4', '6m',
     'Diligence · Auditar sesgos y problemas éticos del sistema en producción',
-    'Revisa trimestralmente si el sistema produce outputs sesgados, inequitativos o perjudiciales para ciertos grupos. La diligencia no es un evento único — es una práctica continua.',
+    'Revisa trimestralmente si el sistema produce outputs sesgados, inequitativos o perjudiciales para ciertos grupos. La diligencia no es un evento único, sino una práctica continua.',
     'medium', 4, 3),
   makeItem('sys-d4-5', '12m',
     'AI Fluency · Evaluar madurez en los 4D y planificar el siguiente nivel',
@@ -123,7 +123,7 @@ const DILIGENCE_ITEMS: RoadmapItem[] = [
     'medium', 5, 2),
   makeItem('sys-d4-6', '12m',
     'AI Fluency · Construir cultura organizacional de fluencia en IA',
-    'La fluencia no es dominar una herramienta — es un cambio cultural. Celebra casos de éxito, comparte aprendizajes entre equipos, integra el uso de IA en los procesos de onboarding y desarrollo profesional.',
+    'La fluencia no es dominar una herramienta, sino un cambio cultural. Celebra casos de éxito, comparte aprendizajes entre equipos, integra el uso de IA en los procesos de onboarding y desarrollo profesional.',
     'medium', 4, 3),
 ]
 
@@ -154,7 +154,7 @@ const INTERACTION_ITEMS: Record<string, RoadmapItem[]> = {
       'high', 5, 2),
     makeItem('sys-agency-d2', '60d',
       'Description (Agencia) · Diseñar el system prompt y las herramientas del agente',
-      'El agente necesita un system prompt que describa su rol, sus límites, sus herramientas disponibles y sus criterios de decisión. Esta descripción es su "contrato de trabajo" — debe ser precisa y completa.',
+      'El agente necesita un system prompt que describa su rol, sus límites, sus herramientas disponibles y sus criterios de decisión. Esta descripción es su "contrato de trabajo": debe ser precisa y completa.',
       'high', 5, 4),
     makeItem('sys-agency-d3', '90d',
       'Discernment (Agencia) · Supervisar y corregir comportamiento del agente en producción',
@@ -168,7 +168,7 @@ const INTERACTION_ITEMS: Record<string, RoadmapItem[]> = {
   augmentation: [
     makeItem('sys-augment-d1', '30d',
       'Delegation (Aumentación) · Identificar dónde la IA amplifica el criterio experto',
-      'Mapea los momentos en el trabajo del experto donde la IA puede aportar más contexto, opciones o síntesis para mejorar sus decisiones. El experto sigue decidiendo — la IA expande su capacidad.',
+      'Mapea los momentos en el trabajo del experto donde la IA puede aportar más contexto, opciones o síntesis para mejorar sus decisiones. El experto sigue decidiendo; la IA expande su capacidad.',
       'high', 5, 1),
     makeItem('sys-augment-d2', '60d',
       'Description (Aumentación) · Diseñar los prompts del copiloto del experto',
@@ -180,7 +180,7 @@ const INTERACTION_ITEMS: Record<string, RoadmapItem[]> = {
       'high', 5, 2),
     makeItem('sys-augment-d4', '6m',
       'Diligence (Aumentación) · Transparencia sobre qué es del experto y qué de la IA',
-      'Define cuándo declarar que un análisis, propuesta o decisión fue apoyada por IA. La accountability del experto no disminuye por usar IA — si acaso, aumenta la exigencia de verificación.',
+      'Define cuándo declarar que un análisis, propuesta o decisión fue apoyada por IA. La accountability del experto no disminuye por usar IA; si acaso, aumenta la exigencia de verificación.',
       'high', 4, 2),
   ],
 }
@@ -193,7 +193,7 @@ const IMPLEMENTATION_ITEMS: Record<string, RoadmapItem[]> = {
       'high', 4, 2),
     makeItem('sys-local-d2', '60d',
       'Description (IA Local) · Seleccionar modelo y configurar para el caso de uso',
-      'Evalúa Llama 3, Mistral, Phi-3 o Gemma. El prompt engineering para modelos locales difiere de APIs cloud — el contexto, el formato de instrucción y los parámetros requieren calibración específica.',
+      'Evalúa Llama 3, Mistral, Phi-3 o Gemma. El prompt engineering para modelos locales difiere de APIs cloud: el contexto, el formato de instrucción y los parámetros requieren calibración específica.',
       'high', 5, 4),
     makeItem('sys-local-d3', '90d',
       'Discernment (IA Local) · Comparar calidad vs modelo cloud como referencia',
@@ -207,7 +207,7 @@ const IMPLEMENTATION_ITEMS: Record<string, RoadmapItem[]> = {
       'high', 4, 1),
     makeItem('sys-api-d2', '60d',
       'Description (API) · Construir y probar el primer prompt de producción',
-      'Itera hasta tener un prompt que produce outputs de calidad consistente. Documenta cada versión y sus resultados — el historial de iteraciones es el aprendizaje más valioso del equipo.',
+      'Itera hasta tener un prompt que produce outputs de calidad consistente. Documenta cada versión y sus resultados: el historial de iteraciones es el aprendizaje más valioso del equipo.',
       'high', 5, 3),
     makeItem('sys-api-d3', '90d',
       'Discernment (API) · Establecer proceso de revisión de outputs en producción',
@@ -217,7 +217,7 @@ const IMPLEMENTATION_ITEMS: Record<string, RoadmapItem[]> = {
   traditionalML: [
     makeItem('sys-ml-d1', '30d',
       'Delegation (ML) · Definir exactamente qué decisión tomará el modelo',
-      'En ML, la "delegación" es definir qué predice el modelo y cómo se usa esa predicción. El humano puede usar la predicción como señal o dejar que el sistema actúe solo — define cuál con criterio explícito.',
+      'En ML, la "delegación" es definir qué predice el modelo y cómo se usa esa predicción. El humano puede usar la predicción como señal o dejar que el sistema actúe solo; define cuál con criterio explícito.',
       'high', 5, 2),
     makeItem('sys-ml-d2', '60d',
       'Description (ML) · Preparar datos y entrenar el modelo baseline',
@@ -277,7 +277,7 @@ export function formatRoadmapAsText(roadmap: Roadmap): string {
 
   const lines: string[] = [
     '╔══════════════════════════════════════════════════════════════╗',
-    '║  4D FRAMEWORK FOR AI FLUENCY — ROADMAP DE ADOPCIÓN          ║',
+    '║  4D FRAMEWORK FOR AI FLUENCY · ROADMAP DE ADOPCIÓN          ║',
     '║  Delegation · Description · Discernment · Diligence         ║',
     '╚══════════════════════════════════════════════════════════════╝',
     '',
@@ -286,17 +286,17 @@ export function formatRoadmapAsText(roadmap: Roadmap): string {
     `Generado: ${new Date(roadmap.generatedAt).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}`,
     '',
     '─'.repeat(64),
-    'Basado en el AI Fluency Framework — Anthropic (Feller & Dakan)',
+    'Basado en el AI Fluency Framework de Anthropic (Feller & Dakan)',
     '─'.repeat(64),
     '',
   ]
 
   const phases = [
-    { id: '30d', title: 'D1 · DELEGATION — Decidir qué delegar a la IA (30 días)' },
-    { id: '60d', title: 'D2 · DESCRIPTION — Comunicarse con la IA (60 días)' },
-    { id: '90d', title: 'D3 · DISCERNMENT — Evaluar outputs (90 días)' },
-    { id: '6m',  title: 'D4 · DILIGENCE — Uso responsable (6 meses)' },
-    { id: '12m', title: 'AI FLUENCY — Consolidar y escalar (12 meses)' },
+    { id: '30d', title: 'D1 · DELEGATION: decidir qué delegar a la IA (30 días)' },
+    { id: '60d', title: 'D2 · DESCRIPTION: comunicarse con la IA (60 días)' },
+    { id: '90d', title: 'D3 · DISCERNMENT: evaluar outputs (90 días)' },
+    { id: '6m',  title: 'D4 · DILIGENCE: uso responsable (6 meses)' },
+    { id: '12m', title: 'AI FLUENCY: consolidar y escalar (12 meses)' },
   ]
 
   for (const phase of phases) {
@@ -340,7 +340,7 @@ export function buildMailtoLink(email: string, roadmap: Roadmap): string {
   const implLabel  = MODEL_LABELS[result.implementationType] ?? result.implementationType
 
   const subject = encodeURIComponent(
-    `4D AI Fluency Roadmap — ${result.industry} · ${result.country}`
+    `4D AI Fluency Roadmap · ${result.industry} · ${result.country}`
   )
 
   const phases = [
@@ -351,7 +351,7 @@ export function buildMailtoLink(email: string, roadmap: Roadmap): string {
     { id: '12m', title: 'AI Fluency (12 meses)'       },
   ]
 
-  let body = `4D FRAMEWORK FOR AI FLUENCY — ROADMAP\n`
+  let body = `4D FRAMEWORK FOR AI FLUENCY · ROADMAP\n`
   body += `Delegation · Description · Discernment · Diligence\n\n`
   body += `Modelo: ${modelLabel} + ${implLabel}\n`
   body += `${result.industry} · ${result.country}\n\n`

@@ -608,7 +608,7 @@ function ManufacturingViz(_: IndustryVisualizationProps) {
   const stStatus = { ok: 'green' as const, bottleneck: 'amber' as const, down: 'red' as const }
   const AGENT: { agent: string; lines: string[] }[] = [
     { agent: 'LineBot-1', lines: ['Throughput 88%', 'Ritmo nominal'] },
-    { agent: 'LineBot-2', lines: ['Cuello de botella · 96%', 'WIP acumulándose — balanceo sugerido'] },
+    { agent: 'LineBot-2', lines: ['Cuello de botella · 96%', 'WIP acumulándose, balanceo sugerido'] },
     { agent: 'LineBot-3', lines: ['Throughput 72%', 'Operación normal'] },
     { agent: 'MantBot', lines: ['Línea parada desde 14:20', 'Equipo M-3 despachado · 3 repuestos solicitados', 'Arranque estimado ~16:30 (2h)'] },
     { agent: 'LineBot-5', lines: ['Throughput 64%', 'Operación normal'] },
@@ -784,7 +784,7 @@ const HEALTH_FREE_BEDS = [{ x: 252, y: 80 }, { x: 184, y: 116 }, { x: 184, y: 15
 
 // Recomendaciones de reasignación del agente de camas (prioridad 1-3, 3 = más alta).
 const HEALTH_RECS: { patientIdx: number; priority: 1 | 2 | 3; action: string }[] = [
-  { patientIdx: 0, priority: 3, action: 'Admitir P-07 a cama libre #6 — URGENTE por saturación de admisión' },
+  { patientIdx: 0, priority: 3, action: 'Admitir P-07 a cama libre #6: URGENTE por saturación de admisión' },
   { patientIdx: 1, priority: 2, action: 'Mover P-05 a cama #2 dentro de 1 h tras estudios' },
   { patientIdx: 4, priority: 1, action: 'Mantener P-01 en UCI · reevaluar en 2 h' },
 ]
@@ -797,7 +797,7 @@ function HealthViz({ colorText }: IndustryVisualizationProps) {
   const steps: Step[] = sel
     ? HEALTH_STAGES.map((label, i) => {
         const t = sel.times[i]
-        const timeTag = i < sel.stage ? ` · ${t || '—'}` : i === sel.stage ? ` · ${t || 'en curso'}` : ''
+        const timeTag = i < sel.stage ? ` · ${t || 'sin dato'}` : i === sel.stage ? ` · ${t || 'en curso'}` : ''
         return {
           icon: HEALTH_STAGE_ICON[i],
           label,
@@ -1618,7 +1618,7 @@ const CONSTRUCTION_PROJECTS: Project[] = [
       { name: 'Encofrado', personas: 18, status: 'amber' },
       { name: 'Eléctricos', personas: 12, status: 'green' },
     ],
-    obs: ['Presupuesto 62% vs avance físico 45% — sobrecosto proyectado', '3 subcontratistas con retraso · riesgo de overrun', 'Acción correctiva inmediata recomendada'],
+    obs: ['Presupuesto 62% vs avance físico 45%: sobrecosto proyectado', '3 subcontratistas con retraso · riesgo de overrun', 'Acción correctiva inmediata recomendada'],
     status: 'red',
     kpis: [{ label: 'Presupuesto', value: '62%', tone: 'bad' }, { label: 'Accidentes', value: '3.2', tone: 'warn' }, { label: 'Desperdicio', value: '14%', tone: 'bad' }],
   },

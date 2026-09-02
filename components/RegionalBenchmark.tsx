@@ -143,7 +143,7 @@ export default function RegionalBenchmark({ result }: { result: AssessmentResult
               >
                 {source.publisher}, {source.label} ({source.year})
               </a>{' '}
-              — {source.method}
+              · {source.method}
             </li>
           ))}
         </ul>

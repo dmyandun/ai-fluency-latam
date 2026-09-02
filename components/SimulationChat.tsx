@@ -186,7 +186,7 @@ export default function SimulationChat({
         <h3 className="text-sm font-semibold text-slate-800">
           Simulador de diagnóstico operativo
         </h3>
-        <span className="text-xs text-slate-400 font-normal">— respuesta generada por IA en tiempo real</span>
+        <span className="text-xs text-slate-400 font-normal">respuesta generada por IA en tiempo real</span>
       </div>
       <p className="mb-3 text-xs leading-relaxed text-slate-500">
         Prueba cómo la IA puede ayudarte con problemas de un caso ficticio o real escrito por ti.
