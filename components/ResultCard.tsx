@@ -15,12 +15,19 @@ const IMPL_COLORS: Record<ImplementationType, { bar: string; badge: string; bord
   traditionalML:{ bar: 'bg-blue-500',    badge: 'bg-blue-100 text-blue-700',       border: 'border-blue-200',    bg: 'bg-blue-50'    },
 }
 
-type ResultCardProps =
+/**
+ * 'panel' lo deja sin carcasa para convivir con otros bloques dentro de una
+ * misma tarjeta; el badge, los colores y las barras no cambian.
+ */
+type ResultCardVariant = 'card' | 'panel'
+
+type ResultCardProps = (
   | { type: 'interactionModel';   winner: InteractionModel;   scores: Record<InteractionModel, number> }
   | { type: 'implementationType'; winner: ImplementationType; scores: Record<ImplementationType, number> }
+) & { variant?: ResultCardVariant }
 
 export default function ResultCard(props: ResultCardProps) {
-  const { type, winner, scores } = props
+  const { type, winner, scores, variant = 'card' } = props
   const isInteraction = type === 'interactionModel'
   const label = isInteraction ? 'Modelo de interacción' : 'Tipo de implementación'
   const winnerDesc = MODEL_DESCRIPTIONS[winner] ?? ''
@@ -32,8 +39,13 @@ export default function ResultCard(props: ResultCardProps) {
   const entries = Object.entries(scores) as [string, number][]
   const sorted = [...entries].sort(([, a], [, b]) => b - a)
 
+  const shell =
+    variant === 'panel'
+      ? 'px-6 py-5'
+      : `bg-white border rounded-2xl p-6 shadow-sm animate-fade-in ${colors.border}`
+
   return (
-    <div className={`bg-white border rounded-2xl p-6 shadow-sm animate-fade-in ${colors.border}`}>
+    <div className={shell}>
       <p className="text-xs text-slate-400 font-medium uppercase tracking-wider mb-3">{label}</p>
 
       <span className={`inline-block text-sm font-semibold px-3 py-1.5 rounded-full mb-4 ${colors.badge}`}>

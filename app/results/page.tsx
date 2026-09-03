@@ -157,15 +157,17 @@ export default function ResultsPage() {
 
               <ResultSummary result={result} />
 
-              {/* Los dos ejes y su porqué se leen de un vistazo, en la misma fila. */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <ResultCard type="interactionModel"   winner={result.interactionModel}   scores={result.interactionScores} />
-                <ResultCard type="implementationType" winner={result.implementationType} scores={result.implementationScores} />
-                <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm animate-fade-in md:col-span-2 lg:col-span-1">
-                  <p className="text-xs text-slate-400 font-medium uppercase tracking-wider mb-3">
-                    Por qué esta recomendación
-                  </p>
-                  <p className="text-slate-600 text-sm leading-relaxed">{recommendation.rationale}</p>
+              {/* Los dos ejes y su porqué, en columnas de una sola tarjeta */}
+              <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm animate-fade-in">
+                <div className="grid grid-cols-1 lg:grid-cols-3 divide-y lg:divide-y-0 lg:divide-x divide-slate-100">
+                  <ResultCard variant="panel" type="interactionModel"   winner={result.interactionModel}   scores={result.interactionScores} />
+                  <ResultCard variant="panel" type="implementationType" winner={result.implementationType} scores={result.implementationScores} />
+                  <div className="px-6 py-5">
+                    <p className="text-xs text-slate-400 font-medium uppercase tracking-wider mb-3">
+                      Por qué esta recomendación
+                    </p>
+                    <p className="text-slate-600 text-sm leading-relaxed">{recommendation.rationale}</p>
+                  </div>
                 </div>
               </div>
 
