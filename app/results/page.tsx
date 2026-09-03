@@ -71,13 +71,13 @@ export default function ResultsPage() {
             <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
             Diagnóstico completado
           </div>
-          <h1 className="text-3xl sm:text-4xl font-semibold text-slate-900 mb-3">
+          {/* El resumen ya encabeza la matriz de recomendación: aquí sobraba. */}
+          <h1 className="text-3xl sm:text-4xl font-semibold text-slate-900">
             Tu recomendación:{' '}
             <span className="text-blue-600">{MODEL_LABELS[result.interactionModel]}</span>{' '}
             <span className="text-slate-300">+</span>{' '}
             <span className="text-emerald-600">{MODEL_LABELS[result.implementationType]}</span>
           </h1>
-          <p className="text-slate-500 max-w-2xl">{recommendation.summary}</p>
         </div>
       </div>
 
@@ -169,9 +169,9 @@ export default function ResultsPage() {
                 </div>
               </div>
 
-              <RegionalBenchmark result={result} />
-
               <RecommendationMatrix result={result} recommendation={recommendation} />
+
+              <RegionalBenchmark result={result} />
 
               {/* Análisis de actividades diarias */}
               {result.activities && result.activities.length > 0 && (
