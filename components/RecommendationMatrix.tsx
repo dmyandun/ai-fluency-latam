@@ -28,13 +28,6 @@ export default function RecommendationMatrix({ result, recommendation }: Recomme
         <p className="text-slate-500 text-sm mt-1 leading-relaxed">{recommendation.summary}</p>
       </div>
 
-      <div className="px-6 py-5 border-b border-slate-100">
-        <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
-          Por qué esta recomendación
-        </h4>
-        <p className="text-slate-600 text-sm leading-relaxed">{recommendation.rationale}</p>
-      </div>
-
       <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-slate-100">
         <div className="px-6 py-5">
           <h4 className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-3 flex items-center gap-1.5">

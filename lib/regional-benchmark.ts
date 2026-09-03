@@ -58,19 +58,60 @@ export const BENCHMARK_SOURCES: Record<string, BenchmarkSource> = {
   },
 }
 
-/** Cabeza del ranking ILIA 2025. El puntaje es sobre 100. */
-export const ILIA_LEADERS = [
-  { country: 'Chile', score: 70.6 },
-  { country: 'Brasil', score: 67.4 },
-  { country: 'Uruguay', score: 62.3 },
-] as const
+/**
+ * Quién encabeza la región, por subdimensión del ILIA y no en general.
+ *
+ * El ranking global del ILIA (Chile 70.5, Brasil 67.3, Uruguay 62.3) puntúa el
+ * ecosistema completo de cada país, así que sale igual para todo el mundo y no
+ * dice nada sobre la tecnología que el diagnóstico recomienda. Las
+ * subdimensiones sí cambian el orden — en infraestructura manda Brasil, no
+ * Chile — y cada tecnología depende de una distinta. Esa es la comparación que
+ * de verdad informa la decisión.
+ *
+ * Sólo se listan los países cuya cifra publica el informe: el ILIA no tabula
+ * las 19 fichas en la web, y rellenar los huecos sería inventar el ranking.
+ */
+export interface RegionalLeaderboard {
+  /** Subdimensión medida. Se enseña: sin ella el puntaje no significa nada. */
+  dimension: string
+  /** Por qué esa subdimensión condiciona justamente esta tecnología. */
+  why: string
+  leaders: { country: string; score: number }[]
+  /** Promedio de los 19 países, cuando el informe lo publica. */
+  regionalAverage?: number
+  /** Matiz que el puntaje no captura por sí solo. */
+  note?: string
+}
 
-/** Las tres dimensiones que compone el ILIA, para explicar qué mide el puntaje. */
-export const ILIA_DIMENSIONS = [
-  'Factores habilitantes',
-  'Investigación, desarrollo y adopción',
-  'Gobernanza',
-] as const
+export const IMPLEMENTATION_LEADERBOARD: Record<ImplementationType, RegionalLeaderboard> = {
+  localGenAI: {
+    dimension: 'Infraestructura digital',
+    why: 'Correr modelos dentro de tu perímetro depende de cómputo disponible en el país, y ahí el orden regional se invierte respecto del ranking general.',
+    leaders: [
+      { country: 'Brasil', score: 71.4 },
+      { country: 'Uruguay', score: 70.5 },
+      { country: 'Chile', score: 63.8 },
+    ],
+    note: 'Brasil concentra más del 90% de la capacidad de cómputo de la región; Uruguay, Costa Rica y Colombia salen mejor en GPU por habitante.',
+  },
+  apiGenAI: {
+    dimension: 'Talento humano',
+    why: 'Consumir modelos por API se monta rápido, así que la diferencia la marca quién sabe usarlos y con qué criterio, no la infraestructura.',
+    leaders: [{ country: 'Chile', score: 66.8 }],
+    regionalAverage: 43.0,
+    note: 'Chile es el único país con preparación alta y lidera en alfabetización en IA (84.7). Costa Rica encabeza las habilidades profesionales de IA y Colombia el aprendizaje autodirigido.',
+  },
+  traditionalML: {
+    dimension: 'Disponibilidad y uso de datos',
+    why: 'Un modelo predictivo vale lo que valen los datos con que se entrena, así que aquí pesa la madurez de datos del entorno.',
+    leaders: [
+      { country: 'Chile', score: 66.0 },
+      { country: 'México', score: 56.3 },
+    ],
+    regionalAverage: 47.7,
+    note: '15 de los 19 países medidos siguen por debajo de 50 puntos, aunque el promedio regional subió desde 35.7 el año anterior.',
+  },
+}
 
 export interface BenchmarkStat {
   /** Cifra destacada, ya formateada. */

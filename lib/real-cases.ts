@@ -1,8 +1,39 @@
 import type { InteractionModel } from '@/types/assessment'
 
 // Casos reales que inspiraron las simulaciones, documentados en research/*.md.
-// Mismo formato que BANKING_CASES_BY_MODEL (components/BankingWidgets.tsx).
 export const REAL_CASES_BY_INDUSTRY: Record<string, Record<InteractionModel, { cases: string[] }>> = {
+  banking: {
+    automation: {
+      cases: [
+        'HSBC: Dynamic Risk Assessment AML (con Google Cloud)',
+        'JPMorgan Chase, fraud & AML detection',
+        'Commonwealth Bank of Australia, scam prevention',
+        'FinCEN, graph analytics patterns',
+      ],
+    },
+    agency: {
+      cases: [
+        'JPMorgan Chase: COiN (revisión de contratos)',
+        'Nubank, nuFormer (foundation model crediticio)',
+        'Goldman Sachs: GS AI Assistant',
+        'McKinsey, agentic underwriting patterns 2025',
+        'Nubank, cobranza autónoma vía WhatsApp',
+        'Mercado Pago, recuperación de cartera',
+        'BBVA, chatbot de cobranza',
+        'Klarna, agentic recovery 2025',
+      ],
+    },
+    augmentation: {
+      cases: [
+        'Bradesco: BIA con GenAI',
+        'Wells Fargo: Fargo AI Assistant',
+        'DBS Bank, nudges personalizados',
+        'NatWest: Cora+',
+        'Capital One: Eno',
+      ],
+    },
+  },
+
   retail: {
     automation: {
       cases: [

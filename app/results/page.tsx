@@ -162,6 +162,14 @@ export default function ResultsPage() {
                 <ResultCard type="implementationType" winner={result.implementationType} scores={result.implementationScores} />
               </div>
 
+              {/* El porqué se lee pegado a las barras que lo sustentan, no al final. */}
+              <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm animate-fade-in">
+                <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
+                  Por qué esta recomendación
+                </h3>
+                <p className="text-slate-600 text-sm leading-relaxed">{recommendation.rationale}</p>
+              </div>
+
               <RegionalBenchmark result={result} />
 
               <RecommendationMatrix result={result} recommendation={recommendation} />
