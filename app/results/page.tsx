@@ -157,17 +157,16 @@ export default function ResultsPage() {
 
               <ResultSummary result={result} />
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Los dos ejes y su porqué se leen de un vistazo, en la misma fila. */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <ResultCard type="interactionModel"   winner={result.interactionModel}   scores={result.interactionScores} />
                 <ResultCard type="implementationType" winner={result.implementationType} scores={result.implementationScores} />
-              </div>
-
-              {/* El porqué se lee pegado a las barras que lo sustentan, no al final. */}
-              <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm animate-fade-in">
-                <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
-                  Por qué esta recomendación
-                </h3>
-                <p className="text-slate-600 text-sm leading-relaxed">{recommendation.rationale}</p>
+                <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm animate-fade-in md:col-span-2 lg:col-span-1">
+                  <p className="text-xs text-slate-400 font-medium uppercase tracking-wider mb-3">
+                    Por qué esta recomendación
+                  </p>
+                  <p className="text-slate-600 text-sm leading-relaxed">{recommendation.rationale}</p>
+                </div>
               </div>
 
               <RegionalBenchmark result={result} />
