@@ -4,7 +4,7 @@ import type { InteractionModel } from '@/types/assessment'
 import type { SimulationConfig, SimVariant } from '@/lib/simulations'
 import SimulationChat from '@/components/SimulationChat'
 import IndustryVisualization from '@/components/IndustryVisualization'
-import BankingWidget, { BANKING_CASES_BY_MODEL } from '@/components/BankingWidgets'
+import BankingWidget from '@/components/BankingWidgets'
 import { REAL_CASES_BY_INDUSTRY } from '@/lib/real-cases'
 
 const STATUS_STYLES = {
@@ -135,7 +135,7 @@ interface SimulationAppProps {
 export default function SimulationApp({ config, interactionModel, industryId, onSchedule, variants }: SimulationAppProps) {
   const isMulti = Boolean(variants && variants.length > 1)
   const variantsToRender = variants && variants.length > 0 ? variants : [interactionModel]
-  const bibliographyCases = industryId === 'banking' ? BANKING_CASES_BY_MODEL : REAL_CASES_BY_INDUSTRY[industryId]
+  const bibliographyCases = REAL_CASES_BY_INDUSTRY[industryId]
 
   return (
     <div className="rounded-2xl overflow-hidden border border-slate-200 shadow-xl bg-white">

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import type { SimVisualWidget } from '@/lib/simulations'
-import type { InteractionModel } from '@/types/assessment'
+
 
 // Arranca la animación solo cuando el elemento entra al viewport — y solo una vez.
 function useStartOnVisible<T extends Element>(): [React.RefObject<T | null>, boolean] {
@@ -35,37 +35,6 @@ function useStartOnVisible<T extends Element>(): [React.RefObject<T | null>, boo
 // Bibliografía consolidada por patrón — consumida por SimulationApp
 // ════════════════════════════════════════════════════════════════════════════
 
-export const BANKING_CASES_BY_MODEL: Record<InteractionModel, { cases: string[] }> = {
-  automation: {
-    cases: [
-      'HSBC. Dynamic Risk Assessment AML (con Google Cloud)',
-      'JPMorgan Chase, fraud & AML detection',
-      'Commonwealth Bank of Australia, scam prevention',
-      'FinCEN, graph analytics patterns',
-    ],
-  },
-  agency: {
-    cases: [
-      'JPMorgan Chase. COiN (revisión de contratos)',
-      'Nubank, nuFormer (foundation model crediticio)',
-      'Goldman Sachs. GS AI Assistant',
-      'McKinsey, agentic underwriting patterns 2025',
-      'Nubank, cobranza autónoma vía WhatsApp',
-      'Mercado Pago, recuperación de cartera',
-      'BBVA, chatbot de cobranza',
-      'Klarna, agentic recovery 2025',
-    ],
-  },
-  augmentation: {
-    cases: [
-      'Bradesco. BIA con GenAI',
-      'Wells Fargo. Fargo AI Assistant',
-      'DBS Bank, nudges personalizados',
-      'NatWest. Cora+',
-      'Capital One. Eno',
-    ],
-  },
-}
 
 // ════════════════════════════════════════════════════════════════════════════
 // HoverExplainer — tarjeta flotante que aparece al pasar el cursor

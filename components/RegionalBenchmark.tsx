@@ -2,15 +2,13 @@ import type { AssessmentResult } from '@/types/assessment'
 import { MODEL_LABELS } from '@/lib/recommendations'
 import {
   BENCHMARK_SOURCES,
-  ILIA_DIMENSIONS,
-  ILIA_LEADERS,
   IMPLEMENTATION_BENCHMARK,
+  IMPLEMENTATION_LEADERBOARD,
   INTERACTION_BENCHMARK,
   type BenchmarkStat,
 } from '@/lib/regional-benchmark'
-
-/** El puntaje ILIA es sobre 100, pero el líder ronda 70: la barra se escala a él. */
-const ILIA_TOP = ILIA_LEADERS[0].score
+import { REAL_CASES_BY_INDUSTRY } from '@/lib/real-cases'
+import { INDUSTRIES } from '@/lib/industries'
 
 function ScopeChip({ scope }: { scope: BenchmarkStat['scope'] }) {
   const isRegion = scope === 'region'
@@ -68,6 +66,12 @@ function BenchmarkPanel({
 export default function RegionalBenchmark({ result }: { result: AssessmentResult }) {
   const interaction = INTERACTION_BENCHMARK[result.interactionModel]
   const implementation = IMPLEMENTATION_BENCHMARK[result.implementationType]
+  const leaderboard = IMPLEMENTATION_LEADERBOARD[result.implementationType]
+  const industryLabel =
+    INDUSTRIES.find((i) => i.id === result.industry)?.label ?? result.industry
+  /* Sólo seis industrias tienen casos documentados; el resto no pinta el bloque. */
+  const industryCases =
+    REAL_CASES_BY_INDUSTRY[result.industry]?.[result.interactionModel]?.cases ?? []
   const used = [interaction.stat.sourceId, implementation.stat.sourceId, 'ilia' as const]
   const sources = Object.values(BENCHMARK_SOURCES).filter((s) => used.includes(s.id))
 
@@ -96,19 +100,18 @@ export default function RegionalBenchmark({ result }: { result: AssessmentResult
         />
       </div>
 
-      {/* Referencia de país: quién marca hoy el estándar regional y con qué puntaje */}
+      {/* Quién encabeza la subdimensión de la que depende la tecnología recomendada */}
       <div className="border-t border-slate-100 px-6 py-5 bg-slate-50">
-        <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 mb-4">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 mb-2">
           <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-            Quién marca el estándar regional
+            Quién encabeza la región en {leaderboard.dimension.toLowerCase()}
           </h4>
-          <p className="text-xs text-slate-400">
-            ILIA 2025 · sobre 100 · {ILIA_DIMENSIONS.join(' · ')}
-          </p>
+          <p className="text-xs text-slate-400">ILIA 2025 · sobre 100</p>
         </div>
+        <p className="text-sm text-slate-600 leading-relaxed mb-4">{leaderboard.why}</p>
 
         <div className="space-y-2.5">
-          {ILIA_LEADERS.map((leader, index) => (
+          {leaderboard.leaders.map((leader, index) => (
             <div key={leader.country} className="flex items-center gap-3">
               <span className="w-4 text-xs font-semibold text-slate-400 tabular-nums shrink-0">
                 {index + 1}
@@ -117,7 +120,7 @@ export default function RegionalBenchmark({ result }: { result: AssessmentResult
               <div className="h-1.5 flex-1 bg-slate-200 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-blue-500 rounded-full transition-all duration-700"
-                  style={{ width: `${(leader.score / ILIA_TOP) * 100}%` }}
+                  style={{ width: `${leader.score}%` }}
                 />
               </div>
               <span className="w-12 text-right text-xs font-semibold text-slate-900 tabular-nums shrink-0">
@@ -125,8 +128,49 @@ export default function RegionalBenchmark({ result }: { result: AssessmentResult
               </span>
             </div>
           ))}
+
+          {leaderboard.regionalAverage !== undefined && (
+            <div className="flex items-center gap-3 pt-1">
+              <span className="w-4 shrink-0" />
+              <span className="w-20 text-sm text-slate-400 shrink-0">Promedio</span>
+              <div className="h-1.5 flex-1 bg-slate-200 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-slate-300 rounded-full"
+                  style={{ width: `${leaderboard.regionalAverage}%` }}
+                />
+              </div>
+              <span className="w-12 text-right text-xs font-medium text-slate-400 tabular-nums shrink-0">
+                {leaderboard.regionalAverage}
+              </span>
+            </div>
+          )}
         </div>
+
+        {leaderboard.note && (
+          <p className="mt-4 text-xs text-slate-500 leading-relaxed">{leaderboard.note}</p>
+        )}
       </div>
+
+      {/* Casos documentados de la industria: sólo se pintan si existen para ella */}
+      {industryCases.length > 0 && (
+        <div className="border-t border-slate-100 px-6 py-5">
+          <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
+            Quién ya lo hace en {industryLabel}
+          </h4>
+          <p className="text-sm text-slate-500 leading-relaxed mb-4">
+            Implementaciones documentadas del mismo modelo de interacción que te recomienda el
+            diagnóstico.
+          </p>
+          <ul className="space-y-2">
+            {industryCases.map((useCase) => (
+              <li key={useCase} className="text-sm text-slate-600 flex gap-2 leading-relaxed">
+                <span className="text-blue-400 mt-0.5 shrink-0">→</span>
+                <span>{useCase}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <div className="border-t border-slate-100 px-6 py-4">
         <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">

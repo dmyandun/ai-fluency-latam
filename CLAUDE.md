@@ -147,11 +147,23 @@ tocar un valor, comprueba que la fuente lo publica: una estimación presentada
 como medición arruina la sección entera y, con ella, la credibilidad del
 diagnóstico.
 
-Ninguna fuente mide la adopción **por modelo de interacción** — automatización,
+Ninguna fuente mide la adopción **por modelo de interacción**: automatización,
 agencia y aumentación son el marco de esta app, no una categoría que la
 industria reporte. Por eso ese eje se compara contra el dato global de agentes
 y cada panel lleva un chip `scope` que distingue `region` de `global`. No lo
 quites para “igualar” los dos ejes.
+
+Tampoco existe un ranking de países **por industria**, así que el panel de
+países usa `IMPLEMENTATION_LEADERBOARD`: la subdimensión del ILIA de la que
+depende la tecnología recomendada (infraestructura para IA local, talento para
+API, datos para ML tradicional). El ranking general del ILIA no sirve aquí
+porque sale idéntico para todos. Sólo se listan los países con cifra publicada
+—a veces uno solo, con el promedio regional al lado— y ese hueco es
+deliberado: completarlo requeriría inventar el orden.
+
+La variación por industria la aporta `REAL_CASES_BY_INDUSTRY`
+(`lib/real-cases.ts`), con casos documentados por industria y modelo. Cubre 6
+de las 14 industrias; en las demás el bloque simplemente no se pinta.
 
 Las cifras están **embebidas como constantes**: se compilan en el bundle y no
 cuestan ninguna llamada en runtime. La contrapartida es que envejecen en
