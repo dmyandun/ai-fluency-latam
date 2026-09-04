@@ -33,9 +33,6 @@ const TIMEFRAME: Record<RoadmapPhaseId, string> = {
   '12m': '12 meses',
 }
 
-/** Ancho fijo por hito: la línea se recorre en horizontal, no se comprime. */
-const MILESTONE_WIDTH = 148
-
 /** Una fila de la ficha. El rótulo va a la izquierda y el campo ocupa el resto. */
 function FieldRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -142,80 +139,77 @@ export default function RoadmapFlowBoard({ roadmap, onUpdateRoadmap }: RoadmapFl
         </div>
       </div>
 
-      {/* Línea de tiempo: un hito por actividad, en una sola línea que se recorre */}
-      <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <div className="min-w-max px-6 py-6">
-            {/* Bandas de fase: cada una abarca el ancho de sus hitos */}
-            <div className="flex">
-              {ROADMAP_PHASES.map((phase, idx) => {
-                const items = roadmap.items.filter((i) => i.phaseId === phase.id)
-                const color = PHASE_COLORS[idx % PHASE_COLORS.length]
-                return (
-                  <div
-                    key={phase.id}
-                    className="shrink-0 pr-4"
-                    style={{ width: items.length * MILESTONE_WIDTH }}
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className={`text-sm font-semibold ${color.text}`}>{phase.label}</span>
-                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${color.soft} ${color.text}`}>
-                        {TIMEFRAME[phase.id]}
-                      </span>
-                    </div>
-                    <p className="text-xs text-slate-400 mt-0.5 truncate">{phase.description}</p>
+      {/*
+        Itinerario vertical: un hito por actividad. En horizontal los 25 hitos
+        obligaban a un scroll lateral que escondía la fase en la que estabas.
+      */}
+      <div className="bg-white border border-slate-200 rounded-2xl shadow-sm px-6 py-6">
+        <div className="relative">
+          {/* Hilo continuo que atraviesa las cinco fases */}
+          <div className="absolute left-[9px] top-2 bottom-2 w-0.5 bg-slate-200" aria-hidden="true" />
+
+          {ROADMAP_PHASES.map((phase, idx) => {
+            const items = roadmap.items.filter((i) => i.phaseId === phase.id)
+            const color = PHASE_COLORS[idx % PHASE_COLORS.length]
+            const done = items.filter((i) => i.completed).length
+
+            return (
+              <div key={phase.id} className={idx === 0 ? '' : 'mt-7'}>
+                {/* Cabecera de fase, anclada al mismo hilo */}
+                <div className="relative pl-9">
+                  <span
+                    className={`absolute left-[1px] top-1 w-4 h-4 rounded-md ${color.dot} shadow-sm`}
+                    aria-hidden="true"
+                  />
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className={`text-sm font-semibold ${color.text}`}>{phase.label}</span>
+                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${color.soft} ${color.text}`}>
+                      {TIMEFRAME[phase.id]}
+                    </span>
+                    {items.length > 0 && (
+                      <span className="text-xs text-slate-400 tabular-nums">{done}/{items.length}</span>
+                    )}
                   </div>
-                )
-              })}
-            </div>
+                  <p className="text-xs text-slate-400 mt-0.5">{phase.description}</p>
+                </div>
 
-            {/* La línea y sus marcadores */}
-            <div className="relative mt-5">
-              <div className="absolute left-0 right-0 top-[7px] h-0.5 bg-slate-200" aria-hidden="true" />
-
-              <div className="relative flex">
-                {ROADMAP_PHASES.map((phase, idx) => {
-                  const items = roadmap.items.filter((i) => i.phaseId === phase.id)
-                  const color = PHASE_COLORS[idx % PHASE_COLORS.length]
-
-                  return (
-                    <div key={phase.id} className="flex shrink-0">
-                      {items.map((item) => {
-                        const isOpen = item.id === openId
-                        return (
-                          <button
-                            key={item.id}
-                            type="button"
-                            onClick={() => setOpenId(isOpen ? null : item.id)}
-                            aria-expanded={isOpen}
-                            className="group shrink-0 pr-4 text-left"
-                            style={{ width: MILESTONE_WIDTH }}
-                          >
-                            <span
-                              className={`block w-4 h-4 rounded-full border-2 border-white transition-all ${
-                                item.completed ? 'bg-emerald-500' : color.dot
-                              } ${isOpen ? `ring-4 ${color.ring}` : 'group-hover:ring-4 group-hover:ring-slate-100'}`}
-                            />
-                            <span
-                              className={`mt-2 block text-xs leading-snug line-clamp-3 ${
-                                item.completed
-                                  ? 'text-slate-400 line-through'
-                                  : isOpen
-                                    ? 'text-slate-900 font-semibold'
-                                    : 'text-slate-600 group-hover:text-slate-900'
-                              }`}
-                            >
-                              {item.title}
-                            </span>
-                          </button>
-                        )
-                      })}
-                    </div>
-                  )
-                })}
+                <div className="mt-2">
+                  {items.map((item) => {
+                    const isOpen = item.id === openId
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => setOpenId(isOpen ? null : item.id)}
+                        aria-expanded={isOpen}
+                        className={`group relative block w-full pl-9 pr-3 py-2 text-left rounded-lg transition-colors ${
+                          isOpen ? 'bg-slate-50' : 'hover:bg-slate-50'
+                        }`}
+                      >
+                        <span
+                          className={`absolute left-[3px] top-[13px] w-3 h-3 rounded-full border-2 border-white transition-all ${
+                            item.completed ? 'bg-emerald-500' : color.dot
+                          } ${isOpen ? `ring-4 ${color.ring}` : ''}`}
+                          aria-hidden="true"
+                        />
+                        <span
+                          className={`block text-sm leading-snug ${
+                            item.completed
+                              ? 'text-slate-400 line-through'
+                              : isOpen
+                                ? 'text-slate-900 font-semibold'
+                                : 'text-slate-600 group-hover:text-slate-900'
+                          }`}
+                        >
+                          {item.title}
+                        </span>
+                      </button>
+                    )
+                  })}
+                </div>
               </div>
-            </div>
-          </div>
+            )
+          })}
         </div>
       </div>
 
