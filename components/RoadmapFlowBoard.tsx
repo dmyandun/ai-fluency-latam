@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
-import type { Roadmap, RoadmapItem, RoadmapPhaseId } from '@/types/assessment'
+import type { Roadmap, RoadmapItem, RoadmapPhaseId, RoadmapPriority } from '@/types/assessment'
 import { ROADMAP_PHASES, saveRoadmap, downloadRoadmap, buildMailtoLink } from '@/lib/roadmap'
 import RoadmapItemForm from './RoadmapItemForm'
 
@@ -10,25 +10,19 @@ interface RoadmapFlowBoardProps {
   onUpdateRoadmap: (updated: Roadmap) => void
 }
 
-const PRIORITY_DOT: Record<string, string> = {
-  high:   'bg-amber-400',
-  medium: 'bg-blue-400',
-  low:    'bg-slate-300',
-}
-
-const PRIORITY_LABEL: Record<string, string> = {
-  high:   'Alta',
+const PRIORITY_LABEL: Record<RoadmapPriority, string> = {
+  high: 'Alta',
   medium: 'Media',
-  low:    'Baja',
+  low: 'Baja',
 }
 
 // Acento de color por fase (alineado al orden de ROADMAP_PHASES)
 const PHASE_COLORS = [
-  { ring: 'bg-blue-600',    soft: 'bg-blue-50',    border: 'border-blue-200',    text: 'text-blue-700'    },
-  { ring: 'bg-violet-600',  soft: 'bg-violet-50',  border: 'border-violet-200',  text: 'text-violet-700'  },
-  { ring: 'bg-amber-500',   soft: 'bg-amber-50',   border: 'border-amber-200',   text: 'text-amber-700'   },
-  { ring: 'bg-emerald-600', soft: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-700' },
-  { ring: 'bg-slate-700',   soft: 'bg-slate-50',   border: 'border-slate-300',   text: 'text-slate-700'   },
+  { dot: 'bg-blue-600',    ring: 'ring-blue-200',    soft: 'bg-blue-50',    border: 'border-blue-200',    text: 'text-blue-700'    },
+  { dot: 'bg-violet-600',  ring: 'ring-violet-200',  soft: 'bg-violet-50',  border: 'border-violet-200',  text: 'text-violet-700'  },
+  { dot: 'bg-amber-500',   ring: 'ring-amber-200',   soft: 'bg-amber-50',   border: 'border-amber-200',   text: 'text-amber-700'   },
+  { dot: 'bg-emerald-600', ring: 'ring-emerald-200', soft: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-700' },
+  { dot: 'bg-slate-700',   ring: 'ring-slate-200',   soft: 'bg-slate-50',   border: 'border-slate-300',   text: 'text-slate-700'   },
 ]
 
 const TIMEFRAME: Record<RoadmapPhaseId, string> = {
@@ -39,95 +33,24 @@ const TIMEFRAME: Record<RoadmapPhaseId, string> = {
   '12m': '12 meses',
 }
 
-// Tarjeta de iniciativa dentro del grid de una fase
-function ItemCard({
-  item,
-  color,
-  onToggle,
-  onEdit,
-  onDelete,
-}: {
-  item: RoadmapItem
-  color: (typeof PHASE_COLORS)[0]
-  onToggle: (id: string) => void
-  onEdit: (item: RoadmapItem) => void
-  onDelete: (id: string) => void
-}) {
+/** Ancho fijo por hito: la línea se recorre en horizontal, no se comprime. */
+const MILESTONE_WIDTH = 148
+
+/** Una fila de la ficha. El rótulo va a la izquierda y el campo ocupa el resto. */
+function FieldRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div
-      className={`group relative rounded-xl border bg-white p-4 shadow-sm transition-all hover:shadow-md ${
-        item.completed ? 'border-slate-200 opacity-60' : color.border
-      }`}
-    >
-      {/* Barra de color superior */}
-      <div className={`absolute top-0 left-0 right-0 h-1 rounded-t-xl ${item.completed ? 'bg-slate-300' : color.ring}`} />
-
-      <div className="flex items-start gap-2 mt-1">
-        <button
-          type="button"
-          onClick={() => onToggle(item.id)}
-          className={`mt-0.5 w-4 h-4 rounded border-2 shrink-0 flex items-center justify-center transition-all ${
-            item.completed ? 'bg-emerald-500 border-emerald-500' : 'border-slate-300 hover:border-emerald-400'
-          }`}
-          aria-label={item.completed ? 'Marcar como pendiente' : 'Marcar como completado'}
-        >
-          {item.completed && (
-            <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-            </svg>
-          )}
-        </button>
-        <p className={`text-sm font-semibold leading-snug flex-1 ${item.completed ? 'line-through text-slate-400' : 'text-slate-800'}`}>
-          {item.title}
-        </p>
+    <div className="grid grid-cols-1 sm:grid-cols-[140px_1fr] border-b border-slate-100 last:border-0">
+      <div className="px-4 py-3 bg-slate-50 text-xs font-medium text-slate-500 uppercase tracking-wider flex items-center">
+        {label}
       </div>
-
-      {item.description && (
-        <p className={`text-xs leading-relaxed mt-2 pl-6 ${item.completed ? 'text-slate-400' : 'text-slate-500'}`}>
-          {item.description}
-        </p>
-      )}
-
-      <div className="flex items-center gap-2 mt-3 pl-6">
-        <span className="flex items-center gap-1 text-xs text-slate-500">
-          <span className={`w-1.5 h-1.5 rounded-full ${PRIORITY_DOT[item.priority]}`} />
-          {PRIORITY_LABEL[item.priority]}
-        </span>
-        <span className="text-xs text-slate-300">·</span>
-        <span className="text-xs text-slate-400">
-          {item.source === 'system' ? 'Sistema' : 'Tú'}
-        </span>
-      </div>
-
-      {/* Botones edición (hover) */}
-      <div className="absolute top-2 right-2 hidden group-hover:flex gap-1">
-        <button
-          type="button"
-          onClick={() => onEdit(item)}
-          className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center shadow hover:bg-blue-700"
-          aria-label="Editar"
-        >
-          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-          </svg>
-        </button>
-        <button
-          type="button"
-          onClick={() => onDelete(item.id)}
-          className="w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center shadow hover:bg-red-600"
-          aria-label="Eliminar"
-        >
-          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-      </div>
+      <div className="px-4 py-3">{children}</div>
     </div>
   )
 }
 
 export default function RoadmapFlowBoard({ roadmap, onUpdateRoadmap }: RoadmapFlowBoardProps) {
-  const [editingItem, setEditingItem] = useState<RoadmapItem | null>(null)
+  /** Sólo un hito abierto a la vez: la ficha de abajo siempre habla de uno. */
+  const [openId, setOpenId] = useState<string | null>(null)
   const [addingPhase, setAddingPhase] = useState<RoadmapPhaseId | null>(null)
   const [emailModal, setEmailModal]   = useState(false)
   const [emailInput, setEmailInput]   = useState('')
@@ -139,21 +62,30 @@ export default function RoadmapFlowBoard({ roadmap, onUpdateRoadmap }: RoadmapFl
     [roadmap, onUpdateRoadmap]
   )
 
+  const openItem = roadmap.items.find((i) => i.id === openId) ?? null
+
+  function patchOpen(patch: Partial<RoadmapItem>) {
+    if (!openItem) return
+    update(roadmap.items.map((i) => (i.id === openItem.id ? { ...i, ...patch } : i)))
+  }
+
   function handleAdd(data: Omit<RoadmapItem, 'id' | 'createdAt' | 'source'>) {
-    update([...roadmap.items, { ...data, id: crypto.randomUUID(), source: 'user', createdAt: new Date().toISOString() }])
+    const item: RoadmapItem = {
+      ...data,
+      id: crypto.randomUUID(),
+      source: 'user',
+      createdAt: new Date().toISOString(),
+    }
+    update([...roadmap.items, item])
     setAddingPhase(null)
+    setOpenId(item.id)
   }
-  function handleToggle(id: string) {
-    update(roadmap.items.map((i) => i.id === id ? { ...i, completed: !i.completed } : i))
-  }
-  function handleEditSubmit(data: Omit<RoadmapItem, 'id' | 'createdAt' | 'source'>) {
-    if (!editingItem) return
-    update(roadmap.items.map((i) => i.id === editingItem.id ? { ...i, ...data } : i))
-    setEditingItem(null)
-  }
+
   function handleDelete(id: string) {
     update(roadmap.items.filter((i) => i.id !== id))
+    setOpenId(null)
   }
+
   function handleSendEmail() {
     if (!emailInput.trim()) return
     window.open(buildMailtoLink(emailInput.trim(), roadmap), '_blank')
@@ -210,101 +142,194 @@ export default function RoadmapFlowBoard({ roadmap, onUpdateRoadmap }: RoadmapFl
         </div>
       </div>
 
-      {/* Leyenda */}
-      <div className="flex flex-wrap items-center gap-4 mb-6 text-xs text-slate-500">
-        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-amber-400" /> Prioridad alta</span>
-        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-blue-400" /> Prioridad media</span>
-        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-slate-300" /> Prioridad baja</span>
-        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-500" /> Completado</span>
-      </div>
-
-      {/* Timeline vertical de fases */}
-      <div className="space-y-8">
-        {ROADMAP_PHASES.map((phase, idx) => {
-          const items = roadmap.items.filter((i) => i.phaseId === phase.id)
-          const color = PHASE_COLORS[idx % PHASE_COLORS.length]
-          const isLast = idx === ROADMAP_PHASES.length - 1
-          const done = items.filter((i) => i.completed).length
-
-          return (
-            <div key={phase.id} className="relative">
-              {/* Línea conectora vertical */}
-              {!isLast && (
-                <div className="hidden sm:block absolute left-4 top-10 bottom-[-2rem] w-px bg-slate-200" />
-              )}
-
-              {/* Encabezado de fase */}
-              <div className="flex items-start gap-3 mb-4">
-                <div className={`relative z-10 shrink-0 w-8 h-8 rounded-full ${color.ring} text-white flex items-center justify-center text-sm font-bold shadow-sm`}>
-                  {idx + 1}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="text-base font-semibold text-slate-900">{phase.label}</h3>
-                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${color.soft} ${color.text}`}>
-                      {TIMEFRAME[phase.id]}
-                    </span>
-                    {items.length > 0 && (
-                      <span className="text-xs text-slate-400 tabular-nums">{done}/{items.length}</span>
-                    )}
-                  </div>
-                  <p className="text-sm text-slate-500 mt-0.5">{phase.description}</p>
-                </div>
-              </div>
-
-              {/* Grid de iniciativas */}
-              <div className="sm:pl-11">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {items.map((item) => (
-                    <ItemCard
-                      key={item.id}
-                      item={item}
-                      color={color}
-                      onToggle={handleToggle}
-                      onEdit={setEditingItem}
-                      onDelete={handleDelete}
-                    />
-                  ))}
-
-                  {/* Botón agregar */}
-                  <button
-                    type="button"
-                    onClick={() => setAddingPhase(addingPhase === phase.id ? null : phase.id)}
-                    className={`min-h-[88px] rounded-xl border-2 border-dashed ${color.border} flex items-center justify-center gap-2 text-slate-400 hover:text-slate-600 hover:border-slate-400 transition-all`}
+      {/* Línea de tiempo: un hito por actividad, en una sola línea que se recorre */}
+      <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
+          <div className="min-w-max px-6 py-6">
+            {/* Bandas de fase: cada una abarca el ancho de sus hitos */}
+            <div className="flex">
+              {ROADMAP_PHASES.map((phase, idx) => {
+                const items = roadmap.items.filter((i) => i.phaseId === phase.id)
+                const color = PHASE_COLORS[idx % PHASE_COLORS.length]
+                return (
+                  <div
+                    key={phase.id}
+                    className="shrink-0 pr-4"
+                    style={{ width: items.length * MILESTONE_WIDTH }}
                   >
-                    <span className="text-lg leading-none">+</span>
-                    <span className="text-xs font-medium">Agregar iniciativa</span>
-                  </button>
-                </div>
-
-                {/* Formulario inline */}
-                {addingPhase === phase.id && (
-                  <div className="mt-4 max-w-md">
-                    <RoadmapItemForm
-                      phaseId={phase.id}
-                      onSubmit={(data) => handleAdd(data)}
-                      onCancel={() => setAddingPhase(null)}
-                    />
+                    <div className="flex items-center gap-2">
+                      <span className={`text-sm font-semibold ${color.text}`}>{phase.label}</span>
+                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${color.soft} ${color.text}`}>
+                        {TIMEFRAME[phase.id]}
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-400 mt-0.5 truncate">{phase.description}</p>
                   </div>
-                )}
+                )
+              })}
+            </div>
+
+            {/* La línea y sus marcadores */}
+            <div className="relative mt-5">
+              <div className="absolute left-0 right-0 top-[7px] h-0.5 bg-slate-200" aria-hidden="true" />
+
+              <div className="relative flex">
+                {ROADMAP_PHASES.map((phase, idx) => {
+                  const items = roadmap.items.filter((i) => i.phaseId === phase.id)
+                  const color = PHASE_COLORS[idx % PHASE_COLORS.length]
+
+                  return (
+                    <div key={phase.id} className="flex shrink-0">
+                      {items.map((item) => {
+                        const isOpen = item.id === openId
+                        return (
+                          <button
+                            key={item.id}
+                            type="button"
+                            onClick={() => setOpenId(isOpen ? null : item.id)}
+                            aria-expanded={isOpen}
+                            className="group shrink-0 pr-4 text-left"
+                            style={{ width: MILESTONE_WIDTH }}
+                          >
+                            <span
+                              className={`block w-4 h-4 rounded-full border-2 border-white transition-all ${
+                                item.completed ? 'bg-emerald-500' : color.dot
+                              } ${isOpen ? `ring-4 ${color.ring}` : 'group-hover:ring-4 group-hover:ring-slate-100'}`}
+                            />
+                            <span
+                              className={`mt-2 block text-xs leading-snug line-clamp-3 ${
+                                item.completed
+                                  ? 'text-slate-400 line-through'
+                                  : isOpen
+                                    ? 'text-slate-900 font-semibold'
+                                    : 'text-slate-600 group-hover:text-slate-900'
+                              }`}
+                            >
+                              {item.title}
+                            </span>
+                          </button>
+                        )
+                      })}
+                    </div>
+                  )
+                })}
               </div>
             </div>
-          )
-        })}
+          </div>
+        </div>
       </div>
 
-      {/* Modal edición */}
-      {editingItem && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white border border-slate-200 rounded-2xl p-6 w-full max-w-md shadow-2xl">
-            <h3 className="text-base font-semibold text-slate-900 mb-4">Editar iniciativa</h3>
-            <RoadmapItemForm
-              phaseId={editingItem.phaseId}
-              initialData={editingItem}
-              onSubmit={handleEditSubmit}
-              onCancel={() => setEditingItem(null)}
-            />
+      {/* Alta de hitos, fuera de la línea para no competir con los títulos */}
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <span className="text-xs text-slate-400">Agregar hito en</span>
+        {ROADMAP_PHASES.map((phase) => (
+          <button
+            key={phase.id}
+            type="button"
+            onClick={() => {
+              setAddingPhase(addingPhase === phase.id ? null : phase.id)
+              setOpenId(null)
+            }}
+            className={`px-2.5 py-1 text-xs font-medium rounded-lg border transition-all ${
+              addingPhase === phase.id
+                ? 'bg-blue-50 border-blue-300 text-blue-700'
+                : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300'
+            }`}
+          >
+            {phase.label}
+          </button>
+        ))}
+      </div>
+
+      {addingPhase && (
+        <div className="mt-4 max-w-md">
+          <RoadmapItemForm
+            phaseId={addingPhase}
+            onSubmit={handleAdd}
+            onCancel={() => setAddingPhase(null)}
+          />
+        </div>
+      )}
+
+      {/* Ficha del hito abierto: tabla editable, siempre de uno solo */}
+      {openItem && (
+        <div className="mt-4 bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden animate-fade-in">
+          <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-b border-slate-100">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">
+                {ROADMAP_PHASES.find((p) => p.id === openItem.phaseId)?.label}
+              </span>
+              <span className="text-xs text-slate-400">· {TIMEFRAME[openItem.phaseId]}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => handleDelete(openItem.id)}
+                className="text-xs font-medium text-slate-400 hover:text-red-600 transition-colors"
+              >
+                Eliminar
+              </button>
+              <button
+                type="button"
+                onClick={() => setOpenId(null)}
+                className="text-xs font-medium text-slate-500 hover:text-slate-900 transition-colors"
+              >
+                Cerrar
+              </button>
+            </div>
           </div>
+
+          <FieldRow label="Título">
+            <input
+              type="text"
+              value={openItem.title}
+              onChange={(e) => patchOpen({ title: e.target.value })}
+              className="w-full bg-white border border-slate-300 text-slate-900 text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
+            />
+          </FieldRow>
+
+          <FieldRow label="Detalle">
+            <textarea
+              value={openItem.description}
+              onChange={(e) => patchOpen({ description: e.target.value })}
+              rows={3}
+              placeholder="Qué implica este hito en tu organización"
+              className="w-full bg-white border border-slate-300 text-slate-900 text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-slate-400 resize-none shadow-sm"
+            />
+          </FieldRow>
+
+          <FieldRow label="Prioridad">
+            <div className="flex flex-wrap gap-2">
+              {(Object.keys(PRIORITY_LABEL) as RoadmapPriority[]).map((value) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => patchOpen({ priority: value })}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-all ${
+                    openItem.priority === value
+                      ? 'bg-blue-50 border-blue-300 text-blue-700'
+                      : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300'
+                  }`}
+                >
+                  {PRIORITY_LABEL[value]}
+                </button>
+              ))}
+            </div>
+          </FieldRow>
+
+          <FieldRow label="Estado">
+            <button
+              type="button"
+              onClick={() => patchOpen({ completed: !openItem.completed })}
+              className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-all ${
+                openItem.completed
+                  ? 'bg-emerald-50 border-emerald-300 text-emerald-700'
+                  : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300'
+              }`}
+            >
+              {openItem.completed ? '✓ Completado' : 'Pendiente'}
+            </button>
+          </FieldRow>
         </div>
       )}
 
